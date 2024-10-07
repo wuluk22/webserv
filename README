@@ -1,3 +1,35 @@
+Simplified Project Split for MVP Version
+
+    Team Member 1: Basic Server Functionality
+        Responsibilities:
+            Implement the main server loop.
+            Handle incoming connections using blocking I/O (for simplicity).
+            Parse HTTP requests and generate basic HTTP responses (e.g., serving static HTML files).
+            Implement a basic logging mechanism to log incoming requests.
+        Key Focus Areas:
+            Networking Basics: Understand how to create sockets, bind to a port, listen for connections, and accept connections.
+            HTTP Protocol Basics: Familiarity with HTTP requests and responses, focusing on serving static content.
+
+    Team Member 2: Configuration Management and File Serving
+        Responsibilities:
+            Implement the configuration file parser to load server settings (e.g., root directory, log file).
+            Handle serving of static files (like HTML, CSS, and JS) from the designated root directory.
+            Implement a simple mechanism to handle 404 errors (file not found).
+        Key Focus Areas:
+            File System Interaction: Understand how to read files from the filesystem.
+            Configuration Management: Learn to read from configuration files and apply settings.
+
+    Team Member 3: Basic Error Handling and Testing
+        Responsibilities:
+            Implement basic error handling and create simple custom error pages (like 404.html).
+            Write unit tests for the basic functionalities implemented by the other two members (if applicable).
+            Document the codebase and help with README or usage instructions for the server.
+        Key Focus Areas:
+            Error Handling: Design user-friendly error pages to inform users when things go wrong.
+            Testing Practices: Learn how to write basic tests to verify server functionality.
+
+-------------------------------------------------------------
+
 webserv/
 │
 ├── docs/                     # Documentation files
@@ -43,7 +75,11 @@ webserv/
 ├── README.md                  # Project overview and setup instructions
 └── Makefile                   # Build configuration (if applicable)
 
+---------------------------------------------
+
 Core Relationships and Class Responsibilities
+
+---------------------------------------------
 
     WebServer:
         Responsibility: This is the main class that coordinates all other components. It initializes the server, listens for connections, and delegates tasks (like handling requests and responses) to other classes.
@@ -57,8 +93,6 @@ Core Relationships and Class Responsibilities
             Optional: CGIHandler if CGI support is required.
 
     Code Example:
-
-    cpp
 
 class WebServer {
 public:
@@ -93,6 +127,8 @@ private:
     // More server logic...
 };
 
+-----------------------------------------------------
+
 ConfigParser:
 
     Responsibility: Parses the configuration file and populates a ServerConfig structure.
@@ -100,8 +136,6 @@ ConfigParser:
         ServerConfig struct which holds configuration data.
 
 Code Example:
-
-cpp
 
 struct ServerConfig {
     std::string root_dir;
@@ -122,14 +156,14 @@ public:
     }
 };
 
+-----------------------------------------------------
+
 HttpRequest & HttpResponse:
 
     Responsibility: HttpRequest handles parsing incoming client requests, while HttpResponse generates the response to be sent back.
     Dependencies: Both depend on each other within the request-response cycle in WebServer.
 
 Code Example:
-
-cpp
 
 class HttpRequest {
 public:
@@ -150,8 +184,6 @@ public:
 
 WebServer usage:
 
-cpp
-
 void WebServer::processRequest(int client_socket) {
     HttpRequest request(client_socket);
     HttpResponse response(client_socket);
@@ -166,14 +198,14 @@ void WebServer::processRequest(int client_socket) {
     }
 }
 
+-----------------------------------------------------
+
 AuthHandler:
 
     Responsibility: Validates credentials based on the Authorization header for Basic Authentication.
     Dependencies: Works with HttpRequest to fetch the Authorization header.
 
 Code Example:
-
-cpp
 
 class AuthHandler {
 public:
@@ -194,8 +226,6 @@ bool AuthHandler::authenticate(const HttpRequest& request) {
 
 WebServer usage:
 
-cpp
-
 void WebServer::processRequest(int client_socket) {
     HttpRequest request(client_socket);
     HttpResponse response(client_socket);
@@ -209,14 +239,14 @@ void WebServer::processRequest(int client_socket) {
     // Proceed with normal request handling...
 }
 
+-----------------------------------------------------
+
 Logger:
 
     Responsibility: Logs all server activity (requests, errors).
     Dependencies: None.
 
 Code Example:
-
-cpp
 
 class Logger {
 public:
@@ -227,13 +257,13 @@ public:
 
 WebServer usage:
 
-cpp
-
 void WebServer::processRequest(int client_socket) {
     HttpRequest request(client_socket);
     logger_.logRequest(request);  // Log incoming request
     // Handle the request...
 }
+
+-----------------------------------------------------
 
 VirtualHostHandler:
 
@@ -241,8 +271,6 @@ VirtualHostHandler:
     Dependencies: Works with HttpRequest to fetch the Host header.
 
 Code Example:
-
-cpp
 
 class VirtualHostHandler {
 public:
@@ -257,8 +285,6 @@ private:
 
 WebServer usage:
 
-cpp
-
 void WebServer::processRequest(int client_socket) {
     HttpRequest request(client_socket);
     std::string host = request.getHeader("Host");
@@ -266,14 +292,14 @@ void WebServer::processRequest(int client_socket) {
     // Serve the requested file from the resolved document root...
 }
 
+-----------------------------------------------------
+
 DirectoryListingHandler:
 
     Responsibility: Generates a directory listing for a folder if no default index.html exists.
     Dependencies: Works with the file system to read directories.
 
 Code Example:
-
-cpp
 
 class DirectoryListingHandler {
 public:
@@ -288,8 +314,6 @@ private:
 
 WebServer usage:
 
-cpp
-
 void WebServer::processRequest(int client_socket) {
     HttpRequest request(client_socket);
     std::string path = config_.root_dir + request.getUrl();
@@ -302,14 +326,14 @@ void WebServer::processRequest(int client_socket) {
     }
 }
 
+-----------------------------------------------------
+
 ErrorHandler:
 
     Responsibility: Manages error responses (like 404, 500) and sends custom error pages.
     Dependencies: None.
 
 Code Example:
-
-cpp
 
     class ErrorHandler {
     public:
@@ -321,6 +345,8 @@ cpp
     private:
         std::string error_pages_dir_;
     };
+
+-----------------------------------------------------
 
 Summary of Class Interactions:
 
