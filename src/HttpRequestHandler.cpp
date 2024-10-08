@@ -1,7 +1,4 @@
 #include "HttpRequestHandler.hpp"
-#include <iostream>
-#include <cstring>
-#include <unistd.h>
 
 const int BUFFER_SIZE = 1024;
 

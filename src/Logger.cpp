@@ -1,5 +1,4 @@
 #include "Logger.hpp"
-#include <iostream>
 
 void Logger::log(const std::string message)
 {

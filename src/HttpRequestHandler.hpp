@@ -2,6 +2,9 @@
 # define HTTPREQUESTHANDLER_HPP
 # include <sys/socket.h>
 # include <cstdlib>
+# include <iostream>
+# include <cstring>
+# include <unistd.h>
 
 class HttpRequestHandler
 {

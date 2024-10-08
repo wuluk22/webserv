@@ -1,10 +1,4 @@
 #include "SocketHandler.hpp"
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
-#include <sys/socket.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 int SocketHandler::create_socket()
 {
