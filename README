@@ -1,13 +1,12 @@
-## Table of Contents
-1. [Simplified project split](#simplified-project-split)
-2. [Repo organisation](#repo-organisation)
-3. [Core relationships](#core-relationships)
+Table of Contents
+1. [Simplified project split]
+2. [Repo organisation]
+3. [Core relationships]
 
-## Simplified project split
 Simplified Project Split for MVP Version
 
-### Team Member 1: Basic Server Functionality
-**Responsibilities:**
+    Team Member 1: Basic Server Functionality
+        Responsibilities:
             Implement the main server loop.
             Handle incoming connections using blocking I/O (for simplicity).
             Parse HTTP requests and generate basic HTTP responses (e.g., serving static HTML files).
