@@ -4,6 +4,8 @@
 #include <iostream>
 #include <map>
 
+#define BAD_CONFIG_FILE "The configuration file you gave is not valid"
+
 class ConfigParser
 {
 	private:
