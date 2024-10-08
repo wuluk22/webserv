@@ -1,3 +1,10 @@
+
+## Table of Contents
+1. [Simplified project split](#split)
+2. [Repo organisation](#orga)
+3. [Core relationship](#class)
+
+## split
 Simplified Project Split for MVP Version
 
     Team Member 1: Basic Server Functionality
@@ -29,7 +36,7 @@ Simplified Project Split for MVP Version
             Testing Practices: Learn how to write basic tests to verify server functionality.
 
 -------------------------------------------------------------
-
+## orga
 webserv/
 │
 ├── docs/                     # Documentation files
@@ -76,7 +83,7 @@ webserv/
 └── Makefile                   # Build configuration (if applicable)
 
 ---------------------------------------------
-
+## class
 Core Relationships and Class Responsibilities
 
 ---------------------------------------------
