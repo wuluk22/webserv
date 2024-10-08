@@ -1,41 +1,53 @@
+# My Web Server Project
+
+Welcome to the **My Web Server Project**! This repository contains a basic non-blocking web server built in C++ (C++98 compliant) and follows modular development practices.
+
 ## Table of Contents
 1. [Simplified project split](#simplified-project-split)
 2. [Repo organisation](#repo-organisation)
 3. [Core relationships](#core-relationships)
 
+---
+
 ## Simplified project split
-Simplified Project Split for MVP Version
 
-    Team Member 1: Basic Server Functionality
-        Responsibilities:
-            Implement the main server loop.
-            Handle incoming connections using blocking I/O (for simplicity).
-            Parse HTTP requests and generate basic HTTP responses (e.g., serving static HTML files).
-            Implement a basic logging mechanism to log incoming requests.
-        Key Focus Areas:
-            Networking Basics: Understand how to create sockets, bind to a port, listen for connections, and accept connections.
-            HTTP Protocol Basics: Familiarity with HTTP requests and responses, focusing on serving static content.
+Simplified Project Split for MVP Version:
 
-    Team Member 2: Configuration Management and File Serving
-        Responsibilities:
-            Implement the configuration file parser to load server settings (e.g., root directory, log file).
-            Handle serving of static files (like HTML, CSS, and JS) from the designated root directory.
-            Implement a simple mechanism to handle 404 errors (file not found).
-        Key Focus Areas:
-            File System Interaction: Understand how to read files from the filesystem.
-            Configuration Management: Learn to read from configuration files and apply settings.
+### Team Member 1: Basic Server Functionality
+**Responsibilities:**
+- Implement the main server loop.
+- Handle incoming connections using blocking I/O (for simplicity).
+- Parse HTTP requests and generate basic HTTP responses (e.g., serving static HTML files).
+- Implement a basic logging mechanism to log incoming requests.
 
-    Team Member 3: Basic Error Handling and Testing
-        Responsibilities:
-            Implement basic error handling and create simple custom error pages (like 404.html).
-            Write unit tests for the basic functionalities implemented by the other two members (if applicable).
-            Document the codebase and help with README or usage instructions for the server.
-        Key Focus Areas:
-            Error Handling: Design user-friendly error pages to inform users when things go wrong.
-            Testing Practices: Learn how to write basic tests to verify server functionality.
+**Key Focus Areas:**
+- Networking Basics: Understand how to create sockets, bind to a port, listen for connections, and accept connections.
+- HTTP Protocol Basics: Familiarity with HTTP requests and responses, focusing on serving static content.
 
--------------------------------------------------------------
+### Team Member 2: Configuration Management and File Serving
+**Responsibilities:**
+- Implement the configuration file parser to load server settings (e.g., root directory, log file).
+- Handle serving of static files (like HTML, CSS, and JS) from the designated root directory.
+- Implement a simple mechanism to handle 404 errors (file not found).
+
+**Key Focus Areas:**
+- File System Interaction: Understand how to read files from the filesystem.
+- Configuration Management: Learn to read from configuration files and apply settings.
+
+### Team Member 3: Basic Error Handling and Testing
+**Responsibilities:**
+- Implement basic error handling and create simple custom error pages (like 404.html).
+- Write unit tests for the basic functionalities implemented by the other two members (if applicable).
+- Document the codebase and help with README or usage instructions for the server.
+
+**Key Focus Areas:**
+- Error Handling: Design user-friendly error pages to inform users when things go wrong.
+- Testing Practices: Learn how to write basic tests to verify server functionality.
+
+---
+
 ## Repo organisation
+
 webserv/
 │
 ├── docs/                     # Documentation files
