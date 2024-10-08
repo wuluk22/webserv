@@ -92,26 +92,24 @@ webserv/
 ├── .gitignore                 # Git ignore file
 ├── README.md                  # Project overview and setup instructions
 └── Makefile                   # Build configuration (if applicable)
-
 ---------------------------------------------
 ## Core relationships
-Core Relationships and Class Responsibilities
 
----------------------------------------------
+### WebServer:
+**Responsibilities**: This is the main class that coordinates all other components. It initializes the server, listens for connections, and delegates tasks (like handling requests and responses) to other classes.
 
-    WebServer:
-        Responsibility: This is the main class that coordinates all other components. It initializes the server, listens for connections, and delegates tasks (like handling requests and responses) to other classes.
-        Dependencies:
-            ConfigParser for reading the configuration file.
-            HttpRequest and HttpResponse to handle the HTTP request/response lifecycle.
-            Logger for logging events and errors.
-            VirtualHostHandler to resolve the correct host (if multiple virtual hosts are defined).
-            DirectoryListingHandler for directory listing functionality.
-            ErrorHandler for custom error pages.
-            Optional: CGIHandler if CGI support is required.
+**Dependencies**:
+- ConfigParser for reading the configuration file.
+- HttpRequest and HttpResponse to handle the HTTP request/response lifecycle.
+- Logger for logging events and errors.
+- VirtualHostHandler to resolve the correct host (if multiple virtual hosts are defined).
+- DirectoryListingHandler for directory listing functionality.
+- ErrorHandler for custom error pages.
+- Optional: CGIHandler if CGI support is required.
 
-    Code Example:
+#### Code Example:
 
+```cpp
 class WebServer {
 public:
     WebServer(int port, const std::string& config_file)
@@ -134,12 +132,12 @@ public:
 
 private:
     int port_;
-    ServerConfig config_;                 // Holds server configuration
-    Logger logger_;                       // Logs events and errors
-    VirtualHostHandler virtual_host_handler_; // Handles requests for different hosts
-    DirectoryListingHandler directory_listing_handler_; // Generates directory listings
-    ErrorHandler error_handler_;          // Sends custom error responses
-    CGIHandler cgi_handler_;              // Executes CGI scripts (optional)
+    ServerConfig config_;                 
+    Logger logger_;                       
+    VirtualHostHandler virtual_host_handler_;
+    DirectoryListingHandler directory_listing_handler_; 
+    ErrorHandler error_handler_;          
+    CGIHandler cgi_handler_;              
 
     void processRequest(int client_socket);
     // More server logic...
