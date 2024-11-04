@@ -1,11 +1,8 @@
 #ifndef SOCKETHANDLER_HPP
 # define SOCKETHANDLER_HPP
-# include <netinet/in.h> // sockaddr_in
+# include <netinet/in.h> // sockaddr_in | socklen_t
 # include <iostream>
-# include <cstring>
-# include <cstdlib>
-# include <sys/socket.h>
-# include <fcntl.h>
+# include <fcntl.h> // fcntl
 
 class SocketHandler
 {

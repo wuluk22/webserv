@@ -1,6 +1,5 @@
 #ifndef LOGGER_HPP
 # define LOGGER_HPP
-# include <string>
 # include <iostream>
 
 class Logger

@@ -3,7 +3,7 @@
 int SocketHandler::create_socket()
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == 0)
+    if (sock == -1)
     {
         std::cerr << "Socket creation failed" << std::endl;
         exit(EXIT_FAILURE);
@@ -34,6 +34,21 @@ void SocketHandler::bind_socket(int sock, struct sockaddr_in &address, int port)
     }
 }
 
+void SocketHandler::set_nonblocking(int sock)
+{
+    int flags = fcntl(sock, F_GETFL, 0);
+    if (flags == -1)
+    {
+        std::cerr << "Error in fcntl: unable to get flags" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1)
+    {
+        std::cerr << "Error in fcntl: unable to set non-blocking" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
 void SocketHandler::listen_socket(int sock, int backlog)
 {
     if (listen(sock, backlog) < 0)
@@ -52,20 +67,5 @@ int SocketHandler::accept_connection(int server_sock, struct sockaddr_in &addres
         exit(EXIT_FAILURE);
     }
     return new_socket;
-}
-
-void SocketHandler::set_nonblocking(int sock)
-{
-    int flags = fcntl(sock, F_GETFL, 0);
-    if (flags == -1)
-    {
-        std::cerr << "Error in fcntl: unable to get flags" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1)
-    {
-        std::cerr << "Error in fcntl: unable to set non-blocking" << std::endl;
-        exit(EXIT_FAILURE);
-    }
 }
 

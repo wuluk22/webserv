@@ -1,11 +1,6 @@
 #include "SocketHandler.hpp"
 #include "HttpRequestHandler.hpp"
 #include "Logger.hpp"
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
-#include <sys/socket.h>
-#include <iostream>
 
 const int PORT = 8080;
 const int MAX_CLIENTS = 10;
