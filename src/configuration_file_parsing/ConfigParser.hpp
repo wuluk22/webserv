@@ -1,5 +1,5 @@
 #ifndef CONFIGPARSER_HPP
-#define CONSIGPARSER_HPP
+#define CONFIGPARSER_HPP
 
 #include <iostream>
 #include <map>
@@ -12,8 +12,8 @@
 class ConfigParser
 {
 	private:
-		const std::string path_of_configuration_file;
-		std::map<unsigned int,std::vector<Directive>> servers_config;
+		std::string _path_of_configuration_file;
+		std::map<unsigned int,std::vector<Directive>> _servers_config;
 		ConfigParser(const std::string init_path);
 	public:
 		ConfigParser(const ConfigParser &copy) = delete;
@@ -21,8 +21,12 @@ class ConfigParser
 		~ConfigParser();
 		ConfigParser& createInstance(const std::string init_path);
 		ConfigParser& getInstance(void);
-		std::string& getPathOfConfigurationFile(void) const;
-		std::map<unsigned int, std::vector<Directive>> getServersConfig(void) const;
+		const std::string& getPathOfConfigurationFile(void) const;
+		Directive getServerConfig(unsigned int id) const;
+		class ConfigException : public std::exception {
+			public:
+				virtual const char* what() const throw();
+		};
 };
 
 #endif
