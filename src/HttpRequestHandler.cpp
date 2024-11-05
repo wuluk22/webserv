@@ -4,18 +4,49 @@
 
 const int BUFFER_SIZE = 1024;
 
-std::string HttpRequestHandler::httpParsing(std::string buffer) const
+std::string HttpRequestHandler::getMethod(void) const
 {
+	return method;
+}
+
+std::string HttpRequestHandler::getPath(void) const
+{
+	return path;
+}
+
+std::string HttpRequestHandler::getHttpVersion(void) const
+{
+	return httpVersion;
+}
+
+void	HttpRequestHandler::setMethod(const std::string &m)
+{
+	method = m;
+}
+
+void	HttpRequestHandler::setPath(const std::string &p)
+{
+	path = p;
+}
+
+void	HttpRequestHandler::setHttpVersion(const std::string &h)
+{
+	httpVersion = h;
+}
+
+HttpRequestHandler	HttpRequestHandler::httpParsing(std::string buffer)
+{
+	HttpRequestHandler	request;
 	size_t	methodPos;
 	size_t	pathPos;
 	size_t	httpVersionPos;
 
-	std::string	method;
-	std::string	path;
-	std::string	httpVersion;
-	std::cout << "-----------------" << std::endl;
+	//std::string	method;
+	//std::string	path;
+	//std::string	httpVersion;
+	/*std::cout << "-----------------" << std::endl;
     std::cout << "Received request:\n" << buffer << std::endl;
-	std::cout << "-----------------" << std::endl;
+	std::cout << "-----------------" << std::endl;*/
 
 	std::istringstream	stream(buffer);
 	std::string	line;
@@ -24,18 +55,18 @@ std::string HttpRequestHandler::httpParsing(std::string buffer) const
 
 	// method
 	methodPos = line.find(" ");
-	method = line.substr(0, methodPos);
+	request.setMethod(line.substr(0, methodPos));
+	
 	
 	// path
 	pathPos = methodPos + 1;
 	httpVersionPos = line.find(" ", pathPos);
-	path = line.substr(pathPos, httpVersionPos - pathPos);
+	request.setPath(line.substr(pathPos, httpVersionPos - pathPos));
 
 	// http version
-	httpVersion = line.substr(httpVersionPos + 1, '\n');
-	std::cout << " - " << method << " " << path << " " << httpVersion << std::endl;
+	request.setHttpVersion(line.substr(httpVersionPos + 1, '\n'));
+	std::cout << " - " << request.method << " " << request.path << " " << request.httpVersion << std::endl;
 
-	std::map<std::string, std::string> headers;
 	while (std::getline(stream, line) && line != "\r" && !line.empty())
 	{
 		std::string	headerName;
@@ -45,13 +76,13 @@ std::string HttpRequestHandler::httpParsing(std::string buffer) const
 		pos = line.find(":");
 		headerName = line.substr(0, pos);
 		headerValue = line.substr(pos + 2);
-		headers[headerName] = headerValue;
+		request.headers[headerName] = headerValue;
 		std::cout << " - " << headerName;
 		std::cout << ": ";
 		std::cout << headerValue << std::endl;
 	}
 
-	return buffer;
+	return request;
 }
 
 void HttpRequestHandler::handle_request(int client_sock)
@@ -74,7 +105,12 @@ void HttpRequestHandler::handle_request(int client_sock)
 
     buffer[valread] = '\0';
 
-	http.httpParsing(buffer);
+	http = http.httpParsing(buffer);
+	std::cout << " --- getters --- " << std::endl;
+	std::cout << " - " << http.getMethod() << std::endl;
+	std::cout << " - " << http.getPath() << std::endl;
+	std::cout << " - " << http.getHttpVersion() << std::endl;
+	std::cout << " --- getters --- " << std::endl;
 
     // Simple HTTP Response
     const std::string response =

@@ -9,8 +9,17 @@
 class HttpRequestHandler
 {
 	public:
+		std::string	getMethod(void) const;
+		std::string	getPath(void) const;
+		std::string	getHttpVersion(void) const;
+
+		void		setMethod(const std::string &m);
+		void		setPath(const std::string &p);
+		void		setHttpVersion(const std::string &h);
+
 		static void handle_request(int client_sock);
-		std::string	httpParsing(std::string buffer) const;
+		HttpRequestHandler	httpParsing(std::string buffer);
+		//HttpRequestHandler&	operator=(const HttpRequestHandler &assign);
 	private:
 		std::map<std::string, std::string> headers;
 		std::string	method;
