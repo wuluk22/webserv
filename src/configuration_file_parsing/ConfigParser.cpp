@@ -1,5 +1,5 @@
+#include "ServerConfig.hpp"
 #include "ConfigParser.hpp"
-#include "Directive.hpp"
 #include <map>
 
 ConfigParser::ConfigParser(const std::string init_path) {
@@ -34,7 +34,7 @@ const std::string& ConfigParser::getPathOfConfigurationFile(void) const {
 }
 
 Directive ConfigParser::getServerConfig(unsigned int id) const {
-	std::map<unsigned int, std::vector<Directive> >::const_iterator wanted_server_config;
+	std::map<unsigned int, std::vector<ServerConfig> >::const_iterator wanted_server_config;
 	
 	wanted_server_config = _servers_config.find(id);
 	if (wanted_server_config != _servers_config.end() && !wanted_server_config->second.empty())

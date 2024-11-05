@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
-#include "Directive.hpp"
+#include "ServerConfig.hpp"
 
 #define BAD_CONFIG_FILE "Invalid file"
 #define NO_ACCESS "Cannot acces the file"
@@ -16,7 +16,7 @@ class ConfigParser
 	private:
 		ConfigParser* instance;
 		std::string _path_of_configuration_file;
-		std::map<unsigned int,std::vector<Directive>> _servers_config;
+		std::map<unsigned int,std::vector<ServerConfig>> _servers_config;
 		ConfigParser(const std::string init_path);
 		bool endsWith(const std::string path, const std::string extension);
 	public:
