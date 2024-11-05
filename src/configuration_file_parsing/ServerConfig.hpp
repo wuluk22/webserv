@@ -46,6 +46,7 @@ enum e_allowed_methods {
 
 class LocationBlock : public Directive {
 	private:
+		std::string uri;
 		std::string alias;
 		std::string root;
 		std::string index;
