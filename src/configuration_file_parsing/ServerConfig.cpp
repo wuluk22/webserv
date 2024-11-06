@@ -36,7 +36,7 @@ void ServerConfig::addLocationDirective(s_common_params c_params, s_loc_params l
 
 void ServerConfig::addServerDirective(s_common_params c_params, s_server_params s_params) {
 	if (this->_server_params_defined)
-		throw ConfigException(TWO_SERVER_BLOCK_DEFINITIONS);
+		throw std::exception();
 	ServerBlock new_server_directive(c_params, s_params);
 	setDirective(new_server_directive);
 }
@@ -103,6 +103,7 @@ LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
 		this->_common_params = rhs._common_params;
 		this->_location_params = rhs._location_params;
 	}
+	return (*this);
 }
 
 s_common_params LocationBlock::getCommonParams(void) const {
