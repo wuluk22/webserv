@@ -19,8 +19,16 @@ std::vector<Directive> ServerConfig::getAllDirectives(void) const {
 
 }
 
-void ServerConfig::addOneDirective(Directive element_to_add) {
+void ServerConfig::setDirective(Directive new_directive) {
 
+}
+
+void ServerConfig::addLocationDirective(s_common_params c_params, s_loc_params l_params) {
+
+}
+
+void ServerConfig::addServerDirective(s_common_params c_params, s_server_params s_params) {
+    
 }
 
 // Directive class and its derivatives
@@ -41,7 +49,7 @@ Directive& Directive::operator=(const Directive &rhs) {
 
 // ServerBlock
 
-ServerBlock::ServerBlock(s_common_parameters common_params, s_server_block_parameters server_params) {
+ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {
 
 }
 
@@ -57,7 +65,7 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 
 }
 
-LocationBlock::LocationBlock(s_common_parameters common_params, s_location_block_parameters location_params) {
+LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
 
 }
 
