@@ -5,7 +5,7 @@
 #include <iostream>
 #include "ConfigException.hpp"
 
-class Directive;
+class ADirective;
 
 struct s_common_params {
 	std::string _root;
@@ -35,31 +35,31 @@ enum e_allowed_methods {
 
 class ServerConfig {
 	private:
-		std::vector<Directive> _all_directives;
+		std::vector<ADirective> _all_directives;
 		bool _server_params_defined;
 	public:
 		ServerConfig(void);
 		ServerConfig(const ServerConfig &copy);
 		~ServerConfig();
 		ServerConfig& operator=(const ServerConfig& rhs);
-		std::vector<Directive> getAllDirectives(void) const;
-		void setDirective(Directive new_directive);
+		std::vector<ADirective> getAllDirectives(void) const;
+		void setDirective(ADirective new_directive);
 		void addLocationDirective(s_common_params c_params, s_loc_params l_params);
 		void addServerDirective(s_common_params c_params, s_server_params s_params);
 };
 
 // Directive class sole purpose is to enable a composite design pattern for the ServerConfig class
 
-class Directive {
+class ADirective {
 	public:
-		Directive(void);
-		virtual ~Directive();
+		ADirective(void);
+		virtual ~ADirective();
 		virtual s_common_params getCommonParams(void) const;
 		virtual void setCommonParams(s_server_params s_params);
 };
 
 
-class ServerBlock : public Directive {
+class ServerBlock : public ADirective {
 	private:
 		s_common_params _common_params;
 		s_server_params _server_params;
@@ -74,7 +74,7 @@ class ServerBlock : public Directive {
 		void setServerParams(s_server_params s_params);
 };
 
-class LocationBlock : public Directive {
+class LocationBlock : public ADirective {
 	private:
 		s_common_params _common_params;
 		s_loc_params _location_params;
