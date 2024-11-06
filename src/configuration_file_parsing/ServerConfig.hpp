@@ -19,7 +19,14 @@ struct s_server_params {
 	unsigned int _client_max_body_size;
 };
 
+struct s_cgi_params {
+	std::string _cgi_path;
+	std::string _cgi_extension;
+};
+
 struct s_loc_params {
+	bool _is_cgi;
+	s_cgi_params _cgi_params;
 	std::string _uri;
 	std::string _alias;
 	unsigned char _allowed_methods;
@@ -53,11 +60,7 @@ class ServerConfig {
 class ADirective {
 	public:
 		ADirective(void);
-		virtual ~ADirective();
-		virtual s_common_params getCommonParams(void) const;
-		virtual void setCommonParams(s_server_params s_params);
 };
-
 
 class ServerBlock : public ADirective {
 	private:
@@ -78,6 +81,7 @@ class LocationBlock : public ADirective {
 	private:
 		s_common_params _common_params;
 		s_loc_params _location_params;
+		LocationBlock* _upper_location;
 	public:
 		LocationBlock(s_common_params common_params, s_loc_params location_params);
 		LocationBlock(const LocationBlock &copy);
@@ -85,6 +89,7 @@ class LocationBlock : public ADirective {
 		LocationBlock& operator = (const LocationBlock &rhs);
 		s_common_params getCommonParams(void) const;
 		s_loc_params getLocationParams(void) const;
+		void setUpperLocation(LocationBlock* upper_location);
 		void setCommonParams(s_common_params common_params);
 		void setLocationParams(s_loc_params location_params);
 };
