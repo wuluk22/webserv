@@ -7,18 +7,12 @@ const int BUFFER_SIZE = 1024;
 std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i)
 {
 	out << i.getMethod() << " " << i.getPath() << " " << i.getHttpVersion() << std::endl;
-	out << "Host: " << i.getHeader("Host") << std::endl;
-	out << "Connection: " << i.getHeader("Connection") << std::endl;
-	out << "Cache-Control: " << i.getHeader("Cache-Control") << std::endl;
-	out << "sec-ch-ua: " << i.getHeader("sec-ch-ua") << std::endl;
-	out << "User-Agent: " << i.getHeader("User-Agent") << std::endl;
-	out << "Accept: " << i.getHeader("Accept") << std::endl;
-	out << "Set-Fetch-Site: " << i.getHeader("Sec-Fetch-Site") << std::endl;
-	out << "Set-Fetch-Mode: " << i.getHeader("Sec-Fetch-Mode") << std::endl;
-	out << "Set-Fetch-Dest: " << i.getHeader("Sec-Fetch-Dest") << std::endl;
-	out << "Accept-Encoding: " << i.getHeader("Accept-Encoding") << std::endl;
-	out << "Accept-Language: " << i.getHeader("Accept-Language") << std::endl;
-
+	std::map<std::string, std::string> headers = i.getHeaders();
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = headers.begin(); it != headers.end(); ++it)
+	{
+		out << it->first << ": " << it->second << std::endl;
+	}
 	return out;
 }
 
@@ -89,9 +83,6 @@ HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
 	size_t	pathPos;
 	size_t	httpVersionPos;
 
-	//std::string	method;
-	//std::string	path;
-	//std::string	httpVersion;
 	/*std::cout << "-----------------" << std::endl;
     std::cout << "Received request:\n" << buffer << std::endl;
 	std::cout << "-----------------" << std::endl;*/
@@ -158,9 +149,9 @@ void HttpRequestHandler::handle_request(int client_sock)
     buffer[valread] = '\0';
 
 	http = http.httpParsing(buffer);
-	std::cout << " --- getters --- " << std::endl;
+	std::cout << " -<- getters --- " << std::endl;
 	std::cout << http << std::endl;
-	std::cout << " --- getters --- " << std::endl;
+	std::cout << " --- getters ->- " << std::endl;
 
     // Simple HTTP Response
     const std::string response =
