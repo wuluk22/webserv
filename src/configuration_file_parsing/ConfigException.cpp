@@ -1,7 +1,17 @@
 #include "ConfigException.hpp"
 
-ConfigException::ConfigException(const std::string& msg) : message(msg) {}
+const char * ConfigException::what() {
+	return ("Default Config Exception");
+}
 
-const char* ConfigException::what() const throw() {
-	return (message.c_str());
+const char * BadPathException::what() {
+	return (BAD_FILE);
+}
+
+const char * NoAccessException::what() {
+	return (NO_ACCESS);
+}
+
+const char * NoServerConfigException::what() {
+	return (NO_SERVER_CONFIG);
 }
