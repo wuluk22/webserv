@@ -4,6 +4,24 @@
 
 const int BUFFER_SIZE = 1024;
 
+std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i)
+{
+	out << i.getMethod() << " " << i.getPath() << " " << i.getHttpVersion() << std::endl;
+	out << "Host: " << i.getHeader("Host") << std::endl;
+	out << "Connection: " << i.getHeader("Connection") << std::endl;
+	out << "Cache-Control: " << i.getHeader("Cache-Control") << std::endl;
+	out << "sec-ch-ua: " << i.getHeader("sec-ch-ua") << std::endl;
+	out << "User-Agent: " << i.getHeader("User-Agent") << std::endl;
+	out << "Accept: " << i.getHeader("Accept") << std::endl;
+	out << "Set-Fetch-Site: " << i.getHeader("Sec-Fetch-Site") << std::endl;
+	out << "Set-Fetch-Mode: " << i.getHeader("Sec-Fetch-Mode") << std::endl;
+	out << "Set-Fetch-Dest: " << i.getHeader("Sec-Fetch-Dest") << std::endl;
+	out << "Accept-Encoding: " << i.getHeader("Accept-Encoding") << std::endl;
+	out << "Accept-Language: " << i.getHeader("Accept-Language") << std::endl;
+
+	return out;
+}
+
 std::string HttpRequestHandler::getMethod(void) const
 {
 	return method;
@@ -17,6 +35,26 @@ std::string HttpRequestHandler::getPath(void) const
 std::string HttpRequestHandler::getHttpVersion(void) const
 {
 	return httpVersion;
+}
+
+std::string HttpRequestHandler::getHeader(const std::string &headerName) const
+{
+    std::map<std::string, std::string>::const_iterator it = headers.find(headerName);
+    if (it != headers.end())
+	{
+        return it->second;
+    }
+    return ""; // Return empty string if header is not found
+}
+
+std::map<std::string, std::string> HttpRequestHandler::getHeaders() const
+{
+    return headers;
+}
+
+std::string HttpRequestHandler::getBody() const
+{
+    return body;
 }
 
 void	HttpRequestHandler::setMethod(const std::string &m)
@@ -34,7 +72,17 @@ void	HttpRequestHandler::setHttpVersion(const std::string &h)
 	httpVersion = h;
 }
 
-HttpRequestHandler	HttpRequestHandler::httpParsing(std::string buffer)
+void HttpRequestHandler::setHeader(const std::string &headerName, const std::string &headerValue)
+{
+    headers[headerName] = headerValue;
+}
+
+void HttpRequestHandler::setBody(const std::string &b)
+{
+    body = b;
+}
+
+HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
 {
 	HttpRequestHandler	request;
 	size_t	methodPos;
@@ -65,7 +113,6 @@ HttpRequestHandler	HttpRequestHandler::httpParsing(std::string buffer)
 
 	// http version
 	request.setHttpVersion(line.substr(httpVersionPos + 1, '\n'));
-	std::cout << " - " << request.method << " " << request.path << " " << request.httpVersion << std::endl;
 
 	while (std::getline(stream, line) && line != "\r" && !line.empty())
 	{
@@ -76,11 +123,16 @@ HttpRequestHandler	HttpRequestHandler::httpParsing(std::string buffer)
 		pos = line.find(":");
 		headerName = line.substr(0, pos);
 		headerValue = line.substr(pos + 2);
-		request.headers[headerName] = headerValue;
-		std::cout << " - " << headerName;
-		std::cout << ": ";
-		std::cout << headerValue << std::endl;
+		request.setHeader(headerName, headerValue);
 	}
+
+    std::string bodyContent;
+    while (std::getline(stream, line))
+	{
+        bodyContent += line + "\n";
+    }
+    setBody(bodyContent);
+
 
 	return request;
 }
@@ -107,9 +159,7 @@ void HttpRequestHandler::handle_request(int client_sock)
 
 	http = http.httpParsing(buffer);
 	std::cout << " --- getters --- " << std::endl;
-	std::cout << " - " << http.getMethod() << std::endl;
-	std::cout << " - " << http.getPath() << std::endl;
-	std::cout << " - " << http.getHttpVersion() << std::endl;
+	std::cout << http << std::endl;
 	std::cout << " --- getters --- " << std::endl;
 
     // Simple HTTP Response

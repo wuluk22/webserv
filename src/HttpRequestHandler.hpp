@@ -12,19 +12,26 @@ class HttpRequestHandler
 		std::string	getMethod(void) const;
 		std::string	getPath(void) const;
 		std::string	getHttpVersion(void) const;
+		std::string	getHeader(const std::string &headerName) const;
+		std::map<std::string, std::string> getHeaders() const;
+		std::string	getBody() const;
 
 		void		setMethod(const std::string &m);
 		void		setPath(const std::string &p);
 		void		setHttpVersion(const std::string &h);
+		void		setHeader(const std::string &headerName, const std::string &headerValue);
+		void		setBody(const std::string &body);
 
 		static void handle_request(int client_sock);
-		HttpRequestHandler	httpParsing(std::string buffer);
+		HttpRequestHandler	httpParsing(const std::string &buffer);
 		//HttpRequestHandler&	operator=(const HttpRequestHandler &assign);
 	private:
-		std::map<std::string, std::string> headers;
 		std::string	method;
 		std::string	path;
 		std::string	httpVersion;
+		std::map<std::string, std::string> headers;
+		std::string body;
 };
+std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i);
 
 #endif
