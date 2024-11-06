@@ -33,7 +33,7 @@ const std::string& ConfigParser::getPathOfConfigurationFile(void) const {
 	return (this->_path_of_configuration_file);
 }
 
-Directive ConfigParser::getServerConfig(unsigned int id) const {
+ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	std::map<unsigned int, std::vector<ServerConfig> >::const_iterator wanted_server_config;
 	
 	wanted_server_config = _servers_config.find(id);

@@ -26,7 +26,7 @@ class ConfigParser
 		~ConfigParser();
 		ConfigParser& getInstance(const std::string init_path);
 		const std::string& getPathOfConfigurationFile(void) const;
-		Directive getServerConfig(unsigned int id) const;
+		ServerConfig getServerConfig(unsigned int id) const;
 };
 
 #endif
