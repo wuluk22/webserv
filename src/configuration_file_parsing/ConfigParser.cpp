@@ -10,7 +10,7 @@ ConfigParser::ConfigParser(const std::string init_path) {
 	configuration_input_file.open(init_path);
 	if (!configuration_input_file.is_open())
 		throw ConfigException(NO_ACCESS);
-	
+	parseConfigurationFile(configuration_input_file);
 }
 
 bool ConfigParser::endsWith(const std::string path, const std::string extension) {
@@ -43,3 +43,6 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 		throw ConfigException(NO_SERVER_CONFIG);
 }
 
+void ConfigParser::parseConfigurationFile(std::ifstream &configuration_file) {
+
+}

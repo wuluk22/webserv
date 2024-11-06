@@ -20,6 +20,7 @@ class ConfigParser
 		std::map<unsigned int,std::vector<ServerConfig>> _servers_config;
 		ConfigParser(const std::string init_path);
 		bool endsWith(const std::string path, const std::string extension);
+		void parseConfigurationFile(std::ifstream &configuration_file);
 	public:
 		ConfigParser(const ConfigParser &copy) = delete;
 		ConfigParser& operator=(const ConfigParser &rhs) = delete;
