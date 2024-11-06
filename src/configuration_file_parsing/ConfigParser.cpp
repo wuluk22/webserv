@@ -43,10 +43,3 @@ Directive ConfigParser::getServerConfig(unsigned int id) const {
 		throw ConfigException(NO_SERVER_CONFIG);
 }
 
-// EXCEPTION CLASS
-
-ConfigParser::ConfigException::ConfigException(const std::string& msg) : message(msg) {}
-
-const char* ConfigParser::ConfigException::what() const throw() {
-	return (message.c_str());
-}

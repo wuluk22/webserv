@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include "ServerConfig.hpp"
+#include "ConfigException.hpp"
 
 #define BAD_CONFIG_FILE "Invalid file"
 #define NO_ACCESS "Cannot acces the file"
@@ -26,13 +27,6 @@ class ConfigParser
 		ConfigParser& getInstance(const std::string init_path);
 		const std::string& getPathOfConfigurationFile(void) const;
 		Directive getServerConfig(unsigned int id) const;
-		class ConfigException : public std::exception {
-			private:
-				std::string message;
-			public:
-				ConfigException(const std::string& msg);
-				virtual const char* what() const throw();
-		};
 };
 
 #endif
