@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include "ConfigException.hpp"
 
 class Directive;
 
@@ -29,6 +30,8 @@ enum e_allowed_methods {
 	POST = 1 << 1,
 	DELETE = 1 << 2
 };
+
+#define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
 
 class ServerConfig {
 	private:
