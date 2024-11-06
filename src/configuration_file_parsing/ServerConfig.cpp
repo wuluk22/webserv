@@ -39,7 +39,6 @@ void ServerConfig::addServerDirective(s_common_params c_params, s_server_params 
         throw ConfigException(TWO_SERVER_BLOCK_DEFINITIONS);
     ServerBlock new_server_directive(c_params, s_params);
     setDirective(new_server_directive);
-
 }
 
 // Directive class and its derivatives
@@ -47,47 +46,79 @@ void ServerConfig::addServerDirective(s_common_params c_params, s_server_params 
 
 Directive::Directive(void) {}
 
-Directive::Directive(const ServerConfig &copy) {
-
-}
-
-Directive::~Directive() {}
-
-Directive& Directive::operator=(const Directive &rhs) {
-
-}
-
 // ServerBlock
 
 ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {
-
+    this->_common_params = common_params;
+    this->_server_params = server_params;
 }
 
 ServerBlock::ServerBlock(const ServerBlock &copy) {
-
+    (*this) = copy;
 }
 
-ServerBlock::~ServerBlock() {
+ServerBlock::~ServerBlock() {}
 
+s_common_params ServerBlock::getCommonParams(void) const {
+    return (this->_common_params);
+}
+
+s_server_params ServerBlock::getServerParams(void) const {
+    return (this->_server_params);
+}
+
+void ServerBlock::setCommonParams(s_common_params common_params) {
+    this->_common_params = common_params;
+}
+
+void ServerBlock::setServerParams(s_server_params server_params) {
+    this->_server_params = server_params;
 }
 
 // LocationBlock
 
 ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
-
+    if (this != &rhs)
+    {
+        this->_common_params = rhs._common_params;
+        this->_server_params = rhs._server_params;
+    }
+    return (*this);
 }
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
-
+    this->_common_params = common_params;
+    this->_location_params = location_params;
 }
 
 LocationBlock::LocationBlock(const LocationBlock &copy) {
-
+    (*this) = copy;
 }
 
 LocationBlock::~LocationBlock() {}
 
 LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
-
+    if (this != &rhs)
+    {
+        this->_common_params = rhs._common_params;
+        this->_location_params = rhs._location_params;
+    }
 }
+
+s_common_params LocationBlock::getCommonParams(void) const {
+    return (this->_common_params);
+}
+
+s_loc_params LocationBlock::getLocationParams(void) const {
+    return (this->_location_params);
+}
+
+void LocationBlock::setCommonParams(s_common_params common_params) {
+    this->_common_params = common_params;
+}
+
+void LocationBlock::setLocationParams(s_loc_params location_params) {
+    this->_location_params = location_params;
+}
+
 

@@ -53,9 +53,9 @@ class ServerConfig {
 class Directive {
 	public:
 		Directive(void);
-		Directive(const ServerConfig &copy);
-		~Directive();
-		Directive& operator = (const Directive &rhs);
+		virtual ~Directive();
+		virtual s_common_params getCommonParams(void) const;
+		virtual void setCommonParams(s_server_params s_params);
 };
 
 
@@ -68,10 +68,10 @@ class ServerBlock : public Directive {
 		ServerBlock(const ServerBlock &copy);
 		~ServerBlock();
 		ServerBlock& operator = (const ServerBlock &rhs);
-		void getCommonParams(void) const;
-		void getServerParams(void) const;
-		void setLocationParams(s_common_params c_params, s_loc_params l_params);
-		void setServerParams(s_common_params c_params, s_loc_params l_params);
+		s_common_params getCommonParams(void) const;
+		s_server_params getServerParams(void) const;
+		void setCommonParams(s_common_params c_params);
+		void setServerParams(s_server_params s_params);
 };
 
 class LocationBlock : public Directive {
@@ -83,8 +83,8 @@ class LocationBlock : public Directive {
 		LocationBlock(const LocationBlock &copy);
 		~LocationBlock();
 		LocationBlock& operator = (const LocationBlock &rhs);
-		void getCommonParams(void) const;
-		void getLocationParams(void) const;
+		s_common_params getCommonParams(void) const;
+		s_loc_params getLocationParams(void) const;
 		void setCommonParams(s_common_params common_params);
 		void setLocationParams(s_loc_params location_params);
 };
