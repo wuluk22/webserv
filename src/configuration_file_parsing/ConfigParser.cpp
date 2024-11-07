@@ -77,11 +77,6 @@ bool is_only_whitespace(const std::string& str) {
 #define L_SIZE 4
 #define TAB_SIZE 4
 
-/**
- *  PARAMS THAT CAN ONLY BE DELCARED ONE TIME IN A RESPECTIVE BLOCK 
- *  ROOT - CGI-PATH - CGI-EXTENSIONS - allowed_method
- *  
- */
 std::string trim(const std::string& str) {
 	size_t start = str.find_first_not_of(" \t\n\r\f\v");
 	if (start == std::string::npos)
@@ -90,35 +85,81 @@ std::string trim(const std::string& str) {
 	return str.substr(start, end - start + 1);
 }
 
-void ConfigParser::parseConfigurationFile(std::ifstream &configuration_file) {
-	std::string working_line;
+// TODO : Incorporte string splitting to recieve arguments, make another class for file path validation and parameter
+// validation. It is vital for the web server to check the validity of the uri and other params while parsing 
+// config file and also mid-exec !!!
+
+void ConfigParser::processBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk, size_t &level) {
+	std::string l_param[5] = {"cgi_path", "cgi_extensions", "alias", "allowed_methods", "return"};
+	std::streampos last_position;
+	Tk.enterBlock();
+	std::cout << level << std::endl;
+
+	while (std::getline(config_file, w_line)) {
+		w_line = trim(w_line);
+		last_position = config_file.tellg();
+
+		if (is_token_valid(w_line, B_LOC)) {
+			std::cout << "Entering nested location block: " << w_line << std::endl;
+			level++;
+			processBlock(config_file, w_line, Tk, level);
+		} 
+		else if (is_token_valid(w_line, LOC_TERMINATOR)) {
+			level--;
+			if (level == 0) {
+				std::cout << "Exiting block at top level." << std::endl;
+				break;
+			}
+			std::cout << "Exiting nested block." << std::endl;
+		} 
+		else if (is_only_whitespace(w_line)) {
+			continue;
+		} 
+		else {
+			Tk.incrementToken(w_line);
+			std::cout << "Directive in block: " << w_line << std::endl;
+			if (Tk.getTokenCount("cgi_path") > 1 || Tk.getTokenCount("cgi_extensions") > 1 || Tk.getTokenCount("root")) {
+				std::cerr << "Error: Directive repeated within block." << std::endl;
+				std::cout << "Tk root token count" << Tk.getTokenCount("root") << "\n";
+				break;
+			}
+		}
+	}
+	config_file.seekg(last_position);
+}
+/**
+ *  PARAMS THAT CAN ONLY BE DELCARED ONE TIME IN A RESPECTIVE BLOCK 
+ *  ROOT - CGI-PATH - CGI-EXTENSIONS - allowed_method
+ */
+void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
+	std::string w_line;
 	std::string possible_directive;
 	std::string c_param[4] = {"root", "index", "auto_index", "client_max_body_size"};
 	std::string s_param[2] = {"server_name", "listen"};
-	std::string l_param[4] = {"cgi_path", "cgi_extensions", "alias", "allowed_methods"};
-	unsigned int level = 0;
-	ADirective workingDirective;
+	size_t level = 0;
+	ServerBlock server_directive;
 	TokenCounter Tk;
 
-	while (std::getline(configuration_file, working_line)) {
-		working_line = trim(working_line);
-		if (level == 0 && is_token_valid(working_line,B_SERVER)) {
+	while (std::getline(config_file, w_line)) {
+		w_line = trim(w_line);
+		if (level == 0 && is_token_valid(w_line,B_SERVER)) {
 			level++;
 			std::cout << "inside" << std::endl;
-		} else if (level && is_token_valid(working_line, CONFIG_TERMINATOR)) {
+		} else if (level && is_token_valid(w_line, CONFIG_TERMINATOR)) {
 			std::cout << "outside" << std::endl;
 			level--;
-		} else if (!level && is_only_whitespace(working_line)){
+		} else if (!level && is_only_whitespace(w_line)){
 			std::cout << "skip" << "\n";
-		} else if (level && level && (is_token_valid_multiple(working_line, s_param, S_SIZE) || is_token_valid_multiple(working_line, c_param, C_SIZE))) {
-			Tk.incrementToken(working_line);
+		} else if (level && level && (is_token_valid_multiple(w_line, s_param, S_SIZE) || is_token_valid_multiple(w_line, c_param, C_SIZE))) {
+			Tk.incrementToken(w_line);
 			std::cout << "good directive" << std::endl;
 			if (Tk.getTokenCount("root") > 1) {
 				std::cout << "a bit too much" << std::endl;
 				break;
 			}
-		} else if (level && is_token_valid(working_line, B_LOC)) {
-			std::cout << "entering location" << std::endl;
+		} else if (level && is_token_valid(w_line, B_LOC)) {
+			std::cout << "location block" << std::endl;
+			processBlock(config_file, w_line, Tk, level);
 		} else {
 			std::cout << "bye bye" << std::endl;
 			break;
