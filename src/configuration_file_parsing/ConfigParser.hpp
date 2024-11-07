@@ -9,6 +9,10 @@
 #include "ServerConfig.hpp"
 #include "ConfigException.hpp"
 
+#define CONFIG_TERMINATOR "end-server"
+#define B_SERVER "server"
+#define B_LOC "location"
+
 class ConfigParser
 {
 	private:
@@ -18,6 +22,7 @@ class ConfigParser
 		ConfigParser(const std::string init_path);
 		bool endsWith(const std::string path, const std::string extension);
 		void parseConfigurationFile(std::ifstream &configuration_file);
+		void processBlock(std::ifstream &configuration_file, std::string working_line);
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);

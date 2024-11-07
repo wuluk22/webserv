@@ -75,42 +75,54 @@ bool is_only_whitespace(const std::string& str) {
 #define C_SIZE 4
 #define S_SIZE 2
 #define L_SIZE 4
-#define B_PARAM 2
+#define TAB_SIZE 4
 
 /**
  *  PARAMS THAT CAN ONLY BE DELCARED ONE TIME IN A RESPECTIVE BLOCK 
  *  ROOT - CGI-PATH - CGI-EXTENSIONS - allowed_method
  *  
  */
+std::string trim(const std::string& str) {
+	size_t start = str.find_first_not_of(" \t\n\r\f\v");
+	if (start == std::string::npos)
+		return "";
+	size_t end = str.find_last_not_of(" \t\n\r\f\v");
+	return str.substr(start, end - start + 1);
+}
+
 void ConfigParser::parseConfigurationFile(std::ifstream &configuration_file) {
 	std::string working_line;
+	std::string possible_directive;
 	std::string c_param[4] = {"root", "index", "auto_index", "client_max_body_size"};
 	std::string s_param[2] = {"server_name", "listen"};
 	std::string l_param[4] = {"cgi_path", "cgi_extensions", "alias", "allowed_methods"};
-	std::string b_param[2] = {"server", "location"};
-	std::string config_terminator = "end-server";
-	unsigned int tab_count = 0;
-	unsigned int location_deep = 0;
-	bool inside_server_block = false;
+	unsigned int level = 0;
 	ADirective workingDirective;
 	TokenCounter Tk;
 
 	while (std::getline(configuration_file, working_line)) {
-		if (!inside_server_block && is_token_valid(working_line,b_param[0]) && tab_count == 0) {
+		working_line = trim(working_line);
+		if (level == 0 && is_token_valid(working_line,B_SERVER)) {
+			level++;
 			std::cout << "inside" << std::endl;
-			inside_server_block = true;
-			tab_count++;
-		}
-		else if (inside_server_block && is_token_valid(working_line, config_terminator)) {
+		} else if (level && is_token_valid(working_line, CONFIG_TERMINATOR)) {
 			std::cout << "outside" << std::endl;
-			inside_server_block = false;
-		}else if(!inside_server_block && is_only_whitespace(working_line)){
+			level--;
+		} else if (!level && is_only_whitespace(working_line)){
 			std::cout << "skip" << "\n";
-			tab_count = 0;
+		} else if (level && level && (is_token_valid_multiple(working_line, s_param, S_SIZE) || is_token_valid_multiple(working_line, c_param, C_SIZE))) {
+			Tk.incrementToken(working_line);
+			std::cout << "good directive" << std::endl;
+			if (Tk.getTokenCount("root") > 1) {
+				std::cout << "a bit too much" << std::endl;
+				break;
+			}
+		} else if (level && is_token_valid(working_line, B_LOC)) {
+			std::cout << "entering location" << std::endl;
 		} else {
-			std::cout << "problem" << "\n";
-			
-		}
+			std::cout << "bye bye" << std::endl;
+			break;
+		}	
 	}
 }
 
@@ -147,5 +159,4 @@ int main(void) {
 	{
 		std::cout << e.what() <<std::endl;
 	}
-	
 }
