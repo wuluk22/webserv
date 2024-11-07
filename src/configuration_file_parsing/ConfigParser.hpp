@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <stack>
 #include "ServerConfig.hpp"
 #include "ConfigException.hpp"
 
@@ -23,6 +24,17 @@ class ConfigParser
 		static ConfigParser* getInstance(const std::string init_path);
 		const std::string& getPathOfConfigurationFile(void) const;
 		ServerConfig getServerConfig(unsigned int id) const;
+};
+
+class TokenCounter {
+	public:
+		TokenCounter();
+		void enterBlock();
+		void exitBlock();
+		void incrementToken(const std::string& token);
+		int getTokenCount(const std::string& token);
+	private:
+		std::stack<std::map<std::string, int> > blockStack;
 };
 
 #endif
