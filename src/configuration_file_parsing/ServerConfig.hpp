@@ -11,12 +11,12 @@ struct s_common_params {
 	std::string _root;
 	std::string _index;
 	bool auto_index;
+	unsigned int _client_max_body_size;
 };
 
 struct s_server_params {
 	std::string _server_name;
 	std::vector<unsigned int> _listen;
-	unsigned int _client_max_body_size;
 };
 
 struct s_cgi_params {
