@@ -48,6 +48,8 @@ ADirective::ADirective(void) {}
 
 // ServerBlock
 
+ServerBlock::ServerBlock(void) {}
+
 ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {
 	this->_common_params = common_params;
 	this->_server_params = server_params;
@@ -75,7 +77,6 @@ void ServerBlock::setServerParams(s_server_params server_params) {
 	this->_server_params = server_params;
 }
 
-// LocationBlock
 
 ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 	if (this != &rhs)
@@ -85,6 +86,9 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 	}
 	return (*this);
 }
+// LocationBlock
+
+LocationBlock::LocationBlock(void) {}
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
 	this->_common_params = common_params;

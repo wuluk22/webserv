@@ -67,6 +67,7 @@ class ServerBlock : public ADirective {
 		s_common_params _common_params;
 		s_server_params _server_params;
 	public:
+		ServerBlock(void);
 		ServerBlock(s_common_params common_params, s_server_params server_params);
 		ServerBlock(const ServerBlock &copy);
 		~ServerBlock();
@@ -83,6 +84,7 @@ class LocationBlock : public ADirective {
 		s_loc_params _location_params;
 		LocationBlock* _upper_location;
 	public:
+		LocationBlock(void);
 		LocationBlock(s_common_params common_params, s_loc_params location_params);
 		LocationBlock(const LocationBlock &copy);
 		~LocationBlock();
