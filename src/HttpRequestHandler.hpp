@@ -1,10 +1,25 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpRequestHandler.hpp                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
+/*   Updated: 2024/11/07 14:10:08 by clegros          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef HTTPREQUESTHANDLER_HPP
 # define HTTPREQUESTHANDLER_HPP
+# include "HttpResponseHandler.hpp"
 # include <sys/socket.h> // recv | send
 # include <iostream>
 # include <unistd.h> // close
 # include <map>
 # include <sstream>
+
+class HttpResponseHandler;
 
 class HttpRequestHandler
 {

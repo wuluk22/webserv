@@ -154,15 +154,28 @@ void HttpRequestHandler::handle_request(int client_sock)
 	std::cout << " --- getters ->- " << std::endl;
 
     // Simple HTTP Response
-    const std::string response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/plain\r\n"
-        "Content-Length: 13\r\n"
-        "Connection: close\r\n\r\n"
-        "Hello, World!";
+	HttpResponseHandler	httpRes;
+	if (http.getPath() == "/")
+	{
+		httpRes.setStatusCode(200);
+    	httpRes.setBody("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, World!");
+	}
+	else if (http.getPath() == "/about")
+	{
+		httpRes.setStatusCode(200);
+    	httpRes.setBody("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nAbout page");
+	}
+	else
+	{
+		httpRes.setStatusCode(404);
+    	httpRes.setBody("HTTP/1.1 404 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nError: 404");
+	}
 
-    send(client_sock, response.c_str(), response.length(), 0);
+    send(client_sock, httpRes.getBody().c_str(), httpRes.getBody().length(), 0);
     std::cout << "Response sent to client" << std::endl;
+	std::cout << "-<-" << std::endl;
+	std::cout << httpRes << std::endl;
+	std::cout << "->-" << std::endl;
 
     close(client_sock);  // Close the client socket after sending response
 }
