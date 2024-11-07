@@ -126,6 +126,7 @@ void ConfigParser::processBlock(std::ifstream &config_file, std::string w_line, 
 		}
 	}
 	config_file.seekg(last_position);
+	Tk.exitBlock();
 }
 /**
  *  PARAMS THAT CAN ONLY BE DELCARED ONE TIME IN A RESPECTIVE BLOCK 
