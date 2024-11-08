@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/07 14:10:08 by clegros          ###   ########.fr       */
+/*   Updated: 2024/11/08 15:21:43 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,12 @@ class HttpResponseHandler;
 class HttpRequestHandler
 {
 	public:
+		void		setMethod(const std::string &m);
+		void		setPath(const std::string &p);
+		void		setHttpVersion(const std::string &h);
+		void		setHeader(const std::string &headerName, const std::string &headerValue);
+		void		setBody(const std::string &body);
+
 		std::string	getMethod(void) const;
 		std::string	getPath(void) const;
 		std::string	getHttpVersion(void) const;
@@ -31,15 +37,9 @@ class HttpRequestHandler
 		std::map<std::string, std::string> getHeaders() const;
 		std::string	getBody() const;
 
-		void		setMethod(const std::string &m);
-		void		setPath(const std::string &p);
-		void		setHttpVersion(const std::string &h);
-		void		setHeader(const std::string &headerName, const std::string &headerValue);
-		void		setBody(const std::string &body);
-
 		static void handle_request(int client_sock);
 		HttpRequestHandler	httpParsing(const std::string &buffer);
-		//HttpRequestHandler&	operator=(const HttpRequestHandler &assign);
+		HttpResponseHandler	handlePath(HttpRequestHandler &http, HttpResponseHandler &httpRes);
 	private:
 		std::string	method;
 		std::string	path;

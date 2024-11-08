@@ -16,6 +16,31 @@ std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i)
 	return out;
 }
 
+void	HttpRequestHandler::setMethod(const std::string &m)
+{
+	method = m;
+}
+
+void	HttpRequestHandler::setPath(const std::string &p)
+{
+	path = p;
+}
+
+void	HttpRequestHandler::setHttpVersion(const std::string &h)
+{
+	httpVersion = h;
+}
+
+void HttpRequestHandler::setHeader(const std::string &headerName, const std::string &headerValue)
+{
+    headers[headerName] = headerValue;
+}
+
+void HttpRequestHandler::setBody(const std::string &b)
+{
+    body = b;
+}
+
 std::string HttpRequestHandler::getMethod(void) const
 {
 	return method;
@@ -49,31 +74,6 @@ std::map<std::string, std::string> HttpRequestHandler::getHeaders() const
 std::string HttpRequestHandler::getBody() const
 {
     return body;
-}
-
-void	HttpRequestHandler::setMethod(const std::string &m)
-{
-	method = m;
-}
-
-void	HttpRequestHandler::setPath(const std::string &p)
-{
-	path = p;
-}
-
-void	HttpRequestHandler::setHttpVersion(const std::string &h)
-{
-	httpVersion = h;
-}
-
-void HttpRequestHandler::setHeader(const std::string &headerName, const std::string &headerValue)
-{
-    headers[headerName] = headerValue;
-}
-
-void HttpRequestHandler::setBody(const std::string &b)
-{
-    body = b;
 }
 
 HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
@@ -128,6 +128,41 @@ HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
 	return request;
 }
 
+HttpResponseHandler HttpRequestHandler::handlePath(HttpRequestHandler &http, HttpResponseHandler &httpRes)
+{
+	if (http.getPath() == "/")
+	{
+		httpRes.setHttpVersion("HTTP/1.1");
+		httpRes.setStatusCode(200);
+		httpRes.setStatusMsg("OK");
+		httpRes.setHeader("Content-Type", "text/plain");
+		httpRes.setHeader("Content-Length", "13");
+		httpRes.setHeader("Connection", "close");
+		httpRes.setBody("Hello, World!");
+	}
+	else if (http.getPath() == "/about")
+	{
+		httpRes.setHttpVersion("HTTP/1.1");
+		httpRes.setStatusCode(200);
+		httpRes.setStatusMsg("OK");
+		httpRes.setHeader("Content-Type", "text/plain");
+		httpRes.setHeader("Content-Length", "13");
+		httpRes.setHeader("Connection", "close");
+		httpRes.setBody("About page");
+	}
+	else
+	{
+		httpRes.setHttpVersion("HTTP/1.1");
+		httpRes.setStatusCode(404);
+		httpRes.setStatusMsg("OK");
+		httpRes.setHeader("Content-Type", "text/plain");
+		httpRes.setHeader("Content-Length", "13");
+		httpRes.setHeader("Connection", "close");
+		httpRes.setBody("Error 404");
+	}
+	return httpRes;
+}
+
 void HttpRequestHandler::handle_request(int client_sock)
 {
 	HttpRequestHandler http;
@@ -150,32 +185,22 @@ void HttpRequestHandler::handle_request(int client_sock)
 
 	http = http.httpParsing(buffer);
 	std::cout << " -<- getters --- " << std::endl;
-	std::cout << http << std::endl;
+	std::cout << http;
 	std::cout << " --- getters ->- " << std::endl;
 
     // Simple HTTP Response
 	HttpResponseHandler	httpRes;
-	if (http.getPath() == "/")
-	{
-		httpRes.setStatusCode(200);
-    	httpRes.setBody("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, World!");
-	}
-	else if (http.getPath() == "/about")
-	{
-		httpRes.setStatusCode(200);
-    	httpRes.setBody("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nAbout page");
-	}
-	else
-	{
-		httpRes.setStatusCode(404);
-    	httpRes.setBody("HTTP/1.1 404 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nError: 404");
-	}
+	httpRes = http.handlePath(http, httpRes);
 
-    send(client_sock, httpRes.getBody().c_str(), httpRes.getBody().length(), 0);
+	std::string	response;
+	response = httpRes.getAll();
+    send(client_sock, response.c_str(), response.length(), 0);
+	std::cout << "   " << std::endl;
     std::cout << "Response sent to client" << std::endl;
-	std::cout << "-<-" << std::endl;
+	std::cout << "   " << std::endl;
+	std::cout << " -<-" << std::endl;
 	std::cout << httpRes << std::endl;
-	std::cout << "->-" << std::endl;
+	std::cout << " ->-" << std::endl;
 
     close(client_sock);  // Close the client socket after sending response
 }
