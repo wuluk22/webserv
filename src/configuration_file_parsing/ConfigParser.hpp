@@ -28,6 +28,9 @@ class TokenCounter {
 class ConfigParser
 {
 	private:
+		std::vector <std::string> l_params;
+		std::vector <std::string> c_params;
+		std::vector <std::string> s_params;
 		static ConfigParser* instance;
 		std::string _path_of_configuration_file;
 		std::map<unsigned int,std::vector<ServerConfig> > _servers_config;

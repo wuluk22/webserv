@@ -7,6 +7,24 @@ ConfigParser* ConfigParser::instance = NULL;
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
+	// LOCATION TOKENS
+
+	l_params.push_back("cgi_path");
+	l_params.push_back("cgi_extensions");
+	l_params.push_back("alias");
+	l_params.push_back("allowed_method");
+	l_params.push_back("return");
+	
+	// SERVER TOKENS
+	s_params.push_back("server_name");
+	s_params.push_back("listen");
+
+	// COMMON TOKENS
+	c_params.push_back("root");
+	c_params.push_back("index");
+	c_params.push_back("auto_index");
+	c_params.push_back("client_max_body_size");
+
 	if (init_path.empty() || !endsWith(init_path, ".conf"))
 		throw BadPathException();
 	this->_path_of_configuration_file = init_path;
@@ -30,7 +48,7 @@ ConfigParser::~ConfigParser() {
 	delete (this->instance);
 }
 
-ConfigParser* ConfigParser::getInstance(const std::string init_path = "") {
+ConfigParser* ConfigParser::getInstance(const std::string init_path = "" ) {
 	if (!instance)
 		instance = new ConfigParser(init_path);
 	return (instance);
@@ -50,8 +68,8 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 		throw std::exception();
 }
 
-bool is_token_valid_multiple(const std::string& line, const std::string tokens[], size_t size) {
-	for (size_t i = 0; i < size; ++i) {
+bool is_token_valid_multiple(const std::string& line, const std::vector <std::string> tokens) {
+	for (size_t i = 0; i < tokens.size(); ++i) {
 		if (line.find(tokens[i]) != std::string::npos) {
 			return true;
 		}
@@ -72,11 +90,6 @@ bool is_only_whitespace(const std::string& str) {
 	return true;
 }
 
-#define C_SIZE 4
-#define S_SIZE 2
-#define L_SIZE 4
-#define TAB_SIZE 4
-
 std::string trim(const std::string& str) {
 	size_t start = str.find_first_not_of(" \t\n\r\f\v");
 	if (start == std::string::npos)
@@ -85,87 +98,93 @@ std::string trim(const std::string& str) {
 	return str.substr(start, end - start + 1);
 }
 
-// TODO : Incorporte string splitting to recieve arguments, make another class for file path validation and parameter
-// validation. It is vital for the web server to check the validity of the uri and other params while parsing 
-// config file and also mid-exec !!!
-
 void ConfigParser::processBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk, size_t &level) {
-	std::string l_param[5] = {"cgi_path", "cgi_extensions", "alias", "allowed_methods", "return"};
 	std::streampos last_position;
 	Tk.enterBlock();
-	std::cout << level << std::endl;
+	std::cout << "Entering block at level " << level << std::endl;
 
 	while (std::getline(config_file, w_line)) {
 		w_line = trim(w_line);
 		last_position = config_file.tellg();
+		
+		std::cout << "current working line : " << w_line << std::endl;
 
 		if (is_token_valid(w_line, B_LOC)) {
 			std::cout << "Entering nested location block: " << w_line << std::endl;
 			level++;
 			processBlock(config_file, w_line, Tk, level);
+			level--;
 		} 
 		else if (is_token_valid(w_line, LOC_TERMINATOR)) {
-			level--;
-			if (level == 0) {
-				std::cout << "Exiting block at top level." << std::endl;
-				break;
-			}
-			std::cout << "Exiting nested block." << std::endl;
+			std::cout << "Exiting location block at level " << level << std::endl;
+			break;
 		} 
 		else if (is_only_whitespace(w_line)) {
 			continue;
 		} 
-		else {
+		else if (is_token_valid_multiple(w_line, l_params) || is_token_valid_multiple(w_line, c_params)) {
 			Tk.incrementToken(w_line);
 			std::cout << "Directive in block: " << w_line << std::endl;
-			if (Tk.getTokenCount("cgi_path") > 1 || Tk.getTokenCount("cgi_extensions") > 1 || Tk.getTokenCount("root")) {
+			if (Tk.getTokenCount("cgi_path") > 1 || Tk.getTokenCount("cgi_extensions") > 1 || Tk.getTokenCount("root") > 1) {
 				std::cerr << "Error: Directive repeated within block." << std::endl;
-				std::cout << "Tk root token count" << Tk.getTokenCount("root") << "\n";
-				break;
+				std::cout << "Tk root token count: " << Tk.getTokenCount("root") << "\n";
+				throw ConfigException();
 			}
+		} else {
+			std::cout << "Invalid token encountered in block." << std::endl;
+			throw ConfigException();
 		}
 	}
 	config_file.seekg(last_position);
 	Tk.exitBlock();
+	std::cout << "Exited block at level " << level << std::endl;
 }
-/**
- *  PARAMS THAT CAN ONLY BE DELCARED ONE TIME IN A RESPECTIVE BLOCK 
- *  ROOT - CGI-PATH - CGI-EXTENSIONS - allowed_method
- */
+
 void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	std::string w_line;
-	std::string possible_directive;
-	std::string c_param[4] = {"root", "index", "auto_index", "client_max_body_size"};
-	std::string s_param[2] = {"server_name", "listen"};
-	size_t level = 0;
+	size_t level;
 	ServerBlock server_directive;
 	TokenCounter Tk;
 
+	level = 0;
 	while (std::getline(config_file, w_line)) {
 		w_line = trim(w_line);
-		if (level == 0 && is_token_valid(w_line,B_SERVER)) {
+		if (is_token_valid(w_line, B_SERVER)) {
 			level++;
-			std::cout << "inside" << std::endl;
-		} else if (level && is_token_valid(w_line, CONFIG_TERMINATOR)) {
-			std::cout << "outside" << std::endl;
+			std::cout << "Starting server block at level " << level << std::endl;
+		} 
+		else if (is_token_valid(w_line, CONFIG_TERMINATOR) && level > 0) {
 			level--;
-		} else if (!level && is_only_whitespace(w_line)){
-			std::cout << "skip" << "\n";
-		} else if (level && level && (is_token_valid_multiple(w_line, s_param, S_SIZE) || is_token_valid_multiple(w_line, c_param, C_SIZE))) {
-			Tk.incrementToken(w_line);
-			std::cout << "good directive" << std::endl;
-			if (Tk.getTokenCount("root") > 1) {
-				std::cout << "a bit too much" << std::endl;
-				break;
+			std::cout << "Ending server block at level " << level << std::endl;
+			if (level == 0) {
+				std::cout << "Exited server block" << std::endl;
 			}
-		} else if (level && is_token_valid(w_line, B_LOC)) {
-			std::cout << "location block" << std::endl;
+		} 
+		else if (!level && is_only_whitespace(w_line)) {
+			std::cout << "Skip empty line" << std::endl;
+		} 
+		else if (level > 0 && (is_token_valid_multiple(w_line, s_params) || is_token_valid_multiple(w_line, c_params))) {
+			Tk.incrementToken(w_line);
+			std::cout << "Server-level directive: " << w_line << std::endl;
+			if (Tk.getTokenCount("root") > 1) {
+				std::cerr << "Error: 'root' directive repeated within server block." << std::endl;
+				throw ConfigException();
+			}
+		} 
+		else if (level > 0 && is_token_valid(w_line, B_LOC)) {
+			std::cout << "Starting location block within server block" << std::endl;
 			processBlock(config_file, w_line, Tk, level);
-		} else {
-			std::cout << "bye bye" << std::endl;
-			break;
-		}	
+		} 
+		else {
+			std::cerr << "Invalid token in configuration file: " << w_line << std::endl;
+			throw ConfigException();
+		}
 	}
+	if (level != 0) {
+		std::cerr << "Error: Unmatched server or location block." << std::endl;
+		throw ConfigException();
+	}
+	std::cout << "Finished parsing configuration file." << std::endl;
 }
 
 // Token counter class
@@ -197,7 +216,7 @@ int TokenCounter::getTokenCount(const std::string& token) {
 int main(void) {
 	try {
 		ConfigParser *config = ConfigParser::getInstance("test.conf");
-	} catch (BadPathException &e)
+	} catch (ConfigException &e)
 	{
 		std::cout << e.what() <<std::endl;
 	}
