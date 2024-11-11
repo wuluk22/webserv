@@ -3,29 +3,24 @@
 
 #include <iostream>
 
-#define BAD_FILE "Invalid file"
-#define NO_ACCESS "Cannot acces the file"
-#define NO_SERVER_CONFIG "ID points to non-existant server configuration"
+// ERROR MACRO
+#define ERROR_HEADER "[CONFIG_PARSER] : "
+
+// ERROR MESSAGES
+#define BAD_ACCESS "No such file present, aborting"
+#define NO_SERVER_CONFIG "No such server configuration, aborting"
+#define TOKEN_REPEATED "Non-repeatable token repeated within block, aborting"
+#define INVALID_TOKEN "Invalid token in the configuration file, aborting"
+#define NO_INSTRUCTION "No instruction given in the configuration file, aborting"
+#define TOKEN_POSITION_MISMATCH "Token is not within any block, aborting"
+#define AL " at line : "
+
+// EXCEPTIONS MESSAGES
+#define DEFAULT_CONFIG_EXCEPTION "Config exception, aborting"
 
 class ConfigException : std::exception {
 	public:
 		virtual const char * what ();
 };
-
-class BadPathException : ConfigException {
-	public:
-		virtual const char * what ();
-};
-
-class NoAccessException : ConfigException {
-	public:
-		virtual const char * what ();
-};
-
-class NoServerConfigException : ConfigException {
-	public:
-		virtual const char * what ();
-};
-
 
 #endif
