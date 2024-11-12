@@ -51,6 +51,7 @@ class ConfigParser {
 		bool is_only_whitespace(const std::string& str);
 		bool is_token_valid_multiple(const std::string& line, const std::vector <std::string> tokens);
 		bool is_token_valid(const std::string& line, const std::string token);
+		bool isTwo(std::vector <std::string> arguments);
 
 		// Main methods
 		void initializeVector(std::vector<std::string>& vec, std::string items[], size_t count);
@@ -58,6 +59,8 @@ class ConfigParser {
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, LocationBlock *loc_directive);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line);
+		void processDirectiveLoc(LocationBlock directive, std::vector <std::string> args);
+		void processDirectiveServ(ServerBlock directive, std::vector <std::string> args);
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);
