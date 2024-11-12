@@ -1,3 +1,4 @@
+#include "ConfigException.hpp"
 #include "ServerConfig.hpp"
 #include "ConfigParser.hpp"
 #include <map>
@@ -69,6 +70,31 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	}
 }
 
+std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size" };
+void ConfigParser::processDirectiveLoc(LocationBlock directive, std::vector <std::string> args) {
+	if (args[0] == "root" && isTwo(args))
+		// DO SOMETHING
+	else if (args[0] == "index" && args.size() >= 2)
+		// DO SOMETHING ELSE
+	else if (args[0] == "auto_index" && isTwo(args))
+		// DO SOMETHING ELSE
+	else if (args[0] == "cgi_path" && isTwo(args))
+		// DO SOMETHING ELSE
+	else if (args[0] == "client_max_body_size" && isTwo(args))
+		// DO SOMETHING ELSE
+	else if (args[0] == "cgi_extension" && args.size() >= 2)
+		// DO SOMETHING ELSE
+	else if (args[0] == "alias" && isTwo(args))
+		// DO SOMETHING ELSE
+	else if (args[0] == "allowed_method" && args.size() >= 1)
+		// DO SOMETHING ELSE
+	else if (args[0] == "return" && isTwo(args))
+}
+
+void ConfigParser::processDirectiveServ(ServerBlock directive, std::vector <std::string> args) {
+
+}
+
 void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, LocationBlock *loc_directive = NULL) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
@@ -80,11 +106,12 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 		if (is_only_whitespace(working_line))
 			continue;
 		working_line_splitted = split(working_line, ' ');
-		if (is_token_valid(working_line_splitted[0], B_LOC) && working_line_splitted.size() == 2)
+		if (is_token_valid(working_line_splitted[0], B_LOC)) {
+			if (working_line_splitted.size() != 2) {
+				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
+				throw ConfigException();
+			}
 			processLocationBlock(config_file, working_line, token_counter, current_line);
-		else if (is_token_valid(working_line_splitted[0], B_LOC) && working_line_splitted.size() != 2) {
-			std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;
-			throw ConfigException();
 		} else if (is_token_valid(working_line_splitted[0], LOC_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], l_params) || is_token_valid_multiple(working_line_splitted[0], c_params)) {
@@ -93,6 +120,9 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
+		} else {
+			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
+			throw ConfigException();
 		}
 	}
 	config_file.seekg(last_position);
@@ -111,18 +141,22 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 		if (is_only_whitespace(working_line))
 			continue;
 		working_line_splitted = split(working_line, ' ');
-		if (is_token_valid(working_line_splitted[0], B_LOC) && working_line_splitted.size() == 2) {
+		if (is_token_valid(working_line_splitted[0], B_LOC)) {
+			if (working_line_splitted.size() != 2) {
+				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
+				throw ConfigException();
+			}
 			processLocationBlock(config_file, working_line, token_counter, current_line);
 		} else if (is_token_valid(working_line_splitted[0], SERVER_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], c_params) || is_token_valid_multiple(working_line_splitted[0], s_params)) {
 			token_counter.incrementToken(working_line_splitted[0]);
 			if (!token_counter.oneOccurenceCheck(non_repeat_s_token)) {
-				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << std::endl;
+				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
-		}else {
-			std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
+		} else {
+			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
 			throw ConfigException();
 		}
 	}
@@ -139,7 +173,6 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 		current_line++;
 		if (is_only_whitespace(working_line))
 			continue;
-
 		working_line_splitted = split(working_line, ' ');
 		if (working_line_splitted[0] == B_SERVER && working_line.size()) {
 			processServerBlock(config_file, working_line, current_line);
