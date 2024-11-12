@@ -26,8 +26,16 @@ int TokenCounter::getTokenCount(const std::string& token) const {
 	if (!blockStack.empty()) {
 		std::map<std::string, int>::const_iterator it = blockStack.top().find(token);
 		if (it != blockStack.top().end()) {
-			return it->second;
+			return (it->second);
 		}
 	}
-	return 0;
+	return (0);
+}
+
+bool TokenCounter::oneOccurenceCheck(std::vector <std::string> unrepeatable_tokens) {
+	for (int i = 0; i < unrepeatable_tokens.size(); i++) {
+		if (getTokenCount(unrepeatable_tokens[i]) > 1)
+			return (false);
+	}
+	return (true);
 }
