@@ -168,12 +168,12 @@ HttpResponseHandler HttpRequestHandler::handlePath(HttpRequestHandler &http, Htt
 	}
 	if (!fileExists(filePath))
 	{
-        	httpRes.setStatusCode(404);
 		httpRes.setHttpVersion("HTTP/1.1");
+        	httpRes.setStatusCode(404);
         	httpRes.setStatusMsg("Not Found");
+        	httpRes.setHeader("Content-Type", "text/plain");
 		httpRes.setHeader("Content-Length", "20");
         	httpRes.setBody("404 Not Found");
-        	httpRes.setHeader("Content-Type", "text/plain");
 	}
 	else
 	{
@@ -181,9 +181,9 @@ HttpResponseHandler HttpRequestHandler::handlePath(HttpRequestHandler &http, Htt
 		httpRes.setHttpVersion("HTTP/1.1");
         	httpRes.setStatusCode(200);
         	httpRes.setStatusMsg("OK");
-        	httpRes.setBody(fileContent);
         	httpRes.setHeader("Content-Type", "text.plain");    //getMimeType(filePath));
         	httpRes.setHeader("Content-Length", to_string(fileContent.size()));
+        	httpRes.setBody(fileContent);
     	}
 	return httpRes;
 }
