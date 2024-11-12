@@ -10,18 +10,18 @@ class ADirective;
 struct s_common_params {
 	std::string _root;
 	std::string _index;
-	bool auto_index;
+	bool _auto_index;
 	unsigned int _client_max_body_size;
 };
 
 struct s_server_params {
-	std::string _server_name;
+	std::vector<std::string> _server_name;
 	std::vector<unsigned int> _listen;
 };
 
 struct s_cgi_params {
 	std::string _cgi_path;
-	std::string _cgi_extension;
+	std::vector <std::string> _cgi_extension;
 };
 
 struct s_loc_params {
@@ -76,6 +76,12 @@ class ServerBlock : public ADirective {
 		s_server_params getServerParams(void) const;
 		void setCommonParams(s_common_params c_params);
 		void setServerParams(s_server_params s_params);
+
+		//Individual setters
+		void setRoot(std::string root_args);
+		void setIndex(std::string index_args);
+		void setAutoIndex(bool value);
+		void setClientMaxBodySize(unsigned int body_size_value);
 };
 
 class LocationBlock : public ADirective {
@@ -94,6 +100,18 @@ class LocationBlock : public ADirective {
 		void setUpperLocation(LocationBlock* upper_location);
 		void setCommonParams(s_common_params common_params);
 		void setLocationParams(s_loc_params location_params);
+
+		// Individual setter
+		void setIsCgi(bool value);
+		void setCgiPath(std::string path_args);
+		void setCgiExtension(std::string extension_args);
+		void setUri(std::string uri_args);
+		void setAlias(std::string alias_path);
+		void setAllowedMethods(unsigned char allowed_method);
+		void setRoot(std::string root_args);
+		void setIndex(std::string index_args);
+		void setAutoIndex(bool value);
+		void setClientMaxBodySize(unsigned int body_size_value);
 };
 
 #endif
