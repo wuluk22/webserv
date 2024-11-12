@@ -50,4 +50,8 @@ bool ConfigParser::is_token_valid(const std::string& line, const std::string tok
 	return line == token;
 }
 
+bool ConfigParser::isTwo(std::vector <std::string> arguments) {
+	return (arguments.size())
+}
+
 
