@@ -3,6 +3,7 @@
 # include <netinet/in.h> // sockaddr_in | socklen_t
 # include <iostream>
 # include <fcntl.h> // fcntl
+# include <cstdlib>
 
 class SocketHandler
 {

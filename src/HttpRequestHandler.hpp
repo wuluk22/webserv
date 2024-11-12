@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/08 15:21:43 by clegros          ###   ########.fr       */
+/*   Updated: 2024/11/12 16:40:11 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ class HttpRequestHandler
 		std::string	getHeader(const std::string &headerName) const;
 		std::map<std::string, std::string> getHeaders() const;
 		std::string	getBody() const;
+		std::string	readFile(const std::string& filePath);
+		bool		fileExists(const std::string& path);
 
 		static void handle_request(int client_sock);
 		HttpRequestHandler	httpParsing(const std::string &buffer);

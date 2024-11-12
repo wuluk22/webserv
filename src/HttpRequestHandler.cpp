@@ -1,8 +1,20 @@
 #include "HttpRequestHandler.hpp"
 #include <string>
 #include <iostream>
+#include <map>
+#include <fstream>
+#include <sstream>
+#include <sys/stat.h>
 
 const int BUFFER_SIZE = 1024;
+
+template <typename T>
+std::string to_string(T value)
+{
+	std::ostringstream oss;
+	oss << value;
+	return oss.str();
+}
 
 std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i)
 {
@@ -128,38 +140,51 @@ HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
 	return request;
 }
 
+std::string HttpRequestHandler::readFile(const std::string& filePath)
+{
+	std::ifstream		file(filePath.c_str());
+	if (!file)
+		return "";
+	std::ostringstream	contentStream;
+	std::string		line;
+	while (std::getline(file, line))
+		contentStream << line << "\n";
+	return contentStream.str();
+}
+
+bool	HttpRequestHandler::fileExists(const std::string& path)
+{
+	struct stat buffer;
+	return stat(path.c_str(), &buffer) == 0;
+}
+
 HttpResponseHandler HttpRequestHandler::handlePath(HttpRequestHandler &http, HttpResponseHandler &httpRes)
 {
+	std::string	staticDir = "public";
+	std::string	filePath = staticDir + http.getPath();
 	if (http.getPath() == "/")
 	{
-		httpRes.setHttpVersion("HTTP/1.1");
-		httpRes.setStatusCode(200);
-		httpRes.setStatusMsg("OK");
-		httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "13");
-		httpRes.setHeader("Connection", "close");
-		httpRes.setBody("Hello, World!");
+		filePath = staticDir + "/index.html";
 	}
-	else if (http.getPath() == "/about")
+	if (!fileExists(filePath))
 	{
+        	httpRes.setStatusCode(404);
 		httpRes.setHttpVersion("HTTP/1.1");
-		httpRes.setStatusCode(200);
-		httpRes.setStatusMsg("OK");
-		httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "13");
-		httpRes.setHeader("Connection", "close");
-		httpRes.setBody("About page");
+        	httpRes.setStatusMsg("Not Found");
+		httpRes.setHeader("Content-Length", "20");
+        	httpRes.setBody("404 Not Found");
+        	httpRes.setHeader("Content-Type", "text/plain");
 	}
 	else
 	{
+		std::string fileContent = readFile(filePath);
 		httpRes.setHttpVersion("HTTP/1.1");
-		httpRes.setStatusCode(404);
-		httpRes.setStatusMsg("OK");
-		httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "13");
-		httpRes.setHeader("Connection", "close");
-		httpRes.setBody("Error 404");
-	}
+        	httpRes.setStatusCode(200);
+        	httpRes.setStatusMsg("OK");
+        	httpRes.setBody(fileContent);
+        	httpRes.setHeader("Content-Type", "text.plain");    //getMimeType(filePath));
+        	httpRes.setHeader("Content-Length", to_string(fileContent.size()));
+    	}
 	return httpRes;
 }
 
