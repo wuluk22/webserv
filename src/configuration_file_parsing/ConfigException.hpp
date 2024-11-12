@@ -15,7 +15,7 @@
 #define TOKEN_POSITION_MISMATCH "Token is not within any block, aborting"
 #define NO_URI_LOCATION "Location token contain no URI, aborting"
 #define AL " at line : "
-#define RESET	"\e[0m"
+#define RESET "\e[0m"
 
 // EXCEPTIONS MESSAGES
 #define DEFAULT_CONFIG_EXCEPTION "Config exception, aborting"
