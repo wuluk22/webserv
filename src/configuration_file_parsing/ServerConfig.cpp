@@ -41,11 +41,30 @@ void ServerConfig::addServerDirective(s_common_params c_params, s_server_params 
 	setDirective(new_server_directive);
 }
 
-// Directive class and its derivatives
-// TODO : Change to abstract, no implementation needed
-
 ADirective::ADirective(void) {}
 
+ADirective::~ADirective() {}
+
+s_common_params ADirective::getCommonParams(void) const {
+	return (this->_common_params);
+}
+
+bool ADirective::setRoot(std::string root_args) {
+	if (root_args.empty())
+		return (false);
+	_validator.setPath(root_args);
+	if (_validator.exists() && _validator.isDirectory() && _validator.isReadable()) {
+		this->_common_params._root = root_args;
+		return (true);
+	}
+	return (false);
+}
+
+bool ADirective::setIndex(std::vector<std::string>index_args) {
+	if (index_args.empty())
+		return (false);
+	// IMPLEMENT THE REST TOMORROW, TIRED
+}
 // ServerBlock
 
 ServerBlock::ServerBlock(void) {}
@@ -61,22 +80,9 @@ ServerBlock::ServerBlock(const ServerBlock &copy) {
 
 ServerBlock::~ServerBlock() {}
 
-s_common_params ServerBlock::getCommonParams(void) const {
-	return (this->_common_params);
-}
-
 s_server_params ServerBlock::getServerParams(void) const {
 	return (this->_server_params);
 }
-
-void ServerBlock::setCommonParams(s_common_params common_params) {
-	this->_common_params = common_params;
-}
-
-void ServerBlock::setServerParams(s_server_params server_params) {
-	this->_server_params = server_params;
-}
-
 
 ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 	if (this != &rhs)
@@ -86,6 +92,7 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 	}
 	return (*this);
 }
+
 // LocationBlock
 
 LocationBlock::LocationBlock(void) {}
@@ -110,18 +117,6 @@ LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
 	return (*this);
 }
 
-s_common_params LocationBlock::getCommonParams(void) const {
-	return (this->_common_params);
-}
-
 s_loc_params LocationBlock::getLocationParams(void) const {
 	return (this->_location_params);
-}
-
-void LocationBlock::setCommonParams(s_common_params common_params) {
-	this->_common_params = common_params;
-}
-
-void LocationBlock::setLocationParams(s_loc_params location_params) {
-	this->_location_params = location_params;
 }
