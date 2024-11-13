@@ -70,29 +70,31 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	}
 }
 
-std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size" };
-void ConfigParser::processDirectiveLoc(LocationBlock directive, std::vector <std::string> args) {
-	if (args[0] == "root" && isTwo(args))
-		// DO SOMETHING
-	else if (args[0] == "index" && args.size() >= 2)
-		// DO SOMETHING ELSE
-	else if (args[0] == "auto_index" && isTwo(args))
-		// DO SOMETHING ELSE
-	else if (args[0] == "cgi_path" && isTwo(args))
-		// DO SOMETHING ELSE
-	else if (args[0] == "client_max_body_size" && isTwo(args))
-		// DO SOMETHING ELSE
-	else if (args[0] == "cgi_extension" && args.size() >= 2)
-		// DO SOMETHING ELSE
-	else if (args[0] == "alias" && isTwo(args))
-		// DO SOMETHING ELSE
-	else if (args[0] == "allowed_method" && args.size() >= 1)
-		// DO SOMETHING ELSE
-	else if (args[0] == "return" && isTwo(args))
+
+// TODO : IMPLEMENT SETTERS IN SERVER CONFIG
+
+void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args) {
+	// if (args[0] == "root" && isTwo(args))
+	// // DO SOMETHING
+	// else if (args[0] == "index" && args.size() >= 2)
+	// 	// DO SOMETHING ELSE
+	// else if (args[0] == "auto_index" && isTwo(args))
+	// 	// DO SOMETHING ELSE
+	// else if (args[0] == "cgi_path" && isTwo(args))
+	// 	// DO SOMETHING ELSE
+	// else if (args[0] == "client_max_body_size" && isTwo(args))
+	// 	// DO SOMETHING ELSE
+	// else if (args[0] == "cgi_extension" && args.size() >= 2)
+	// 	// DO SOMETHING ELSE
+	// else if (args[0] == "alias" && isTwo(args))
+	// 	// DO SOMETHING ELSE
+	// else if (args[0] == "allowed_method" && args.size() >= 1)
+	// 	// DO SOMETHING ELSE
+	// // else if (args[0] == "return" && isTwo(args))
+	//  // DO SOMETHING ELSE
 }
 
-void ConfigParser::processDirectiveServ(ServerBlock directive, std::vector <std::string> args) {
-
+void ConfigParser::processDirectiveServ(ServerBlock directive,  std::string working_line, std::vector<std::string> splitted_working_line) {
 }
 
 void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, LocationBlock *loc_directive = NULL) {
