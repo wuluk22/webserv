@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <iostream>
-#include "ConfigException.hpp"
 
-class ADirective;
+#include "ConfigException.hpp"
+#include "PathValidator.hpp"
 
 struct s_common_params {
 	std::string _root;
@@ -40,6 +40,8 @@ enum e_allowed_methods {
 
 #define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
 
+class ADirective;
+
 class ServerConfig {
 	private:
 		std::vector<ADirective> _all_directives;
@@ -58,13 +60,21 @@ class ServerConfig {
 // Directive class sole purpose is to enable a composite design pattern for the ServerConfig class
 
 class ADirective {
+	protected:
+		PathValidator _validator;
+		s_common_params _common_params;
 	public:
 		ADirective(void);
+		virtual ~ADirective();
+		bool setRoot(std::string root_args);
+		bool setIndex(std::vector <std::string> index_args);
+		bool setAutoIndex(bool value);
+		bool setClientMaxBodySize(unsigned int body_size_value);
+		s_common_params getCommonParams(void) const;
 };
 
 class ServerBlock : public ADirective {
 	private:
-		s_common_params _common_params;
 		s_server_params _server_params;
 	public:
 		ServerBlock(void);
@@ -72,21 +82,22 @@ class ServerBlock : public ADirective {
 		ServerBlock(const ServerBlock &copy);
 		~ServerBlock();
 		ServerBlock& operator = (const ServerBlock &rhs);
-		s_common_params getCommonParams(void) const;
+
 		s_server_params getServerParams(void) const;
-		void setCommonParams(s_common_params c_params);
-		void setServerParams(s_server_params s_params);
 
 		//Individual setters
-		void setRoot(std::string root_args);
-		void setIndex(std::string index_args);
-		void setAutoIndex(bool value);
-		void setClientMaxBodySize(unsigned int body_size_value);
+		bool setRoot(std::string root_args);
+		bool setIndex(std::string index_args);
+		bool setAutoIndex(bool value);
+		bool setClientMaxBodySize(unsigned int body_size_value);
+	
+		bool setServerName(std::vector<std::string> server_names);
+		bool setListeningPort(std::vector<std::string> listening_ports);
+
 };
 
 class LocationBlock : public ADirective {
 	private:
-		s_common_params _common_params;
 		s_loc_params _location_params;
 		LocationBlock* _upper_location;
 	public:
@@ -95,23 +106,22 @@ class LocationBlock : public ADirective {
 		LocationBlock(const LocationBlock &copy);
 		~LocationBlock();
 		LocationBlock& operator = (const LocationBlock &rhs);
-		s_common_params getCommonParams(void) const;
 		s_loc_params getLocationParams(void) const;
 		void setUpperLocation(LocationBlock* upper_location);
-		void setCommonParams(s_common_params common_params);
-		void setLocationParams(s_loc_params location_params);
-
+		void getUpperLocation(void) const;
 		// Individual setter
-		void setIsCgi(bool value);
-		void setCgiPath(std::string path_args);
-		void setCgiExtension(std::string extension_args);
-		void setUri(std::string uri_args);
-		void setAlias(std::string alias_path);
-		void setAllowedMethods(unsigned char allowed_method);
-		void setRoot(std::string root_args);
-		void setIndex(std::string index_args);
-		void setAutoIndex(bool value);
-		void setClientMaxBodySize(unsigned int body_size_value);
+		bool setRoot(std::string root_args);
+		bool setIndex(std::string index_args);
+		bool setAutoIndex(bool value);
+		bool setClientMaxBodySize(unsigned int body_size_value);
+
+		bool setIsCgi(bool value);
+		bool setCgiPath(std::string path_args);
+		bool setCgiExtension(std::string extension_args);
+		bool setUri(std::string uri_args);
+		bool setAlias(std::string alias_path);
+		bool setAllowedMethods(unsigned char allowed_method);
+
 };
 
 #endif
