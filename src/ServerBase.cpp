@@ -3,33 +3,28 @@
 #include "ServerHandler.hpp"
 #include "HttpRequestHandler.hpp"
 #include "HttpResponseHandler.hpp"
-#include "Logger.hpp"
 #include <algorithm>
 #include <cstring>
 
 //METHODS
 ServerBase::ServerBase() : max_sock(0) {
-	// Initialize the socket set to zero
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
 }
 
 ServerBase::~ServerBase() {
-
+	for (std::vector<ServerHandler>::iterator it = Servers.begin(); it != Servers.end(); it++) {
+		int sock = it->get_sock();
+		FD_CLR(sock, &readfds);
+		FD_CLR(sock, &writefds);
+		close(sock);
+	}
 }
 
 /////////// GETTER ///////////////
-fd_set&	ServerBase::get_readfds() {
-	return readfds;
-}
-
-fd_set&	ServerBase::get_writefds() {
-	return writefds;
-}
-
-std::vector<ServerHandler>	ServerBase::get_servers() {
-	return Servers;
-}
+fd_set&	ServerBase::get_readfds() { return readfds; }
+fd_set&	ServerBase::get_writefds() { return writefds; }
+std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 
 ////////// PUBLIC /////////////
 void	ServerBase::addPortAndServers()
@@ -69,33 +64,16 @@ void	ServerBase::processClientConnections()
     {
 		cpyReadFds = readfds;
 		cpyWriteFds = writefds;
+		std::vector<int> clientToRemove;
 
         // Wait for an activity on one of the sockets
-        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0) { // warning :: i cannot use errno to verify errors
-			// throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
-			if (errno == EINTR) {
-			// Signal interruption, continue loop
-			continue;
-			} else if (errno == EBADF) {
-				perror("Select failed due to an invalid file descriptor (EBADF)");
-				// Additional code to check validity of each fd if necessary
-			} else if (errno == ENOMEM) {
-				perror("Select failed due to insufficient memory (ENOMEM)");
-				break;  // Exiting might be safer here
-			} else if (errno == EINVAL) {
-				perror("Select failed due to invalid timeout or max_sd (EINVAL)");
-				break;  // Potentially a serious configuration issue
-			} else {
-				perror("Select failed for an unknown reason");
-				break;
-			}
-		}
+        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
+			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 
         // If activity on server socket, it's an incoming connection
 		for (unsigned long i = 0; i < this->Servers.size(); i++) {
 			int serverSocket = this->Servers[i].get_sock();
 			if (FD_ISSET(serverSocket, &cpyReadFds)) {
-				// if (serverSocket == serverSockets[0])
 				accept_connection(this->Servers[(int)i]);
 			}
 		}
@@ -106,24 +84,23 @@ void	ServerBase::processClientConnections()
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
 				int resultRequest = HttpRequestHandler::handle_request(client_sock);
 				if (resultRequest == 1 || resultRequest == 3) { // Client Disconnected
-					std::cout << "TESTING ERROR CLIENT DISCONNECTED" << std::endl;
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
-					clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), client_sock));
-					if (clientSockets.size() == 0)
-						break ;
+					clientToRemove.push_back(client_sock);
 					continue ;
 				}
 				// FD_CLR(client_sock, &readfds);
-				FD_SET(client_sock, &cpyWriteFds); // Warning maybe it can cause problems
+				FD_SET(client_sock, &cpyWriteFds);
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
-                HttpResponseHandler::handle_response(clientSockets.back());
-				close(client_sock); // if i close it here, don't close in HttpRequestHandler
+                HttpResponseHandler::handle_response(client_sock);
+				// close(client_sock);
 				FD_CLR(client_sock, &writefds);
-				// clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), client_sock));
             }
+		}
+		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
+			clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), clientToRemove[(int)i]), clientSockets.end());
 		}
 		// to verify the content of clientSockets
 		// for (unsigned long i = 0; i < clientSockets.size(); i++) {

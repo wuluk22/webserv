@@ -14,23 +14,14 @@ void print_fd_set(const fd_set& fdset) {
     std::cout << std::endl;
 }
 
-// METHODS
-ServerHandler::ServerHandler() : addrlen(sizeof(address)){
-}
+// METHODS //
+ServerHandler::ServerHandler() : addrlen(sizeof(address)){}
+ServerHandler::~ServerHandler() {}
 
-ServerHandler::~ServerHandler() {} // delete socket client and server
-
-int&	ServerHandler::get_sock() {
-	return sock;
-}
-
-struct sockaddr* ServerHandler::get_address() {
-    return reinterpret_cast<struct sockaddr*>(&address);
-}
-
-socklen_t&	ServerHandler::get_addrlen() {
-	return addrlen;
-}
+// GETTER //
+int&	ServerHandler::get_sock() { return sock; }
+struct sockaddr* ServerHandler::get_address() { return reinterpret_cast<struct sockaddr*>(&address); }
+socklen_t&	ServerHandler::get_addrlen() { return addrlen; }
 
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
