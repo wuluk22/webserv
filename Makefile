@@ -5,11 +5,20 @@ FLAGS	= -Wall -Werror -Wextra -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
-FILES	= src/main src/SocketHandler src/HttpRequestHandler src/Logger src/HttpResponseHandler
+FILES	=	src/main \
+			src/ServerHandler \
+			src/ServerBase \
+			src/HttpRequestHandler \
+			src/HttpResponseHandler \
+			src/Logger
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
-HEADER	= src/SocketHandler.hpp src/HttpRequestHandler.hpp src/Logger.hpp src/HttpResponseHandler.hpp
+HEADER	=	src/ServerHandler.hpp \
+			src/ServerHandler.hpp \
+			src/HttpRequestHandler.hpp \
+			src/HttpResponseHandler.hpp \
+			src/Logger.hpp
 
 GREEN	= \e[92m
 YELLOW	= \e[93m

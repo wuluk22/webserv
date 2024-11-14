@@ -110,10 +110,12 @@ void	ServerBase::processClientConnections()
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
 				int resultRequest = HttpRequestHandler::handle_request(client_sock);
 				if (resultRequest == 1 || resultRequest == 3) { // Client Disconnected
-					std::cout << "ERROR TESTING" << std::endl;
+					std::cout << "TESTING ERROR CLIENT DISCONNECTED" << std::endl;
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
 					clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), client_sock));
+					if (clientSockets.size() == 0)
+						break ;
 					continue ;
 				}
 				FD_CLR(client_sock, &readfds);
