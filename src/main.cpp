@@ -1,3 +1,4 @@
+#include "ErrorHandler.hpp"
 #include "ServerBase.hpp"
 
 // const int BACKLOG = 3;
@@ -5,10 +6,15 @@
 int main()
 {
 	ServerBase	ServerBase;
-
-	ServerBase.addPortAndServers();
-	for (unsigned long i = 0; i < ServerBase.get_servers().size(); i++) {
-		ServerBase.processClientConnections();
+	try {
+		ServerBase.addPortAndServers();
+		for (unsigned long i = 0; i < ServerBase.get_servers().size(); i++) {
+			ServerBase.processClientConnections();
+		}
+	} catch (const ServerHandlerError& e) {
+		std::cerr << "ERROR -> " << e.what() << std::endl;
+	} catch (const ServerBaseError& e) {
+		std::cerr << "ERROR -> " << e.what() << std::endl;
 	}
     return 0;
 }

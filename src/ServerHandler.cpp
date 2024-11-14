@@ -1,8 +1,9 @@
 #include "ServerHandler.hpp"
+#include "ErrorHandler.hpp"
 #include "Logger.hpp"
 #include <sys/_types/_fd_def.h>
 
-// DEBUG //
+// DEBUG // DON'T FORGET TO DELETE
 void print_fd_set(const fd_set& fdset) {
     std::cout << "Current fds in readfds: ";
     for (int i = 0; i < FD_SETSIZE; i++) {
@@ -27,15 +28,14 @@ struct sockaddr* ServerHandler::get_address() {
     return reinterpret_cast<struct sockaddr*>(&address);
 }
 
-
 socklen_t&	ServerHandler::get_addrlen() {
 	return addrlen;
 }
 
+
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
 {
 	this->port = port;
-    // Create server socket
     this->sock = create_socket();
 
     // Set server socket to reuse address
@@ -56,10 +56,7 @@ int ServerHandler::create_socket()
 {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
-    {
-        std::cerr << "Socket creation failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
     return sock;
 }
 
@@ -67,15 +64,9 @@ void ServerHandler::set_socket_options(int sock)
 {
     int opt = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
-    {
-        std::cerr << "setsockopt failed with SO_REUSEADDR" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0)
-    {
-        std::cerr << "setsockopt failed with SO_REUSEPORT" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerHandlerError("setsockopt failed with SO_REUSEPORT", __FUNCTION__, __LINE__);
 }
 
 void ServerHandler::bind_socket(int port)
@@ -87,32 +78,20 @@ void ServerHandler::bind_socket(int port)
 	std::cout << "address.sin_addr.s_addr : " << address.sin_addr.s_addr << std::endl;
 	std::cout << "address.sin_port :" << address.sin_port << std::endl;
 	if (bind(this->sock, (struct sockaddr*)&address, sizeof(address)) < 0)
-	{
-		std::cerr << "Bind failed" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+		throw ServerHandlerError("bind failed", __FUNCTION__, __LINE__);
 }
 
 void ServerHandler::listen_socket(int sock, int backlog)
 {
     if (listen(sock, backlog) < 0)
-    {
-        std::cerr << "Listen failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerHandlerError("listen failed", __FUNCTION__, __LINE__);
 }
 
 void ServerHandler::set_nonblocking(int sock)
 {
     int flags = fcntl(sock, F_GETFL, 0);
     if (flags == -1)
-    {
-        std::cerr << "Error in fcntl: unable to get flags" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerHandlerError("fcntl failed : unable to get flags", __FUNCTION__, __LINE__);
     if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1)
-    {
-        std::cerr << "Error in fcntl: unable to set non-blocking" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerHandlerError("fcntl failed: unable to set non-blocking", __FUNCTION__, __LINE__);
 }

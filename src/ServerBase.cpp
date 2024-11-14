@@ -51,10 +51,7 @@ void	ServerBase::accept_connection(ServerHandler	Server)
 {
     int new_socket = accept(Server.get_sock(), Server.get_address(), &Server.get_addrlen());
     if (new_socket < 0)
-    {
-        std::cerr << "Accept failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	std::cout << "New accepted connection : " << new_socket << std::endl;
 	FD_SET(new_socket, &readfds);
 	if (std::find(clientSockets.begin(), clientSockets.end(), new_socket) == clientSockets.end()) {
@@ -74,9 +71,8 @@ void	ServerBase::processClientConnections()
 		cpyWriteFds = writefds;
 
         // Wait for an activity on one of the sockets
-		// print_fd_set(readfds);
         if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0) { // warning :: i cannot use errno to verify errors
-            Logger::log_error("Select error");
+			// throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 			if (errno == EINTR) {
 			// Signal interruption, continue loop
 			continue;
@@ -118,7 +114,7 @@ void	ServerBase::processClientConnections()
 						break ;
 					continue ;
 				}
-				FD_CLR(client_sock, &readfds);
+				// FD_CLR(client_sock, &readfds);
 				FD_SET(client_sock, &cpyWriteFds); // Warning maybe it can cause problems
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))

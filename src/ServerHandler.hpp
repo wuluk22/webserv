@@ -1,11 +1,14 @@
 #ifndef SOCKETHANDLER_HPP
 # define SOCKETHANDLER_HPP
-# include <netinet/in.h> // sockaddr_in
+
+#include "ErrorHandler.hpp"
+
+#include <netinet/in.h> // sockaddr_in
 #include <sys/_types/_socklen_t.h>
 #include <sys/_types/_fd_def.h>
-# include <sys/socket.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
-# include <fcntl.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 class ServerHandler

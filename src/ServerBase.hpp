@@ -2,6 +2,9 @@
 #define SERVERBASE_HPP
 
 #include "ServerHandler.hpp"
+#include "ErrorHandler.hpp"
+
+#include <iostream>
 #include <sys/_types/_fd_def.h>
 #include <vector>
 
