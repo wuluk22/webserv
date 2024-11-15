@@ -4,8 +4,8 @@
 #include <sys/_types/_fd_def.h>
 
 // DEBUG // DON'T FORGET TO DELETE
-void print_fd_set(const fd_set& fdset) {
-    std::cout << "Current fds in readfds: ";
+void print_fd_set(const fd_set& fdset, std::string functionName) {
+    std::cout << "Current fds in " << functionName << " : ";
     for (int i = 0; i < FD_SETSIZE; i++) {
         if (FD_ISSET(i, &fdset)) {
             std::cout << i << " ";
@@ -66,8 +66,8 @@ void ServerHandler::bind_socket(int port)
 	this->address.sin_addr.s_addr = INADDR_ANY;
 	this->address.sin_port = htons(port);
 
-	std::cout << "address.sin_addr.s_addr : " << address.sin_addr.s_addr << std::endl;
-	std::cout << "address.sin_port :" << address.sin_port << std::endl;
+	// std::cout << "address.sin_addr.s_addr : " << address.sin_addr.s_addr << std::endl;
+	// std::cout << "address.sin_port :" << address.sin_port << std::endl;
 	if (bind(this->sock, (struct sockaddr*)&address, sizeof(address)) < 0)
 		throw ServerHandlerError("bind failed", __FUNCTION__, __LINE__);
 }

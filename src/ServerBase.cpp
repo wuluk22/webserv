@@ -66,6 +66,11 @@ void	ServerBase::processClientConnections()
 		cpyWriteFds = writefds;
 		std::vector<int> clientToRemove;
 
+		std::cout << "BEGIN PROGRAM" << std::endl;
+		print_fd_set(readfds, "readfds");
+		print_fd_set(writefds, "writefds");
+		print_fd_set(cpyReadFds, "cpyReadFds");
+		print_fd_set(cpyWriteFds, "cpyWriteFds");
         // Wait for an activity on one of the sockets
         if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
@@ -86,6 +91,7 @@ void	ServerBase::processClientConnections()
 				if (resultRequest == 1 || resultRequest == 3) { // Client Disconnected
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
+					FD_CLR(client_sock, &writefds);
 					clientToRemove.push_back(client_sock);
 					continue ;
 				}
@@ -102,6 +108,9 @@ void	ServerBase::processClientConnections()
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
 			clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), clientToRemove[(int)i]), clientSockets.end());
 		}
+		std::cout << "END OF PROGRAM" << std::endl;
+		print_fd_set(cpyReadFds, "cpyReadFds");
+		print_fd_set(cpyWriteFds, "cpyWriteFds");
 		// to verify the content of clientSockets
 		// for (unsigned long i = 0; i < clientSockets.size(); i++) {
 		// 	std::cout << i << " : " << clientSockets[i] << std::endl;
