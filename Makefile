@@ -5,11 +5,11 @@ FLAGS	= -g -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
-FILES	= src/configuration_file_parsing/ConfigException src/configuration_file_parsing/ConfigParser src/configuration_file_parsing/ServerConfig src/configuration_file_parsing/ConfigParserUtils src/configuration_file_parsing/TokenCounter
+FILES	= src/configuration_file_parsing/ConfigException src/configuration_file_parsing/PathValidator src/configuration_file_parsing/ConfigParser src/configuration_file_parsing/ServerConfig src/configuration_file_parsing/ConfigParserUtils src/configuration_file_parsing/TokenCounter
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
-HEADER	= src/configuration_file_parsing/ConfigException.hpp src/configuration_file_parsing/ConfigParser.hpp src/configuration_file_parsing/ServerConfig.hpp
+HEADER	= src/configuration_file_parsing/ConfigException.hpp src/configuration_file_parsing/ConfigParser.hpp src/configuration_file_parsing/ServerConfig.hpp src/configuration_file_parsing/PathValidator.hpp
 
 GREEN	= \e[92m
 YELLOW	= \e[93m
