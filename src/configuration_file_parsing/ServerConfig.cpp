@@ -66,7 +66,7 @@ bool ADirective::setIndex(std::vector<std::string>index_args) {
 		return (false);
 	unique_index.insert(index_args.begin(), index_args.end());
 	for (std::set<std::string>::iterator it = unique_index.begin(); it != unique_index.end(); ++it)
-    	_common_params._index.push_back(*it);
+		_common_params._index.push_back(*it);
 	return (true);
 }
 

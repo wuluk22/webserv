@@ -62,6 +62,7 @@ class ADirective {
 	public:
 		ADirective(void);
 		virtual ~ADirective();
+		bool isValidFileName(std::string filename);
 		bool setRoot(std::string root_args);
 		bool setIndex(std::vector <std::string> index_args);
 		void setAutoIndex(bool value);
