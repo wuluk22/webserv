@@ -17,6 +17,7 @@ class PathValidator {
 		bool isDirectory(void) const;
 		bool isReadable(void) const;
 		bool isWritable(void) const;
+		bool isExecutable(void) const;
 };
 
 #endif
