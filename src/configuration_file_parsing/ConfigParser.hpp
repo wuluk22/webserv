@@ -6,6 +6,8 @@
 #include <vector>
 #include <fstream>
 #include <stack>
+#include <limits.h>
+#include <stdlib.h>
 #include "ServerConfig.hpp"
 #include "ConfigException.hpp"
 
@@ -58,15 +60,25 @@ class ConfigParser {
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, LocationBlock *loc_directive);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line);
-		void processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> splitted_working_line);
+		void processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args);
 		void processDirectiveServ(ServerBlock directive, std::string working_line, std::vector<std::string> splitted_working_line);
 
 		// Parsing methods for each tokens
+		// Common
 		bool parseRoot(std::string working_line, ADirective directive);
 		bool parseIndex(std::string working_line, ADirective directive);
 		bool parseAutoIndex(std::vector<std::string> args, ADirective directive);
 		bool parseClientMaxBodySize(std::vector <std::string> args, ADirective directive);
+	
+		// Location
+		bool parseCgiPath(std::string working_line, LocationBlock directive);
+		bool parseAlias(std::string working_line, LocationBlock directive);
+		bool parseAllowedMethhod(std::vector <std::string> args, LocationBlock directive);
+		bool parseReturn(std::vector <std::string> args,LocationBlock directive);
 
+		// Server
+		bool parseServerName(std::vector <std::string> args, ServerBlock directive);
+		bool parseListeningPorts(std::vector <std::string> args, ServerBlock directive);
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);
