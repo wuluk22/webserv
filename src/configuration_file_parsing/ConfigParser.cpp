@@ -70,28 +70,65 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	}
 }
 
+bool ConfigParser::parseRoot(std::string working_line, ADirective directive) {
+	std::string trimmed_command;
+	std::string path;
+	int i;
+
+	trimmed_command = trim(working_line);
+	i = trimmed_command.find(' ');
+	if (i == std::string::npos)
+		return (false);
+	path = trimmed_command.substr(i + 1, std::string::npos);
+	return (directive.setRoot(path));
+}
+
+bool ConfigParser::parseIndex(std::string working_line, ADirective directive) {
+	std::vector <std::string> splitted_string;
+	splitted_string = split(working_line, ' ');
+	return (directive.setIndex(splitted_string));
+}
+
+bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective directive) {
+	if (args[1] == "on")
+		directive.setAutoIndex(true);
+	else if (args[1] == "off")
+		directive.setAutoIndex(false);
+	else
+		return (false);
+	return (true);
+}
+
+bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirective directive) {
+	
+}
 
 // TODO : IMPLEMENT SETTERS IN SERVER CONFIG
 
 void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args) {
-	// if (args[0] == "root" && isTwo(args))
-	// // DO SOMETHING
-	// else if (args[0] == "index" && args.size() >= 2)
-	// 	// DO SOMETHING ELSE
-	// else if (args[0] == "auto_index" && isTwo(args))
-	// 	// DO SOMETHING ELSE
-	// else if (args[0] == "cgi_path" && isTwo(args))
-	// 	// DO SOMETHING ELSE
-	// else if (args[0] == "client_max_body_size" && isTwo(args))
-	// 	// DO SOMETHING ELSE
-	// else if (args[0] == "cgi_extension" && args.size() >= 2)
-	// 	// DO SOMETHING ELSE
-	// else if (args[0] == "alias" && isTwo(args))
-	// 	// DO SOMETHING ELSE
-	// else if (args[0] == "allowed_method" && args.size() >= 1)
-	// 	// DO SOMETHING ELSE
-	// // else if (args[0] == "return" && isTwo(args))
-	//  // DO SOMETHING ELSE
+	bool command_status;
+
+	command_status = true;
+	if (args[0] == "root" && args.size() == 2)
+		command_status = parseRoot(working_line, directive);
+	else if (args[0] == "index" && args.size() >= 2)
+		command_status = parseIndex(working_line, directive);
+	else if (args[0] == "auto_index" && args.size() == 2)
+		command_status = parseAutoIndex(args, directive);
+	else if (args[0] == "client_max_body_size" && args.size() == 2)
+		command_status == parseClientMaxBodySize(args, directive);
+	else if (args[0] == "cgi_path" && args.size() == 2)
+		// DO SOMETHING ELSE
+	else if (args[0] == "cgi_extension" && args.size() >= 2)
+		// DO SOMETHING ELSE
+	else if (args[0] == "alias" && isTwo(args))
+		// DO SOMETHING ELSE
+	else if (args[0] == "allowed_method" && args.size() >= 1)
+		DO SOMETHING ELSE
+	else if (args[0] == "return" && isTwo(args))
+	 DO SOMETHING ELSE
+	if (bad_command)
+		throw ConfigException();
 }
 
 void ConfigParser::processDirectiveServ(ServerBlock directive,  std::string working_line, std::vector<std::string> splitted_working_line) {

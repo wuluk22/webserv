@@ -51,16 +51,22 @@ class ConfigParser {
 		bool is_only_whitespace(const std::string& str);
 		bool is_token_valid_multiple(const std::string& line, const std::vector <std::string> tokens);
 		bool is_token_valid(const std::string& line, const std::string token);
-		bool isTwo(std::vector <std::string> arguments);
-
-		// Main methods
 		void initializeVector(std::vector<std::string>& vec, std::string items[], size_t count);
 		bool endsWith(const std::string path, const std::string extension);
+
+		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, LocationBlock *loc_directive);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line);
 		void processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> splitted_working_line);
 		void processDirectiveServ(ServerBlock directive, std::string working_line, std::vector<std::string> splitted_working_line);
+
+		// Parsing methods for each tokens
+		bool parseRoot(std::string working_line, ADirective directive);
+		bool parseIndex(std::string working_line, ADirective directive);
+		bool parseAutoIndex(std::vector<std::string> args, ADirective directive);
+		bool parseClientMaxBodySize(std::vector <std::string> args, ADirective directive);
+
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);
