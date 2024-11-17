@@ -1,232 +1,175 @@
 #include "HttpRequestHandler.hpp"
-#include <string>
-#include <iostream>
-#include <map>
-#include <fstream>
-#include <sstream>
-#include <sys/stat.h>
 
-const int BUFFER_SIZE = 1024;
+HttpRequestHandler::HttpRequestHandler()
+{}
 
-template <typename T>
-std::string to_string(T value)
+HttpRequestHandler::~HttpRequestHandler()
+{}
+
+HttpResponseHandler HttpRequestHandler::handlePath(const HttpRequestHandler& request, HttpResponseHandler& response)
 {
-	std::ostringstream oss;
-	oss << value;
-	return oss.str();
-}
+    const std::string	staticDir = "public";
+    std::string			filePath;
+	struct stat			pathStat;
+	std::string			errorPage;
+	std::string			content;
 
-std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i)
-{
-	out << i.getMethod() << " " << i.getPath() << " " << i.getHttpVersion() << std::endl;
-	std::map<std::string, std::string> headers = i.getHeaders();
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = headers.begin(); it != headers.end(); ++it)
+	filePath = staticDir + request.getPath();
+	// Handle file upload
+	if (request.getMethod() == "POST")
 	{
-		out << it->first << ": " << it->second << std::endl;
+		handleFileUpload(request.getBody(), request.getPath(), response);
+		return response;
 	}
-	return out;
-}
-
-void	HttpRequestHandler::setMethod(const std::string &m)
-{
-	method = m;
-}
-
-void	HttpRequestHandler::setPath(const std::string &p)
-{
-	path = p;
-}
-
-void	HttpRequestHandler::setHttpVersion(const std::string &h)
-{
-	httpVersion = h;
-}
-
-void HttpRequestHandler::setHeader(const std::string &headerName, const std::string &headerValue)
-{
-    headers[headerName] = headerValue;
-}
-
-void HttpRequestHandler::setBody(const std::string &b)
-{
-    body = b;
-}
-
-std::string HttpRequestHandler::getMethod(void) const
-{
-	return method;
-}
-
-std::string HttpRequestHandler::getPath(void) const
-{
-	return path;
-}
-
-std::string HttpRequestHandler::getHttpVersion(void) const
-{
-	return httpVersion;
-}
-
-std::string HttpRequestHandler::getHeader(const std::string &headerName) const
-{
-    std::map<std::string, std::string>::const_iterator it = headers.find(headerName);
-    if (it != headers.end())
+	// Check if path is a directory
+    if (request.getPath() == "/static")
 	{
-        return it->second;
+        if (stat(filePath.c_str(), &pathStat) == 0)
+	    {
+	    	if (S_ISDIR(pathStat.st_mode))
+	    	{
+	    		handleDirectoryRequest(request.getPath(), response);
+	    		return response;
+	    	}
+	    }
     }
-    return ""; // Return empty string if header is not found
-}
-
-std::map<std::string, std::string> HttpRequestHandler::getHeaders() const
-{
-    return headers;
-}
-
-std::string HttpRequestHandler::getBody() const
-{
-    return body;
-}
-
-HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
-{
-	HttpRequestHandler	request;
-	size_t	methodPos;
-	size_t	pathPos;
-	size_t	httpVersionPos;
-
-	/*std::cout << "-----------------" << std::endl;
-    std::cout << "Received request:\n" << buffer << std::endl;
-	std::cout << "-----------------" << std::endl;*/
-
-	std::istringstream	stream(buffer);
-	std::string	line;
-	std::getline(stream, line);
-	//std::cout << line << std::endl;
-
-	// method
-	methodPos = line.find(" ");
-	request.setMethod(line.substr(0, methodPos));
-	
-	
-	// path
-	pathPos = methodPos + 1;
-	httpVersionPos = line.find(" ", pathPos);
-	request.setPath(line.substr(pathPos, httpVersionPos - pathPos));
-
-	// http version
-	request.setHttpVersion(line.substr(httpVersionPos + 1, '\n'));
-
-	while (std::getline(stream, line) && line != "\r" && !line.empty())
-	{
-		std::string	headerName;
-		std::string	headerValue;
-		size_t	pos;
-
-		pos = line.find(":");
-		headerName = line.substr(0, pos);
-		headerValue = line.substr(pos + 2);
-		request.setHeader(headerName, headerValue);
-	}
-
-    std::string bodyContent;
-    while (std::getline(stream, line))
-	{
-        bodyContent += line + "\n";
-    }
-    setBody(bodyContent);
-
-
-	return request;
-}
-
-std::string HttpRequestHandler::readFile(const std::string& filePath)
-{
-	std::ifstream		file(filePath.c_str());
-	if (!file)
-		return "";
-	std::ostringstream	contentStream;
-	std::string		line;
-	while (std::getline(file, line))
-		contentStream << line << "\n";
-	return contentStream.str();
-}
-
-bool	HttpRequestHandler::fileExists(const std::string& path)
-{
-	struct stat buffer;
-	return stat(path.c_str(), &buffer) == 0;
-}
-
-HttpResponseHandler HttpRequestHandler::handlePath(HttpRequestHandler &http, HttpResponseHandler &httpRes)
-{
-	std::string	staticDir = "public";
-	std::string	filePath = staticDir + http.getPath();
-	if (http.getPath() == "/")
-	{
-		filePath = staticDir + "/index.html";
-	}
-	if (!fileExists(filePath))
-	{
-		httpRes.setHttpVersion("HTTP/1.1");
-        	httpRes.setStatusCode(404);
-        	httpRes.setStatusMsg("Not Found");
-        	httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "20");
-        	httpRes.setBody("404 Not Found");
-	}
-	else
-	{
-		std::string fileContent = readFile(filePath);
-		httpRes.setHttpVersion("HTTP/1.1");
-        	httpRes.setStatusCode(200);
-        	httpRes.setStatusMsg("OK");
-        	httpRes.setHeader("Content-Type", "text.plain");    //getMimeType(filePath));
-        	httpRes.setHeader("Content-Length", to_string(fileContent.size()));
-        	httpRes.setBody(fileContent);
-    	}
-	return httpRes;
-}
-
-void HttpRequestHandler::handle_request(int client_sock)
-{
-	HttpRequestHandler http;
-    char buffer[BUFFER_SIZE];
-    int valread = recv(client_sock, buffer, BUFFER_SIZE, 0);
-
-    if (valread == 0)  // Client disconnected
+    // Handle default page
+    if (request.getPath() == "/")
     {
-        std::cout << "Client disconnected, closing socket" << std::endl;
+        filePath = staticDir + "/index.html";
+    }
+    // Basic security check to prevent directory traversal
+    if (filePath.find("..") != std::string::npos)
+    {
+        response.setStatusCode(403);
+        response.setStatusMsg("Forbidden");
+        errorPage = createErrorPage(403, "Forbidden");
+        response.setBody(errorPage);
+        response.setHeader("Content-Type", "text/html");
+        response.setHeader("Content-Length", toString(errorPage.length()));
+        return response;
+    }
+    if (!fileExists(filePath))
+    {
+        response.setStatusCode(404);
+        response.setStatusMsg("Not Found");
+        errorPage = createErrorPage(404, "Not Found");
+        response.setBody(errorPage);
+        response.setHeader("Content-Type", "text/html");
+        response.setHeader("Content-Length", toString(errorPage.length()));
+    }
+    else
+    {
+        content = readFile(filePath);
+        response.setStatusCode(200);
+        response.setStatusMsg("OK");
+        response.setBody(content);
+        response.setHeader("Content-Type", getMimeType(filePath));
+        response.setHeader("Content-Length", toString(content.length()));
+    }
+    response.setHttpVersion("HTTP/1.1");
+    // Add security headers
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    response.setHeader("X-Frame-Options", "SAMEORIGIN");
+    response.setHeader("X-XSS-Protection", "1; mode=block");
+    std::cout << response << std::endl;
+    return response;
+}
+
+void HttpRequestHandler::handleRequest(int client_sock)
+{
+    const size_t	bufferSize = 1024;
+    bool			headersComplete = false;
+    char			buffer[bufferSize];
+    size_t			contentLength = 0;
+	size_t			bodyLength;
+	size_t			totalSent;
+	ssize_t			sent;
+	ssize_t			bytesRead;
+    std::string		requestData;
+	std::string		contentLengthStr;
+	std::string		responseStr;
+    
+    // Read the complete request
+    while (true)
+    {
+        bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
+        if (bytesRead <= 0) 
+            break;     
+        buffer[bytesRead] = '\0';
+        requestData.append(buffer, bytesRead);
+        if (!headersComplete)
+        {
+            // Find the end of headers
+            std::string::size_type header_end = requestData.find("\r\n\r\n");
+            if (header_end != std::string::npos)
+            {
+                headersComplete = true;
+                // Parse the headers to get Content-Length
+                HttpRequestHandler temp_request = httpParsing(requestData.substr(0, header_end));
+                contentLengthStr = temp_request.getHeader("Content-Length");
+                if (!contentLengthStr.empty())
+                {
+                    // C++98 compatible string to unsigned long conversion
+                    std::istringstream iss(contentLengthStr);
+                    iss >> contentLength;
+                }
+            }
+        }   
+        // For POST requests, keep reading until we get all the content
+        if (headersComplete && contentLength > 0)
+        {
+            std::string::size_type header_end = requestData.find("\r\n\r\n");
+            bodyLength = requestData.length() - (header_end + 4);
+            if (bodyLength >= contentLength)
+            {
+                break;
+            }
+        }
+    }
+    if (requestData.empty())
+    {
         close(client_sock);
         return;
     }
-    else if (valread < 0)
+    try
     {
-        std::cerr << "Error in receiving data" << std::endl;
-        return;
+        HttpRequestHandler request = httpParsing(requestData);
+        HttpResponseHandler response;
+        // Handle the request
+        response = request.handlePath(request, response);
+        // Send response
+        responseStr = response.getAll();
+        totalSent = 0;
+        while (totalSent < responseStr.length())
+        {
+            sent = send(client_sock, 
+                              responseStr.c_str() + totalSent, 
+                              responseStr.length() - totalSent, 
+                              0);
+            if (sent <= 0) 
+                break;
+            totalSent += sent;
+        }
     }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error handling request: " << e.what() << std::endl;
+        // Send 500 Internal Server Error
+        HttpResponseHandler error_response;
+        error_response.setHttpVersion("HTTP/1.1");
+        error_response.setStatusCode(500);
+        error_response.setStatusMsg("Internal Server Error");
+        error_response.setHeader("Content-Type", "text/plain");
+        // C++98 compatible integer to string conversion
+        std::ostringstream oss;
+        oss << strlen(e.what());
+        error_response.setHeader("Content-Length", oss.str());
+        error_response.setBody(e.what());
 
-    buffer[valread] = '\0';
-
-	http = http.httpParsing(buffer);
-	std::cout << " -<- getters --- " << std::endl;
-	std::cout << http;
-	std::cout << " --- getters ->- " << std::endl;
-
-    // Simple HTTP Response
-	HttpResponseHandler	httpRes;
-	httpRes = http.handlePath(http, httpRes);
-
-	std::string	response;
-	response = httpRes.getAll();
-    send(client_sock, response.c_str(), response.length(), 0);
-	std::cout << "   " << std::endl;
-    std::cout << "Response sent to client" << std::endl;
-	std::cout << "   " << std::endl;
-	std::cout << " -<-" << std::endl;
-	std::cout << httpRes << std::endl;
-	std::cout << " ->-" << std::endl;
-
-    close(client_sock);  // Close the client socket after sending response
+        responseStr = error_response.getAll();
+        send(client_sock, responseStr.c_str(), responseStr.length(), 0);
+    }
+    close(client_sock);
 }
 

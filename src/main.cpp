@@ -83,7 +83,7 @@ int main()
             sd = client_sockets[i];
             if (FD_ISSET(sd, &readfds))
             {
-                HttpRequestHandler::handle_request(sd);
+                HttpRequestHandler::handleRequest(sd);
                 client_sockets[i] = 0;  // Mark as available
             }
         }
