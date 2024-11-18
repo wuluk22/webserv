@@ -5,7 +5,7 @@ FLAGS	= -g -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
-FILES	= src/configuration_file_parsing/ConfigException src/configuration_file_parsing/PathValidator src/configuration_file_parsing/ConfigParser src/configuration_file_parsing/ServerConfig src/configuration_file_parsing/ConfigParserUtils src/configuration_file_parsing/TokenCounter
+FILES	= src/configuration_file_parsing/ConfigException src/configuration_file_parsing/PathValidator src/configuration_file_parsing/ConfigParser src/configuration_file_parsing/ServerConfig src/configuration_file_parsing/ConfigParserUtils src/configuration_file_parsing/TokenCounter src/configuration_file_parsing/DirectiveParser 
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
