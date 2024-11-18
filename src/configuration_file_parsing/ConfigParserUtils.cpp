@@ -65,3 +65,28 @@ bool ConfigParser::isStringDigit(std::string args) {
 	}
 	return (true);
 }
+
+bool ConfigParser::isValidServerName(std::string name) {
+	bool last_dot_occurence;
+
+	last_dot_occurence = false;
+	if (name.empty())
+		return (false);
+	if (!std::isalpha(name[0]))
+		return (false);
+	for (int i = 0; i < name.size(); i++) {
+		char c = name[i];
+		if (std::isalnum(c) || c == '-' || c == '.') {
+			if ((i == 0 || i == name.size() - 1) && (c == '.' || c == '-')) 
+				return (false);
+			if (c == '.') {
+				if (last_dot_occurence) 
+					return (false);
+				last_dot_occurence = true;
+			} else
+				last_dot_occurence = false;
+		} else
+			return (false);
+	}
+	return (true);
+}
