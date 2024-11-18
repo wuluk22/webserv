@@ -1,7 +1,7 @@
 NAME	= webserv
 
 CC	= c++
-FLAGS	= -Wall -Werror -Wextra -std=c++98
+FLAGS	= -g -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
@@ -11,7 +11,13 @@ FILES	=	src/main \
 			src/HttpRequestHandler \
 			src/HttpResponseHandler \
 			src/Logger \
-			src/ErrorHandler
+			src/ErrorHandler \
+			src/configuration_file_parsing/ConfigException \
+			src/configuration_file_parsing/PathValidator \
+			src/configuration_file_parsing/ConfigParser \
+			src/configuration_file_parsing/ServerConfig \
+			src/configuration_file_parsing/ConfigParserUtils \
+			src/configuration_file_parsing/TokenCounter
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
@@ -20,7 +26,11 @@ HEADER	=	src/ServerHandler.hpp \
 			src/HttpRequestHandler.hpp \
 			src/HttpResponseHandler.hpp \
 			src/Logger.hpp \
-			src/ErrorHandler.hpp
+			src/ErrorHandler.hpp \
+			src/configuration_file_parsing/ConfigException.hpp \
+			src/configuration_file_parsing/ConfigParser.hpp \
+			src/configuration_file_parsing/ServerConfig.hpp \
+			src/configuration_file_parsing/PathValidator.hpp
 
 GREEN	= \e[92m
 YELLOW	= \e[93m

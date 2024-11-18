@@ -1,8 +1,11 @@
 
 #include "ServerBase.hpp"
 #include "ServerHandler.hpp"
+#include "configuration_file_parsing/ServerConfig.hpp"
+#include "configuration_file_parsing/ConfigParser.hpp"
 #include "HttpRequestHandler.hpp"
 #include "HttpResponseHandler.hpp"
+
 #include <algorithm>
 #include <cstring>
 
@@ -29,11 +32,11 @@ std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 ////////// PUBLIC /////////////
 void	ServerBase::addPortAndServers()
 {
-	std::vector<int>	ports;
-	ports.push_back(8080);
-	ports.push_back(4242);
-	ports.push_back(10);
-	for (std::vector<int>::iterator it = ports.begin(); it != ports.end(); it++) {
+	s_server_params		server_params;
+	server_params._listen.push_back(8080);
+	server_params._listen.push_back(4242);
+	server_params._listen.push_back(10);
+	for (std::vector<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);
 		FD_SET(NewServer.get_sock(), &get_readfds());

@@ -18,6 +18,7 @@ class ServerHandler
 		socklen_t			addrlen;
 		int					sock;
 		int					port;
+		std::string			server_name;
 
 	public:
 		// METHODS
