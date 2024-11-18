@@ -67,8 +67,11 @@ class ADirective {
 		bool setIndex(std::vector <std::string> index_args);
 		void setAutoIndex(bool value);
 		void setClientMaxBodySize(unsigned int body_size_value);
+		std::string getRoot(void) const;
 		s_common_params getCommonParams(void) const;
 };
+
+std::ostream& operator<<(std::ostream& os, const s_common_params& params);
 
 class ServerBlock : public ADirective {
 	private:
@@ -86,6 +89,8 @@ class ServerBlock : public ADirective {
 		bool setServerName(std::vector<std::string> server_names);
 		bool setListeningPort(std::vector<unsigned int> listening_ports);
 };
+
+std::ostream& operator<<(std::ostream& os, const s_server_params& params);
 
 class LocationBlock : public ADirective {
 	private:
@@ -113,5 +118,7 @@ class LocationBlock : public ADirective {
 		bool isPostAllowed(void);
 		bool isDeleteAllowed(void);
 };
+
+std::ostream& operator<<(std::ostream& os, const s_loc_params& params);
 
 #endif

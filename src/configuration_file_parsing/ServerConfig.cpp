@@ -78,6 +78,17 @@ void ADirective::setClientMaxBodySize(unsigned int body_size_value) {
 	_common_params._client_max_body_size = body_size_value;
 }
 
+std::ostream& operator<<(std::ostream& os, const s_common_params& params) {
+    os << "Root: " << params._root << "\n"
+       << "Index: ";
+    for (const auto& idx : params._index) {
+        os << idx << " ";
+    }
+    os << "\nAutoIndex: " << (params._auto_index ? "enabled" : "disabled") << "\n"
+       << "Client Max Body Size: " << params._client_max_body_size;
+    return os;
+}
+
 // ServerBlock
 
 ServerBlock::ServerBlock(void) {}
@@ -150,6 +161,18 @@ bool ServerBlock::setListeningPort(std::vector<unsigned int> listening_ports) {
 	for (std::set<unsigned int>::iterator it = unique_ports.begin(); it != unique_ports.end(); ++it)
     	_server_params._listen.push_back(*it);
 	return (true);
+}
+
+std::ostream& operator<<(std::ostream& os, const s_server_params& params) {
+    os << "Server Names: ";
+    for (const auto& name : params._server_name) {
+        os << name << " ";
+    }
+    os << "\nListen Ports: ";
+    for (const auto& port : params._listen) {
+        os << port << " ";
+    }
+    return os;
 }
 
 // LocationBlock
@@ -233,4 +256,16 @@ bool LocationBlock::isPostAllowed(void) {
 
 bool LocationBlock::isDeleteAllowed(void) {
 	return (_location_params._allowed_methods & DELETE) != 0;
+}
+
+std::ostream& operator<<(std::ostream& os, const s_loc_params& params) {
+    os << "Is CGI: " << (params._is_cgi ? "true" : "false") << "\n"
+       << "CGI Path: " << params._cgi_path << "\n"
+       << "URI: " << params._uri << "\n"
+       << "Alias: " << params._alias << "\n"
+       << "Allowed Methods: ";
+    if (params._allowed_methods & GET) os << "GET ";
+    if (params._allowed_methods & POST) os << "POST ";
+    if (params._allowed_methods & DELETE) os << "DELETE ";
+    return os;
 }
