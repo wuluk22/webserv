@@ -87,13 +87,23 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 }
 
 bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock directive) {
-	std::set <unsigned int> ports;
+
 
 	
 }
 
 bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlock directive) {
-	return true;
+	std::set <unsigned int> ports;
+	std::string current_string;
+
+	if (args.empty())
+		return (false);
+	args.erase(args.begin());
+	for (int i = 0; i < args.size(); i++) {
+		if (!isStringDigit(args[i]))
+			return (false);
+		ports.insert(std::strtoul(args[i].c_str(), NULL, 10));
+	}
 }
 
 bool ConfigParser::parseReturn(std::vector <std::string> args,LocationBlock directive) {

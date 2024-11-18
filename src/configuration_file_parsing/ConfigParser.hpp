@@ -8,6 +8,7 @@
 #include <stack>
 #include <limits.h>
 #include <stdlib.h>
+#include <cctype>
 #include "ServerConfig.hpp"
 #include "ConfigException.hpp"
 
@@ -55,6 +56,7 @@ class ConfigParser {
 		bool is_token_valid(const std::string& line, const std::string token);
 		void initializeVector(std::vector<std::string>& vec, std::string items[], size_t count);
 		bool endsWith(const std::string path, const std::string extension);
+		bool isStringDigit(std::string args);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);

@@ -55,3 +55,13 @@ void ConfigParser::initializeVector(std::vector<std::string>& vec, std::string i
         vec.push_back(items[i]);
     }
 }
+
+bool ConfigParser::isStringDigit(std::string args) {
+	if (args.empty())
+		return (false);
+	for (int i = 0; i < args.size(); i++) {
+		if (!std::isdigit(args[i]))
+			return (false);
+	}
+	return (true);
+}
