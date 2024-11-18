@@ -16,8 +16,8 @@ struct s_common_params {
 };
 
 struct s_server_params {
-	std::vector<std::string> _server_name;
-	std::vector<unsigned int> _listen;
+	std::set<std::string> _server_name;
+	std::set<unsigned int> _listen;
 };
 
 struct s_loc_params {
@@ -64,7 +64,7 @@ class ADirective {
 		virtual ~ADirective();
 		bool isValidFileName(std::string filename);
 		bool setRoot(std::string root_args);
-		bool setIndex(std::vector <std::string> index_args);
+		bool setIndex(std::set <std::string> index_args);
 		void setAutoIndex(bool value);
 		void setClientMaxBodySize(unsigned int body_size_value);
 		std::string getRoot(void) const;
@@ -87,7 +87,7 @@ class ServerBlock : public ADirective {
 
 		//Individual setters
 		bool setServerName(std::vector<std::string> server_names);
-		bool setListeningPort(std::vector<unsigned int> listening_ports);
+		bool setListeningPort(std::set<unsigned int> listening_ports);
 };
 
 std::ostream& operator<<(std::ostream& os, const s_server_params& params);
@@ -113,7 +113,7 @@ class LocationBlock : public ADirective {
 		bool setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
 
-		// Allowed Methods
+		// Allowed HTTP Methods
 		bool isGetAllowed(void);
 		bool isPostAllowed(void);
 		bool isDeleteAllowed(void);

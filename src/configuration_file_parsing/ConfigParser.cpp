@@ -8,7 +8,7 @@ ConfigParser* ConfigParser::instance = NULL;
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
-	std::string l_items[] = { "cgi_path", "cgi_extensions", "alias", "allowed_method", "return" };
+	std::string l_items[] = { "cgi_path", "cgi_extensions", "alias", "allowed_method"};
     initializeVector(l_params, l_items, ARRAY_SIZE(l_items));
     std::string s_items[] = { "server_name", "listen" };
     initializeVector(s_params, s_items, ARRAY_SIZE(s_items));

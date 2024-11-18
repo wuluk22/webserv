@@ -60,12 +60,10 @@ bool ADirective::setRoot(std::string root_args) {
 	return (false);
 }
 
-bool ADirective::setIndex(std::vector<std::string>index_args) {
-	std::set <std::string> unique_index;
+bool ADirective::setIndex(std::set <std::string>index_args) {
 	if (index_args.empty())
 		return (false);
-	unique_index.insert(index_args.begin(), index_args.end());
-	for (std::set<std::string>::iterator it = unique_index.begin(); it != unique_index.end(); ++it)
+	for (std::set<std::string>::iterator it = index_args.begin(); it != index_args.end(); ++it)
 		_common_params._index.push_back(*it);
 	return (true);
 }
@@ -79,14 +77,14 @@ void ADirective::setClientMaxBodySize(unsigned int body_size_value) {
 }
 
 std::ostream& operator<<(std::ostream& os, const s_common_params& params) {
-    os << "Root: " << params._root << "\n"
-       << "Index: ";
-    for (const auto& idx : params._index) {
-        os << idx << " ";
-    }
-    os << "\nAutoIndex: " << (params._auto_index ? "enabled" : "disabled") << "\n"
-       << "Client Max Body Size: " << params._client_max_body_size;
-    return os;
+	os << "Root: " << params._root << "\n"
+		<< "Index: ";
+	for (const std::string& idx : params._index) {
+		os << idx << " ";
+	}
+	os << "\nAutoIndex: " << (params._auto_index ? "enabled" : "disabled") << "\n"
+		<< "Client Max Body Size: " << params._client_max_body_size;
+	return (os);
 }
 
 // ServerBlock
@@ -142,37 +140,40 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 	return (*this);
 }
 
-bool ServerBlock::setServerName(std::vector<std::string> server_names) {
+bool ServerBlock::setServerName(std::set<std::string> server_names) {
+	bool duplicate;
+	
+	duplicate = false;
 	if (server_names.empty())
 		return (false);
 	for (int i = 0; i < server_names.size(); i++) {
 		if (isValidServerName(server_names[i])) {
-			_server_params._server_name.push_back(server_names[i]);
+			_server_params._server_name.insert(server_names[i]);
 		} else
 			return (false);
 	}
 	return (true);
 }
 
-bool ServerBlock::setListeningPort(std::vector<unsigned int> listening_ports) {
+bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	std::set <unsigned int> unique_ports;
 	if (listening_ports.empty())
 		return (false);
 	for (std::set<unsigned int>::iterator it = unique_ports.begin(); it != unique_ports.end(); ++it)
-    	_server_params._listen.push_back(*it);
+		_server_params._listen.insert(*it);
 	return (true);
 }
 
 std::ostream& operator<<(std::ostream& os, const s_server_params& params) {
-    os << "Server Names: ";
-    for (const auto& name : params._server_name) {
-        os << name << " ";
-    }
-    os << "\nListen Ports: ";
-    for (const auto& port : params._listen) {
-        os << port << " ";
-    }
-    return os;
+	os << "Server Names: ";
+	for (const std::string& name : params._server_name) {
+		os << name << " ";
+	}
+	os << "\nListen Ports: ";
+	for (const unsigned int& port : params._listen) {
+		os << port << " ";
+	}
+	return (os);
 }
 
 // LocationBlock
@@ -259,13 +260,13 @@ bool LocationBlock::isDeleteAllowed(void) {
 }
 
 std::ostream& operator<<(std::ostream& os, const s_loc_params& params) {
-    os << "Is CGI: " << (params._is_cgi ? "true" : "false") << "\n"
-       << "CGI Path: " << params._cgi_path << "\n"
-       << "URI: " << params._uri << "\n"
-       << "Alias: " << params._alias << "\n"
-       << "Allowed Methods: ";
-    if (params._allowed_methods & GET) os << "GET ";
-    if (params._allowed_methods & POST) os << "POST ";
-    if (params._allowed_methods & DELETE) os << "DELETE ";
-    return os;
+	os << "Is CGI: " << (params._is_cgi ? "true" : "false") << "\n"
+		<< "CGI Path: " << params._cgi_path << "\n"
+		<< "URI: " << params._uri << "\n"
+		<< "Alias: " << params._alias << "\n"
+		<< "Allowed Methods: ";
+	if (params._allowed_methods & GET) os << "GET ";
+	if (params._allowed_methods & POST) os << "POST ";
+	if (params._allowed_methods & DELETE) os << "DELETE ";
+	return (os);
 }

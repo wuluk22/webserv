@@ -87,14 +87,13 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 }
 
 bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock directive) {
-
-
 	
 }
 
 bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlock directive) {
 	std::set <unsigned int> ports;
 	std::string current_string;
+	unsigned int value;
 
 	if (args.empty())
 		return (false);
@@ -102,15 +101,15 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	for (int i = 0; i < args.size(); i++) {
 		if (!isStringDigit(args[i]))
 			return (false);
-		ports.insert(std::strtoul(args[i].c_str(), NULL, 10));
+		value = std::strtoul(args[i].c_str(), NULL, 10);
+		if (!ports.insert(value).second)
+			std::cout << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
+			return (false);
 	}
+	directive.setListeningPort(ports);
+	return (true);
 }
 
-bool ConfigParser::parseReturn(std::vector <std::string> args,LocationBlock directive) {
-	return true;
-}
-
-// TODO : IMPLEMENT SETTERS IN SERVER CONFIG
 
 void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args) {
 	bool command_status;
@@ -130,8 +129,6 @@ void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string work
 		command_status = parseAlias(working_line, directive);
 	else if (args[0] == "allowed_method" && args.size() >= 2)
 		command_status = parseAllowedMethhod(args, directive);
-	else if (args[0] == "return" && args.size() == 2)
-		command_status = parseReturn(args, directive);
 	if (!command_status)
 		throw ConfigException();
 }
