@@ -50,4 +50,8 @@ bool ConfigParser::is_token_valid(const std::string& line, const std::string tok
 	return line == token;
 }
 
-
+void ConfigParser::initializeVector(std::vector<std::string>& vec, std::string items[], size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        vec.push_back(items[i]);
+    }
+}
