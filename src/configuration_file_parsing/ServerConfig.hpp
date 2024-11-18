@@ -9,6 +9,7 @@
 #include "PathValidator.hpp"
 
 struct s_common_params {
+	bool server_level;
 	std::string _root;
 	std::vector <std::string> _index;
 	bool _auto_index;
@@ -51,6 +52,7 @@ class ServerConfig {
 		void setDirective(ADirective new_directive);
 		void addLocationDirective(s_common_params c_params, s_loc_params l_params);
 		void addServerDirective(s_common_params c_params, s_server_params s_params);
+		bool correctAmmountOfServerDirective(void);
 };
 
 // Directive class sole purpose is to enable a composite design pattern for the ServerConfig class
@@ -76,7 +78,6 @@ std::ostream& operator<<(std::ostream& os, const s_common_params& params);
 class ServerBlock : public ADirective {
 	private:
 		s_server_params _server_params;
-		bool isValidServerName(std::string name);
 	public:
 		ServerBlock(void);
 		ServerBlock(s_common_params common_params, s_server_params server_params);
@@ -86,7 +87,7 @@ class ServerBlock : public ADirective {
 		s_server_params getServerParams(void) const;
 
 		//Individual setters
-		bool setServerName(std::vector<std::string> server_names);
+		bool setServerName(std::set<std::string> server_names);
 		bool setListeningPort(std::set<unsigned int> listening_ports);
 };
 
