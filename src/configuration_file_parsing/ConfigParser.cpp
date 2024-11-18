@@ -28,12 +28,6 @@ ConfigParser::ConfigParser(const std::string init_path) {
 	parseConfigurationFile(configuration_input_file);
 }
 
-void ConfigParser::initializeVector(std::vector<std::string>& vec, std::string items[], size_t count) {
-    for (size_t i = 0; i < count; ++i) {
-        vec.push_back(items[i]);
-    }
-}
-
 ConfigParser::ConfigParser(const ConfigParser &copy) {
 	(void) copy;
 }
@@ -70,153 +64,10 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	}
 }
 
-bool ConfigParser::parseRoot(std::string working_line, ADirective directive) {
-	std::string trimmed_command;
-	std::string path;
-	int i;
-
-	trimmed_command = trim(working_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos)
-		return (false);
-	path = trimmed_command.substr(i + 1, std::string::npos);
-	return (directive.setRoot(path));
-}
-
-bool ConfigParser::parseIndex(std::string working_line, ADirective directive) {
-	std::vector <std::string> splitted_string;
-	splitted_string = split(working_line, ' ');
-	return (directive.setIndex(splitted_string));
-}
-
-bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective directive) {
-	if (args[1] == "on")
-		directive.setAutoIndex(true);
-	else if (args[1] == "off")
-		directive.setAutoIndex(false);
-	else
-		return (false);
-	return (true);
-}
-
-bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirective directive) {
-	unsigned int value;
-
-	value = atol(args[1].c_str());
-	if (value == 0 || value > UINT_MAX)
-		return (false);
-	directive.setClientMaxBodySize(value);
-	return (true);
-}
-
-bool ConfigParser::parseCgiPath(std::string working_line, LocationBlock directive) {
-	std::string trimmed_command;
-	std::string path;
-	int i;
-
-	trimmed_command = trim(working_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos)
-		return (false);
-	path = trimmed_command.substr(i + 1, std::string::npos);
-	return (directive.setCgiPath(path));
-}
-
-bool ConfigParser::parseAlias(std::string working_line, LocationBlock directive) {
-	std::string trimmed_command;
-	std::string path;
-	int i;
-
-	trimmed_command = trim(working_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos)
-		return (false);
-	path = trimmed_command.substr(i + 1, std::string::npos);
-	return (directive.setAlias(path));
-}
-
-bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationBlock directive) {
-	bool valid_entry;
-	
-	if (args.empty() || args.size() < 2 || args.size() > 4)
-		return (false);
-	args.erase(args.begin());
-	for (int i = 0; i < args.size() ; i++) {
-		valid_entry = false;
-		if (args[i] == "GET") {
-			directive.setAllowedMethods(GET);
-		} if (args[i] == "POST") {
-			directive.setAllowedMethods(POST);
-		} if (args[i] == "DELETE") {
-			directive.setAllowedMethods(DELETE);
-		}
-		if (!valid_entry)
-			return (false);
-	}
-	return (true);
-}
-
-bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock directive) {
-	return true;
-}
-
-bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlock directive) {
-	return true;
-}
-
-bool ConfigParser::parseReturn(std::vector <std::string> args,LocationBlock directive) {
-	return true;
-}
-
-// TODO : IMPLEMENT SETTERS IN SERVER CONFIG
-
-void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args) {
-	bool command_status;
-
-	command_status = true;
-	if (args[0] == "root" && args.size() == 2)
-		command_status = parseRoot(working_line, directive);
-	else if (args[0] == "index" && args.size() >= 2)
-		command_status = parseIndex(working_line, directive);
-	else if (args[0] == "auto_index" && args.size() == 2)
-		command_status = parseAutoIndex(args, directive);
-	else if (args[0] == "client_max_body_size" && args.size() == 2)
-		command_status = parseClientMaxBodySize(args, directive);
-	else if (args[0] == "cgi_path" && args.size() == 2)
-		command_status = parseCgiPath(working_line, directive);
-	else if (args[0] == "alias" && args.size() == 2)
-		command_status = parseAlias(working_line, directive);
-	else if (args[0] == "allowed_method" && args.size() >= 2)
-		command_status = parseAllowedMethhod(args, directive);
-	else if (args[0] == "return" && args.size() == 2)
-		command_status = parseReturn(args, directive);
-	if (!command_status)
-		throw ConfigException();
-}
-
-void ConfigParser::processDirectiveServ(ServerBlock directive,  std::string working_line, std::vector<std::string> args) {
-	bool command_status;
-
-	command_status = true;
-	if (args[0] == "root" && args.size() == 2)
-		command_status = parseRoot(working_line, directive);
-	else if (args[0] == "index" && args.size() >= 2)
-		command_status = parseIndex(working_line, directive);
-	else if (args[0] == "auto_index" && args.size() == 2)
-		command_status = parseAutoIndex(args, directive);
-	else if (args[0] == "client_max_body_size" && args.size() == 2)
-		command_status = parseClientMaxBodySize(args, directive);
-	else if (args[0] == "server_name" && args.size() >= 2)
-		command_status = parseServerName(args, directive);
-	else if (args[0] == "listen")
-		command_status = parseListeningPorts(args, directive);
-
-
-}
-
 void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, LocationBlock *loc_directive = NULL) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
+	LocationBlock location_directive;
 
 	token_counter.enterBlock();
 	while (std::getline(config_file, working_line)) {
@@ -239,6 +90,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
+			processDirectiveLoc(location_directive, working_line, working_line_splitted);
 		} else {
 			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
 			throw ConfigException();
@@ -252,6 +104,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	TokenCounter token_counter;
+	ServerBlock server_directive;
 
 	token_counter.enterBlock();
 	while (std::getline(config_file, working_line)) {
@@ -274,6 +127,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
+			processDirectiveServ(server_directive, working_line, working_line_splitted);
 		} else {
 			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
 			throw ConfigException();
