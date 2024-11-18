@@ -21,17 +21,17 @@ int HttpRequestHandler::handleRequest(int client_sock)
 	std::string		responseStr;
     
     // Read the complete request
-        bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
-        if (bytesRead <= 0) 
-		{
+	bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
+	if (bytesRead <= 0)
+	{
 			close(client_sock);
 			return bytesRead;
-		}
-        buffer[bytesRead] = '\0';
-        requestData.append(buffer, bytesRead);
-        if (!headersComplete)
-        {
-            // Find the end of headers
+	}
+	buffer[bytesRead] = '\0';
+	requestData.append(buffer, bytesRead);
+	if (!headersComplete)
+	{
+		// Find the end of headers
             std::string::size_type header_end = requestData.find("\r\n\r\n");
             if (header_end != std::string::npos)
             {
