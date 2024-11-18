@@ -1,6 +1,8 @@
 #include "SocketHandler.hpp"
 #include "HttpRequestHandler.hpp"
 #include "Logger.hpp"
+#include <cstring>
+#include <cstdlib>
 
 const int PORT = 8080;
 const int MAX_CLIENTS = 10;
