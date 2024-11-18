@@ -15,7 +15,9 @@
 #define TOKEN_POSITION_MISMATCH "Token is not within any block, aborting"
 #define NO_URI_LOCATION "Location token contain no URI, aborting"
 #define DUPE_ELEMS "Duplicate elements discovered, aborting"
-#define AL " at line : "
+#define NO_ELEMENTS "Lack of arguments, aborting"
+#define DOUBLE_DIRECTIVE "Double server directive, aborting"
+#define AL "at line : "
 #define RESET "\e[0m"
 
 // EXCEPTIONS MESSAGES
