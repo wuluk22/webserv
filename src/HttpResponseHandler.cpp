@@ -1,5 +1,76 @@
 #include "HttpResponseHandler.hpp"
 
+HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
+{
+    const std::string	staticDir = "public";
+    std::string			filePath;
+	struct stat			pathStat;
+	std::string			errorPage;
+	std::string			content;
+
+	filePath = staticDir + request.getPath();
+	// Handle file upload
+	if (request.getMethod() == "POST")
+	{
+		request.handleFileUpload(request.getBody(), request.getPath(), response);
+		return response;
+	}
+	// Check if path is a directory
+    if (request.getPath() == "/static")
+	{
+        if (stat(filePath.c_str(), &pathStat) == 0)
+	    {
+	    	if (S_ISDIR(pathStat.st_mode))
+	    	{
+				request.handleDirectoryRequest(request.getPath(), response);
+	    		return response;
+	    	}
+	    }
+    }
+    // Handle default page
+    if (request.getPath() == "/")
+    {
+        filePath = staticDir + "/index.html";
+    }
+    // Basic security check to prevent directory traversal
+    if (filePath.find("..") != std::string::npos)
+    {
+        response.setStatusCode(403);
+        response.setStatusMsg("Forbidden");
+        errorPage = request.createErrorPage(403, "Forbidden");
+        response.setBody(errorPage);
+        response.setHeader("Content-Type", "text/html");
+        response.setHeader("Content-Length", request.toString(errorPage.length()));
+        return response;
+    }
+    if (!request.fileExists(filePath))
+    {
+        response.setStatusCode(404);
+        response.setStatusMsg("Not Found");
+        errorPage = request.createErrorPage(404, "Not Found");
+        response.setBody(errorPage);
+        response.setHeader("Content-Type", "text/html");
+        response.setHeader("Content-Length", request.toString(errorPage.length()));
+    }
+    else
+    {
+        content = request.readFile(filePath);
+        response.setStatusCode(200);
+        response.setStatusMsg("OK");
+        response.setBody(content);
+        response.setHeader("Content-Type", request.getMimeType(filePath));
+        response.setHeader("Content-Length", request.toString(content.length()));
+    }
+    response.setHttpVersion("HTTP/1.1");
+    // Add security headers
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    response.setHeader("X-Frame-Options", "SAMEORIGIN");
+    response.setHeader("X-XSS-Protection", "1; mode=block");
+    std::cout << response << std::endl;
+    return response;
+}
+
+
 std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
 {
 	out << i.getHttpVersion() << " " << i.getStatusCode() << " " << i.getStatusMsg() << std::endl;

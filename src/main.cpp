@@ -77,13 +77,15 @@ int main()
             }
         }
 
+		HttpRequestHandler	httpRequest;
         // Handle IO operations on each client socket
         for (int i = 0; i < MAX_CLIENTS; i++)
         {
             sd = client_sockets[i];
             if (FD_ISSET(sd, &readfds))
             {
-                HttpRequestHandler::handleRequest(sd);
+                int rec = httpRequest.handleRequest(sd);
+				std::cout << rec << std::endl;
                 client_sockets[i] = 0;  // Mark as available
             }
         }

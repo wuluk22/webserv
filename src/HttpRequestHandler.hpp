@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/17 13:44:48 by clegros          ###   ########.fr       */
+/*   Updated: 2024/11/18 14:46:20 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,6 @@ class HttpRequestHandler
 		std::string									httpVersion;
 		std::map<std::string, std::string>			headers;
 		std::string									body;
-		static std::string							readFile(const std::string& path);
-		static bool									fileExists(const std::string& path);
 		static std::string							extractBoundary(const std::string& content_type);
     	static std::string							generateErrorResponse(const std::string& message);
 	public:
@@ -48,6 +46,8 @@ class HttpRequestHandler
 		std::string									getMimeType(const std::string& path);
 		std::string									createErrorPage(int status_code, const std::string& message);
 		std::string									toString(size_t value);
+		static std::string							readFile(const std::string& path);
+		static bool									fileExists(const std::string& path);
 
 		void										setMethod(const std::string &m);
 		void										setPath(const std::string &p);
@@ -62,9 +62,9 @@ class HttpRequestHandler
 		const std::map<std::string, std::string>&	getHeaders() const;
 		std::string									getBody() const;
 
-		static void									handleRequest(int client_sock);
+		int											handleRequest(int client_sock);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
-		HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
+		//HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
 		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);
     	void										handleFileUpload(const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 };

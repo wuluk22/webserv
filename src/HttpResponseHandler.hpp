@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/08 13:25:06 by clegros          ###   ########.fr       */
+/*   Updated: 2024/11/18 14:45:13 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 # include <iostream>
 # include <sstream>
 # include <map>
+# include "HttpRequestHandler.hpp"
+
+class HttpRequestHandler;
 
 class HttpResponseHandler
 {
@@ -32,6 +35,7 @@ class HttpResponseHandler
 		std::map<std::string, std::string> getHeaders() const;
 		std::string	getBody() const;
 		std::string	getAll() const;
+		HttpResponseHandler	handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
 	private:
 		std::string	httpVersion;
 		int			code;
