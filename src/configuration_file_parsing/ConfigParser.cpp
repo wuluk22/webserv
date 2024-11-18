@@ -64,10 +64,15 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	}
 }
 
-void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, LocationBlock *loc_directive = NULL) {
+void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerConfig current_server, LocationBlock *loc_directive = NULL) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	LocationBlock location_directive;
+	std::string root;
+
+	// Implement some recursive root fetching method
+	// If no root in the upper locations fetch server root
+	// If no root, big problem
 
 	token_counter.enterBlock();
 	while (std::getline(config_file, working_line)) {
@@ -75,13 +80,14 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 		last_position = config_file.tellg();
 		if (is_only_whitespace(working_line))
 			continue;
+		working_line = trim(working_line);
 		working_line_splitted = split(working_line, ' ');
 		if (is_token_valid(working_line_splitted[0], B_LOC)) {
 			if (working_line_splitted.size() != 2) {
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
 				throw ConfigException();
 			}
-			processLocationBlock(config_file, working_line, token_counter, current_line);
+			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, &location_directive);
 		} else if (is_token_valid(working_line_splitted[0], LOC_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], l_params) || is_token_valid_multiple(working_line_splitted[0], c_params)) {
@@ -90,7 +96,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
-			processDirectiveLoc(location_directive, working_line, working_line_splitted);
+			processDirectiveLoc(location_directive, working_line, working_line_splitted, current_line);
 		} else {
 			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
 			throw ConfigException();
@@ -100,25 +106,34 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	token_counter.exitBlock();
 }
 
-void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line) {
+void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig current_server) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	TokenCounter token_counter;
 	ServerBlock server_directive;
 
+	// Need to check accessibility of some values
+
 	token_counter.enterBlock();
+	if (current_server.correctAmmountOfServerDirective()) {
+		current_server.setDirective(server_directive);
+	} else {
+		std::cout << ERROR_HEADER << DOUBLE_DIRECTIVE << AL << current_line << std::endl;
+		throw ConfigException();
+	}
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
 		if (is_only_whitespace(working_line))
 			continue;
+		working_line = trim(working_line);
 		working_line_splitted = split(working_line, ' ');
 		if (is_token_valid(working_line_splitted[0], B_LOC)) {
 			if (working_line_splitted.size() != 2) {
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
 				throw ConfigException();
 			}
-			processLocationBlock(config_file, working_line, token_counter, current_line);
+			processLocationBlock(config_file, working_line, token_counter, current_line, current_server);
 		} else if (is_token_valid(working_line_splitted[0], SERVER_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], c_params) || is_token_valid_multiple(working_line_splitted[0], s_params)) {
@@ -127,7 +142,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
-			processDirectiveServ(server_directive, working_line, working_line_splitted);
+			processDirectiveServ(server_directive, working_line, working_line_splitted, current_line);
 		} else {
 			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
 			throw ConfigException();
@@ -141,6 +156,10 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	std::string working_line;
 	std::vector<std::string> working_line_splitted;
 	size_t current_line = 0;
+	ServerConfig current_server_configuration;
+
+
+	// Implement code to add server config binded with unsigned int ID
 
 	while (std::getline(config_file, working_line)) {
 		current_line++;
@@ -148,7 +167,7 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 			continue;
 		working_line_splitted = split(working_line, ' ');
 		if (working_line_splitted[0] == B_SERVER && working_line.size()) {
-			processServerBlock(config_file, working_line, current_line);
+			processServerBlock(config_file, working_line, current_line, current_server_configuration);
 		} else {
 			std::cerr << ERROR_HEADER << TOKEN_POSITION_MISMATCH << AL << current_line << RESET <<std::endl;
 			throw ConfigException();

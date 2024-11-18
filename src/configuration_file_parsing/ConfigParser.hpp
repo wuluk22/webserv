@@ -57,18 +57,20 @@ class ConfigParser {
 		void initializeVector(std::vector<std::string>& vec, std::string items[], size_t count);
 		bool endsWith(const std::string path, const std::string extension);
 		bool isStringDigit(std::string args);
+		bool isValidServerName(std::string name);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
-		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, LocationBlock *loc_directive);
-		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line);
-		void processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args);
-		void processDirectiveServ(ServerBlock directive, std::string working_line, std::vector<std::string> splitted_working_line);
+		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerConfig current_server ,LocationBlock *loc_directive);
+		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig current_server);
+		void processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args, size_t current_line);
+		void processDirectiveServ(ServerBlock directive,  std::string working_line, std::vector<std::string> args, size_t current_line);
+		
 
 		// Parsing methods for each tokens
 		// Common
 		bool parseRoot(std::string working_line, ADirective directive);
-		bool parseIndex(std::string working_line, ADirective directive);
+		bool parseIndex(std::vector <std::string> working_line, ADirective directive);
 		bool parseAutoIndex(std::vector<std::string> args, ADirective directive);
 		bool parseClientMaxBodySize(std::vector <std::string> args, ADirective directive);
 	
