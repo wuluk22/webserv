@@ -1,5 +1,11 @@
 #include "ConfigParser.hpp"
 
+bool ConfigParser::endsWith(const std::string path, const std::string extension) {
+	if (extension.size() > path.size())
+		return (false);
+	return (path.substr(path.size() - extension.size()) == extension);
+}
+
 std::vector<std::string> ConfigParser::split(const std::string& str, char delimiter) {
 	std::vector<std::string> tokens;
 	std::string token;
