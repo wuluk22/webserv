@@ -32,21 +32,24 @@ void	ServerBase::addPortAndServers()
 	std::vector<int>	ports;
 	ports.push_back(8080);
 	ports.push_back(4242);
-	ports.push_back(10);
+	ports.push_back(1025);
 	for (std::vector<int>::iterator it = ports.begin(); it != ports.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);
+		// std::cout << "NewServer: " << NewServer.get_port() << std::endl;
 		FD_SET(NewServer.get_sock(), &get_readfds());
 		this->max_sock = std::max(this->max_sock, NewServer.get_sock());
 		Servers.push_back(NewServer);
 	}
+	// getaddrinfo(¨http://coucou.be¨, ¨8080¨, )
 }
 
 void	ServerBase::accept_connection(ServerHandler	Server)
 {
     int new_socket = accept(Server.get_sock(), Server.get_address(), &Server.get_addrlen());
-    if (new_socket < 0)
+    if (new_socket < 0) {
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
+	}
 	std::cout << "New accepted connection : " << new_socket << std::endl;
 	FD_SET(new_socket, &readfds);
 	if (std::find(clientSockets.begin(), clientSockets.end(), new_socket) == clientSockets.end()) {
@@ -67,13 +70,17 @@ void	ServerBase::processClientConnections()
 		std::vector<int> clientToRemove;
 
 		std::cout << "BEGIN PROGRAM" << std::endl;
-		print_fd_set(readfds, "readfds");
-		print_fd_set(writefds, "writefds");
-		print_fd_set(cpyReadFds, "cpyReadFds");
-		print_fd_set(cpyWriteFds, "cpyWriteFds");
+		// print_fd_set(readfds, "readfds");
+		// print_fd_set(writefds, "writefds");
+		// print_fd_set(cpyReadFds, "cpyReadFds");
+		// print_fd_set(cpyWriteFds, "cpyWriteFds");
+		std::cout << std::endl;
         // Wait for an activity on one of the sockets
-        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
+        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0) {
+			print_fd_set(cpyReadFds, "IN SELECT cpyReadFds");
+			print_fd_set(cpyWriteFds, "cpyWriteFds");
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
+		}
 
         // If activity on server socket, it's an incoming connection
 		for (unsigned long i = 0; i < this->Servers.size(); i++) {
@@ -86,9 +93,12 @@ void	ServerBase::processClientConnections()
 		// Handling Request/Response
 		for (std::vector<int>::iterator it = clientSockets.begin(); it != clientSockets.end(); it++) {
 			int client_sock = *it;
+			HttpRequestHandler	httpRequest;
+			HttpResponseHandler	httpResponse;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
-				int resultRequest = HttpRequestHandler::handle_request(client_sock);
-				if (resultRequest == 1 || resultRequest == 3) { // Client Disconnected
+				int resultRequest = httpRequest.handleRequest(client_sock);
+				std::cout << "RESULTEQUEST : " << resultRequest << std::endl;
+				if (resultRequest <= 0 ) { // Client Disconnected
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
 					FD_CLR(client_sock, &writefds);
@@ -100,9 +110,9 @@ void	ServerBase::processClientConnections()
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
-                HttpResponseHandler::handle_response(client_sock);
+                // httpResponse.handlePath(client_sock);
 				// close(client_sock);
-				FD_CLR(client_sock, &writefds);
+				// FD_CLR(client_sock, &writefds);
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {

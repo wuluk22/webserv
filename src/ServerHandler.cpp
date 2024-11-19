@@ -1,7 +1,6 @@
 #include "ServerHandler.hpp"
 #include "ErrorHandler.hpp"
 #include "Logger.hpp"
-#include <sys/_types/_fd_def.h>
 
 // DEBUG // DON'T FORGET TO DELETE
 void print_fd_set(const fd_set& fdset, std::string functionName) {
@@ -15,11 +14,16 @@ void print_fd_set(const fd_set& fdset, std::string functionName) {
 }
 
 // METHODS //
-ServerHandler::ServerHandler() : addrlen(sizeof(address)){}
+ServerHandler::ServerHandler() : addrlen(sizeof(address)){
+  // memset(&this->hints, 0, sizeof this->hints); // Initialise la structure
+  // this->hints.ai_family = AF_UNSPEC; // IPv4 ou IPv6
+  // this->hints.ai_socktype = SOCK_STREAM; // TCP
+}
 ServerHandler::~ServerHandler() {}
 
 // GETTER //
-int&	ServerHandler::get_sock() { return sock; }
+int&	ServerHandler::get_sock() { return this->sock; }
+int   ServerHandler::get_port() { return this->port; }
 struct sockaddr* ServerHandler::get_address() { return reinterpret_cast<struct sockaddr*>(&address); }
 socklen_t&	ServerHandler::get_addrlen() { return addrlen; }
 
@@ -68,8 +72,9 @@ void ServerHandler::bind_socket(int port)
 
 	// std::cout << "address.sin_addr.s_addr : " << address.sin_addr.s_addr << std::endl;
 	// std::cout << "address.sin_port :" << address.sin_port << std::endl;
-	if (bind(this->sock, (struct sockaddr*)&address, sizeof(address)) < 0)
+	if (bind(this->sock, (struct sockaddr*)&address, sizeof(address)) < 0) {
 		throw ServerHandlerError("bind failed", __FUNCTION__, __LINE__);
+  }
 }
 
 void ServerHandler::listen_socket(int sock, int backlog)

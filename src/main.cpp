@@ -9,6 +9,7 @@ int main()
 	try {
 		ServerBase.addPortAndServers();
 		for (unsigned long i = 0; i < ServerBase.get_servers().size(); i++) {
+			std::cout << "nbr of servers : " << ServerBase.get_servers().size() << std::endl;
 			ServerBase.processClientConnections();
 		}
 	} catch (const ServerHandlerError& e) {

@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #ifndef HTTPRESPONSEHANDLER_HPP
-#define HTTPRESPONSEHANDLER_HPP
+# define HTTPRESPONSEHANDLER_HPP
 
 # include <sys/socket.h>
 # include <iostream>
@@ -39,8 +39,13 @@ class HttpResponseHandler
 		std::string	getAll() const;
 		HttpResponseHandler	handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
 	private:
-	public:
-		static int	handle_response(int client_sock);
+		std::string	httpVersion;
+		int			code;
+		std::string	status;
+		std::map<std::string, std::string> headers;
+		std::string	body;
 };
+
+std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i);
 
 #endif

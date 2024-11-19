@@ -12,7 +12,7 @@
 
 #ifndef HTTPREQUESTHANDLER_HPP
 # define HTTPREQUESTHANDLER_HPP
-// # include "HttpResponseHandler.hpp"
+# include "HttpResponseHandler.hpp"
 # include "DirectoryHandler.hpp"
 # include <sys/socket.h> // recv | send
 # include <iostream>
@@ -68,5 +68,7 @@ class HttpRequestHandler
 		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);
     	void										handleFileUpload(const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 };
+
+std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i);
 
 #endif

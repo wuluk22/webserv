@@ -3,9 +3,9 @@
 
 #include "ErrorHandler.hpp"
 
-#include <netinet/in.h> // sockaddr_in
-#include <sys/_types/_socklen_t.h>
-#include <sys/_types/_fd_def.h>
+#include <netinet/in.h>
+// #include <sys/_types/_socklen_t.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>
@@ -14,6 +14,7 @@
 class ServerHandler
 {
 	private:
+		// struct addrinfo 	hints; // for getaddrinfo();
 		struct sockaddr_in	address;
 		socklen_t			addrlen;
 		int					sock;
@@ -24,6 +25,7 @@ class ServerHandler
 		ServerHandler();
 		~ServerHandler();
 		int&	get_sock();
+		int		get_port();
 		struct sockaddr* get_address();
 		socklen_t&	get_addrlen();
 

@@ -24,7 +24,7 @@ int HttpRequestHandler::handleRequest(int client_sock)
 	bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
 	if (bytesRead <= 0)
 	{
-			close(client_sock);
+			// close(client_sock);
 			return bytesRead;
 	}
 	buffer[bytesRead] = '\0';
@@ -60,6 +60,7 @@ int HttpRequestHandler::handleRequest(int client_sock)
     try
     {
         HttpRequestHandler request = httpParsing(requestData);
+        std::cout << request << std::endl;
         HttpResponseHandler response;
         // Handle the request
         response = response.handlePath(request, response);
@@ -95,7 +96,7 @@ int HttpRequestHandler::handleRequest(int client_sock)
         responseStr = error_response.getAll();
         send(client_sock, responseStr.c_str(), responseStr.length(), 0);
     }
-    close(client_sock);
+    // close(client_sock);
 	return 1;
 }
 

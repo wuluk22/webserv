@@ -5,7 +5,8 @@
 #include "ErrorHandler.hpp"
 
 #include <iostream>
-#include <sys/_types/_fd_def.h>
+#include <sys/select.h>
+// #include <netdb.h>
 #include <vector>
 
 class	ServerBase
