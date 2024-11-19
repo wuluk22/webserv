@@ -107,14 +107,12 @@ class LocationBlock : public ADirective {
 		s_loc_params getLocationParams(void) const;
 		void setUpperLocation(LocationBlock* upper_location);
 		void getUpperLocation(void) const;
-	
+
 		// Individual setter
 		bool setCgiPath(std::string path_args);
 		bool setUri(std::string uri_args);
 		bool setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
-
-		// Allowed HTTP Methods
 		bool isGetAllowed(void);
 		bool isPostAllowed(void);
 		bool isDeleteAllowed(void);
