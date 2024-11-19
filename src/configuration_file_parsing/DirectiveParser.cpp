@@ -134,7 +134,37 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	return (true);
 }
 
-void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
+bool ConfigParser::ProcessLocationUri(LocationBlock &location_directve, ServerBlock &server_directive, std::string location_line) {
+	std::string current_uri;
+	std::string server_root_path;
+	std::string location_root_path;
+	std::string path;
+	size_t i;
+	std::string trimmed_command;
+
+	location_root_path = location_directve.getRoot();
+	server_root_path = server_directive.getRoot();
+	trimmed_command = trim(location_line);
+	i = trimmed_command.find(' ');
+	if (i == std::string::npos) {
+		std::cout << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		return (false);
+	}
+	path = trimmed_command.substr(i + 1, std::string::npos);
+
+	if (location_root_path.empty() && server_root_path.empty())
+		return (false);
+	if (!location_root_path.empty()) {
+		current_uri = location_root_path + path;
+		return (location_directve.setUri(current_uri));
+	} else if (!server_root_path.empty()) {
+		current_uri = server_root_path + path;
+		return (location_directve.setUri(current_uri));
+	}
+	return (false);
+}
+
+void ConfigParser::processDirectiveLoc(LocationBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	bool command_status;
 
 	command_status = false;
@@ -158,11 +188,11 @@ void ConfigParser::processDirectiveLoc(LocationBlock directive, std::string work
 	}
 }
 
-void ConfigParser::processDirectiveServ(ServerBlock directive,  std::string working_line, std::vector<std::string> args, size_t current_line) {
+void ConfigParser::processDirectiveServ(ServerBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	bool command_status;
 
 	command_status = false;
-	if (args[0] == "root" && args.size() == 2)
+	if (args[0] == "root")
 		command_status = parseRoot(working_line, directive);
 	else if (args[0] == "index")
 		command_status = parseIndex(args, directive);
