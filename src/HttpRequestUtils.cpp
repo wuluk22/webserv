@@ -110,6 +110,7 @@ void HttpRequestHandler::setPath(const std::string& p) { path = p; }
 void HttpRequestHandler::setHttpVersion(const std::string& h) { httpVersion = h; }
 void HttpRequestHandler::setHeader(const std::string& name, const std::string& value) { headers[trim(name)] = trim(value); }
 void HttpRequestHandler::setBody(const std::string& b) { body = b; }
+void HttpRequestHandler::setFd(const int& nb) { fd = nb; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -121,3 +122,4 @@ std::string HttpRequestHandler::getHeader(const std::string& name) const
     return it != headers.end() ? it->second : "";
 }
 const std::map<std::string, std::string>& HttpRequestHandler::getHeaders() const { return headers; }
+int			HttpRequestHandler::getFd() const { return fd; }

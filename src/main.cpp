@@ -84,7 +84,8 @@ int main()
             sd = client_sockets[i];
             if (FD_ISSET(sd, &readfds))
             {
-                int rec = httpRequest.handleRequest(sd);
+				httpRequest.handleRequest(sd);
+                int rec = httpRequest.getFd();
 				std::cout << rec << std::endl;
                 client_sockets[i] = 0;  // Mark as available
             }

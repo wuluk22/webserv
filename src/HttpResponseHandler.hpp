@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/18 14:45:13 by clegros          ###   ########.fr       */
+/*   Updated: 2024/11/19 15:48:21 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ class HttpResponseHandler
 		std::string	getBody() const;
 		std::string	getAll() const;
 		HttpResponseHandler	handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
+		void handleResponse(HttpRequestHandler& request, int client_sock);
+		void sendError(int client_sock, int statusCode, const std::string& statusMsg, const std::string& body);
 	private:
 		std::string	httpVersion;
 		int			code;
