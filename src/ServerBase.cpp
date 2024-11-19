@@ -96,7 +96,7 @@ void	ServerBase::processClientConnections()
 			HttpRequestHandler	httpRequest;
 			HttpResponseHandler	httpResponse;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
-				int resultRequest = httpRequest.handleRequest(client_sock);
+				int resultRequest = httpRequest.handleRequest(client_sock); // return class request
 				std::cout << "RESULTEQUEST : " << resultRequest << std::endl;
 				if (resultRequest <= 0 ) { // Client Disconnected
 					close(client_sock);
