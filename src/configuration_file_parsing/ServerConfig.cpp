@@ -90,6 +90,10 @@ void ADirective::setClientMaxBodySize(unsigned int body_size_value) {
 	_common_params._client_max_body_size = body_size_value;
 }
 
+std::string ADirective::getRoot(void) const {
+	return (this->_common_params._root);
+}
+
 // std::ostream& operator<<(std::ostream& os, const s_common_params& params) {
 // 	os << "Root: " << params._root << "\n"
 // 		<< "Index: ";
