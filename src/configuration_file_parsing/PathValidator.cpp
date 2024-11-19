@@ -16,14 +16,14 @@ bool PathValidator::exists(void) const {
 bool PathValidator::isFile(void) const {
 	struct stat info;
 	if (stat(_path.c_str(), &info) != 0)
-		return false;
+		return (false);
 	return (S_ISREG(info.st_mode));
 }
 
 bool PathValidator::isDirectory(void) const {
 	struct stat info;
 	if (stat(_path.c_str(), &info) != 0) 
-		return false;
+		return (false);
 	return (S_ISDIR(info.st_mode));
 }
 
