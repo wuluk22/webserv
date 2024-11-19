@@ -32,12 +32,6 @@ ConfigParser::ConfigParser(const ConfigParser &copy) {
 	(void) copy;
 }
 
-bool ConfigParser::endsWith(const std::string path, const std::string extension) {
-	if (extension.size() > path.size())
-		return (false);
-	return (path.substr(path.size() - extension.size()) == extension);
-}
-
 ConfigParser::~ConfigParser() {
 	delete (this->instance);
 }
@@ -53,27 +47,28 @@ const std::string& ConfigParser::getPathOfConfigurationFile(void) const {
 }
 
 ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
-	std::map<unsigned int, std::vector<ServerConfig> >::const_iterator wanted_server_config;
-	
-	wanted_server_config = _servers_config.find(id);
-	if (wanted_server_config != _servers_config.end() && !wanted_server_config->second.empty())
-		return wanted_server_config->second.front();
-	else {
-		std::cerr << ERROR_HEADER << NO_SERVER_CONFIG << std::endl;
-		throw ConfigException();
+	std::map <size_t, ServerConfig>::const_iterator it;
+
+	it = this->_servers_config.find(id);
+	if (it != this->_servers_config.end()) {
+		return (it->second);
 	}
+	std::cout << ERROR_HEADER << NO_SERVER_CONFIG << std::endl;
+	throw ConfigException();
 }
 
-void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerConfig current_server, LocationBlock *loc_directive = NULL) {
+void ConfigParser::setServerConfig(size_t server_id, ServerConfig current_server) {
+	this->_servers_config.insert(std::make_pair(server_id, current_server));
+}
+
+void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerBlock &current_server, LocationBlock *loc_directive = NULL) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	LocationBlock location_directive;
+	std::string location_line;
 	std::string root;
 
-	// Implement some recursive root fetching method
-	// If no root in the upper locations fetch server root
-	// If no root, big problem
-
+	location_line = working_line;
 	token_counter.enterBlock();
 	while (std::getline(config_file, working_line)) {
 		current_line++;
@@ -102,11 +97,12 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 			throw ConfigException();
 		}
 	}
+	ProcessLocationUri(location_directive, current_server, location_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
 }
 
-void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig current_server) {
+void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig &current_server) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	TokenCounter token_counter;
@@ -133,7 +129,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
 				throw ConfigException();
 			}
-			processLocationBlock(config_file, working_line, token_counter, current_line, current_server);
+			processLocationBlock(config_file, working_line, token_counter, current_line, server_directive);
 		} else if (is_token_valid(working_line_splitted[0], SERVER_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], c_params) || is_token_valid_multiple(working_line_splitted[0], s_params)) {
@@ -156,12 +152,10 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	std::string working_line;
 	std::vector<std::string> working_line_splitted;
 	size_t current_line = 0;
-	ServerConfig current_server_configuration;
-
-
-	// Implement code to add server config binded with unsigned int ID
+	size_t server_id = 0;
 
 	while (std::getline(config_file, working_line)) {
+		ServerConfig current_server_configuration;
 		current_line++;
 		if (is_only_whitespace(working_line))
 			continue;
@@ -172,6 +166,8 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 			std::cerr << ERROR_HEADER << TOKEN_POSITION_MISMATCH << AL << current_line << RESET <<std::endl;
 			throw ConfigException();
 		}
+		setServerConfig(server_id, current_server_configuration);
+		server_id++;
 	}
 }
 
