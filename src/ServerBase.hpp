@@ -13,7 +13,7 @@ class	ServerBase
 {
 	private:
 		int							max_sock;
-		std::vector<int>			clientSockets;
+		std::vector<int>			clientSockets; // replace vector clientSockets with map int socket + class request
 		std::vector<ServerHandler>	Servers;
 		fd_set 						readfds, writefds;
 

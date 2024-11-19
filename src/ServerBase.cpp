@@ -110,9 +110,9 @@ void	ServerBase::processClientConnections()
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
-                // httpResponse.handlePath(client_sock);
-				// close(client_sock);
-				// FD_CLR(client_sock, &writefds);
+                httpResponse.handleResponse(client_sock);
+				close(client_sock);
+				FD_CLR(client_sock, &writefds);
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
