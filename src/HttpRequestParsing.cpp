@@ -1,0 +1,51 @@
+#include "HttpRequestHandler.hpp"
+
+HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
+{
+    HttpRequestHandler	request;
+    std::istringstream	stream(buffer);
+    std::string			line;
+	std::string			name;
+	std::string			value;
+	std::string			body;
+    size_t              methodEnd;
+	size_t				pathStart;
+	size_t				pathEnd;
+	size_t				colonPos;
+    
+    // Parse request line
+    if (std::getline(stream, line))
+	{
+        line = request.trim(line);
+        methodEnd = line.find(' ');
+        if (methodEnd != std::string::npos)
+		{
+            request.setMethod(line.substr(0, methodEnd));
+            pathStart = methodEnd + 1;
+            pathEnd = line.find(' ', pathStart);
+            if (pathEnd != std::string::npos)
+			{
+                request.setPath(line.substr(pathStart, pathEnd - pathStart));
+                request.setHttpVersion(line.substr(pathEnd + 1));
+            }
+        }
+    }
+    // Parse headers
+    while (std::getline(stream, line) && !line.empty() && line != "\r")
+	{
+        colonPos = line.find(':');
+        if (colonPos != std::string::npos)
+		{
+            name = line.substr(0, colonPos);
+            value = line.substr(colonPos + 1);
+            request.setHeader(name, value);
+        }
+    }
+    // Parse body
+    while (std::getline(stream, line))
+	{
+        body += line + "\n";
+    }
+    request.setBody(request.trim(body));
+    return request;
+}
