@@ -10,13 +10,13 @@ bool ConfigParser::parseRoot(std::string working_line, ADirective &directive) {
 	trimmed_command = trim(working_line);
 	i = trimmed_command.find(' ');
 	if (i == std::string::npos) {
-		std::cout << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
 	path = trimmed_command.substr(i + 1, std::string::npos);
 	valid_command = directive.setRoot(path);
 	if (!valid_command) {
-		std::cout << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
+		std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
 		return (valid_command);
 	}
 	return (valid_command);
@@ -27,12 +27,12 @@ bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective
 
 	working_line.erase(working_line.begin());
 	if (working_line.empty()) {
-		std::cout << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
 	for (int i = 0; i < working_line.size(); i++) {
 		if (!index_file.insert(working_line[i]).second) {
-			std::cout << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
+			std::cerr << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
 			return (false);
 		}
 	}
@@ -41,7 +41,7 @@ bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective
 
 bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective &directive) {
 	if (args.size()) {
-		std::cout << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
 	if (args[1] == "on")
@@ -49,7 +49,7 @@ bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective &dir
 	else if (args[1] == "off")
 		directive.setAutoIndex(false);
 	else {
-		std::cout << ERROR_HEADER << INVALID_TOKEN << RESET << std::endl;
+		std::cerr << ERROR_HEADER << INVALID_TOKEN << RESET << std::endl;
 		return (false);
 	}
 	return (true);
@@ -60,7 +60,7 @@ bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirec
 
 	value = atol(args[1].c_str());
 	if (value == 0 || value > UINT_MAX) {
-		std::cout << ERROR_HEADER << EXCEEDING_LIMIT << RESET << std::endl;
+		std::cerr << ERROR_HEADER << EXCEEDING_LIMIT << RESET << std::endl;
 		return (false);
 	}
 	directive.setClientMaxBodySize(value);
@@ -96,8 +96,10 @@ bool ConfigParser::parseAlias(std::string working_line, LocationBlock &directive
 bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationBlock &directive) {
 	bool valid_entry;
 	
-	if (args.empty() || args.size() < 2 || args.size() > 4)
+	if (args.empty() || args.size() < 2 || args.size() > 4) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
+	}
 	args.erase(args.begin());
 	for (int i = 0; i < args.size() ; i++) {
 		valid_entry = false;
@@ -108,7 +110,7 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 		} else if (args[i] == "DELETE" && !directive.isDeleteAllowed()) {
 			valid_entry = directive.setAllowedMethods(DELETE);
 		} if (!valid_entry) {
-			std::cout << ERROR_HEADER << BAD_INSTRUCTION << RESET << std::endl;
+			std::cerr << ERROR_HEADER << BAD_INSTRUCTION << RESET << std::endl;
 			return (false);
 		}
 	}
@@ -118,12 +120,14 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock &directive) {
 	std::set <std::string> server_names;
 	
-	if (args.empty())
+	if (args.empty() || args.size()) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
+	}
 	args.erase(args.begin());
 	for (int i = 0; i < args.size(); i++) {
 		if (!server_names.insert(args[i]).second) {
-			std::cout << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
+			std::cerr << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
 			return (false);
 		}
 	}
@@ -136,7 +140,7 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	unsigned int value;
 
 	if (args.empty() || args.size() == 1) {
-		std::cout << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
 	args.erase(args.begin());
@@ -215,7 +219,7 @@ void ConfigParser::processDirectiveServ(ServerBlock &directive, std::string work
 
 	command_status = false;
 	processCommonDirective(directive, working_line, args, command_status);
-	if (args[0] == "server_name" && args.size() >= 2)
+	if (args[0] == "server_name")
 		command_status = parseServerName(args, directive);
 	else if (args[0] == "listen")
 		command_status = parseListeningPorts(args, directive);
