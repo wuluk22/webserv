@@ -1,3 +1,4 @@
+#include "ConfigException.hpp"
 #include "ConfigParser.hpp"
 
 bool ConfigParser::parseRoot(std::string working_line, ADirective directive) {
@@ -12,7 +13,11 @@ bool ConfigParser::parseRoot(std::string working_line, ADirective directive) {
 		return (false);
 	}
 	path = trimmed_command.substr(i + 1, std::string::npos);
-	return (directive.setRoot(path));
+	if (directive.setRoot(path)) {
+		return (true);
+	}
+	std::cout << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
+	return (false);
 }
 
 bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective directive) {
