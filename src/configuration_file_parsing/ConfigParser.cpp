@@ -97,7 +97,11 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 			throw ConfigException();
 		}
 	}
-	ProcessLocationUri(location_directive, current_server, location_line);
+	if (!ProcessLocationUri(location_directive, current_server, location_line)) {
+		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << AL << current_line << RESET << std::endl;
+		std::cout << location_directive.getLocationParams()._uri << std::endl;
+		throw ConfigException();
+	}
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
 }
