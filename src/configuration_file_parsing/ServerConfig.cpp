@@ -231,23 +231,22 @@ bool LocationBlock::setAlias(std::string alias_path) {
 }
 
 bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
-	if (allowed_method == 0) {
+	if (allowed_method == 0)
 		return (false);
-	}
-	_location_params._allowed_methods = allowed_method;
+	_location_params._allowed_methods |= allowed_method;
 	return (true);
 }
 
 bool LocationBlock::isGetAllowed(void) {
-	return (_location_params._allowed_methods & GET) != 0;
+	return ((_location_params._allowed_methods & GET) != 0);
 }
 
 bool LocationBlock::isPostAllowed(void) {
-	return (_location_params._allowed_methods & POST) != 0;
+	return ((_location_params._allowed_methods & POST) != 0);
 }
 
 bool LocationBlock::isDeleteAllowed(void) {
-	return (_location_params._allowed_methods & DELETE) != 0;
+	return ((_location_params._allowed_methods & DELETE) != 0);
 }
 
 // std::ostream& operator<<(std::ostream& os, const s_loc_params& params) {

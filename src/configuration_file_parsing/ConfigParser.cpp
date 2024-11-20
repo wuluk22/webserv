@@ -82,7 +82,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
 				throw ConfigException();
 			}
-			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, &location_directive);
+			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, loc_directive);
 		} else if (is_token_valid(working_line_splitted[0], LOC_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], l_params) || is_token_valid_multiple(working_line_splitted[0], c_params)) {
@@ -97,7 +97,11 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 			throw ConfigException();
 		}
 	}
-	ProcessLocationUri(location_directive, current_server, location_line);
+	// if (!ProcessLocationUri(location_directive, current_server, location_line)) {
+	// 	std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << AL << current_line << RESET << std::endl;
+	// 	std::cout << location_directive.getLocationParams()._uri << std::endl;
+	// 	throw ConfigException();
+	// }
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
 }

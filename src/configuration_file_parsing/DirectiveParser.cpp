@@ -1,3 +1,4 @@
+#include "ConfigException.hpp"
 #include "ConfigParser.hpp"
 
 bool ConfigParser::parseRoot(std::string working_line, ADirective &directive) {

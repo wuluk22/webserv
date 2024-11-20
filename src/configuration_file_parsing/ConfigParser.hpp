@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <cctype>
 #include "ServerConfig.hpp"
-#include "ConfigException.hpp"
 
 // MACROS
 #define SERVER_TERMINATOR "end-server"
