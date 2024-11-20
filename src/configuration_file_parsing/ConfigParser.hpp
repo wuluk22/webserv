@@ -63,26 +63,27 @@ class ConfigParser {
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock &current_server ,LocationBlock *loc_directive);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig &current_server);
+		void processCommonDirective(ADirective &directive, std::string working_line, std::vector<std::string> args, bool &command_status);
 		void processDirectiveLoc(LocationBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line);
 		void processDirectiveServ(ServerBlock &directive,  std::string working_line, std::vector<std::string> args, size_t current_line);
 		bool ProcessLocationUri(LocationBlock &directive, ServerBlock &server_config, std::string location_line);
 		
 		// Parsing methods for each tokens
 		// Common
-		bool parseRoot(std::string working_line, ADirective directive);
-		bool parseIndex(std::vector <std::string> working_line, ADirective directive);
-		bool parseAutoIndex(std::vector<std::string> args, ADirective directive);
-		bool parseClientMaxBodySize(std::vector <std::string> args, ADirective directive);
+		bool parseRoot(std::string working_line, ADirective &directive);
+		bool parseIndex(std::vector <std::string> working_line, ADirective &directive);
+		bool parseAutoIndex(std::vector<std::string> args, ADirective &directive);
+		bool parseClientMaxBodySize(std::vector <std::string> args, ADirective &directive);
 	
 		// Location
-		bool parseCgiPath(std::string working_line, LocationBlock directive);
-		bool parseAlias(std::string working_line, LocationBlock directive);
-		bool parseAllowedMethhod(std::vector <std::string> args, LocationBlock directive);
-		bool parseReturn(std::vector <std::string> args,LocationBlock directive);
+		bool parseCgiPath(std::string working_line, LocationBlock &directive);
+		bool parseAlias(std::string working_line, LocationBlock &directive);
+		bool parseAllowedMethhod(std::vector <std::string> args, LocationBlock &directive);
+		bool parseReturn(std::vector <std::string> args,LocationBlock &directive);
 
 		// Server
-		bool parseServerName(std::vector <std::string> args, ServerBlock directive);
-		bool parseListeningPorts(std::vector <std::string> args, ServerBlock directive);
+		bool parseServerName(std::vector <std::string> args, ServerBlock &directive);
+		bool parseListeningPorts(std::vector <std::string> args, ServerBlock &directive);
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);
