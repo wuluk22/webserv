@@ -51,14 +51,13 @@ void	ServerBase::accept_connection(ServerHandler	Server)
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	std::cout << "New accepted connection : " << new_socket << std::endl;
 	FD_SET(new_socket, &readfds);
-	std::cout << "ICI" << std::endl;
 	if (ClientSockets.find(new_socket) == ClientSockets.end()) {
 		ConnectionState NewConnectionState;
-        ClientSockets.insert(std::make_pair(new_socket, NewConnectionState)); // ajouter un nouvel état de connexion
+        ClientSockets.insert(std::make_pair(new_socket, NewConnectionState));
 	}
 	if (new_socket > max_sock)
 		max_sock = new_socket;
-	std::cout << "max_sock : " << max_sock << std::endl;
+	// std::cout << "max_sock : " << max_sock << std::endl;
 }
 
 void	ServerBase::processClientConnections()
@@ -83,7 +82,6 @@ void	ServerBase::processClientConnections()
 		for (unsigned long i = 0; i < this->Servers.size(); i++) {
 			int serverSocket = this->Servers[i].get_sock();
 			if (FD_ISSET(serverSocket, &cpyReadFds)) {
-				std::cout << "serverSocket" << serverSocket << std::endl;
 				accept_connection(this->Servers[(int)i]);
 			}
 		}
@@ -91,7 +89,6 @@ void	ServerBase::processClientConnections()
 		// Handling Request/Response
 		for (std::map<int, ConnectionState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++) {
 			int client_sock = it->first;
-			std::cout << "it->first : " << it->first << std::endl;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
 				int resultRequest = HttpRequestHandler::handle_request(client_sock);
 				if (resultRequest == 1 || resultRequest == 3) { // Client Disconnected
@@ -119,9 +116,9 @@ void	ServerBase::processClientConnections()
 				 	it++;
 			}
 		}
-		std::cout << "END OF PROGRAM" << std::endl;
-		print_fd_set(cpyReadFds, "cpyReadFds");
-		print_fd_set(cpyWriteFds, "cpyWriteFds");
+		// std::cout << "END OF PROGRAM" << std::endl;
+		// print_fd_set(cpyReadFds, "cpyReadFds");
+		// print_fd_set(cpyWriteFds, "cpyWriteFds");
 		// to verify the content of clientSockets
 		// for (unsigned long i = 0; i < clientSockets.size(); i++) {
 		// 	std::cout << i << " : " << clientSockets[i] << std::endl;
