@@ -11,7 +11,7 @@
 struct s_common_params {
 	bool server_level;
 	std::string _root;
-	std::vector <std::string> _index;
+	std::set <std::string> _index;
 	bool _auto_index;
 	unsigned int _client_max_body_size;
 };
@@ -36,6 +36,7 @@ enum e_allowed_methods {
 };
 
 #define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
+#define UNDEFINED_PARAMS "Undefined parameter"
 
 class ADirective;
 
@@ -65,12 +66,19 @@ class ADirective {
 		ADirective(void);
 		virtual ~ADirective();
 		bool isValidFileName(std::string filename);
+		s_common_params getCommonParams(void) const;
+		
+		// Individual setters
 		bool setRoot(std::string root_args);
 		bool setIndex(std::set <std::string> index_args);
 		void setAutoIndex(bool value);
 		void setClientMaxBodySize(unsigned int body_size_value);
+		
+		// Individual getters
 		std::string getRoot(void) const;
-		s_common_params getCommonParams(void) const;
+		std::set <std::string> getIndex(void) const;
+		bool getAutoIndex(void) const;
+		unsigned int getClientMaxBodySize(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const s_common_params& params);
@@ -89,9 +97,13 @@ class ServerBlock : public ADirective {
 		//Individual setters
 		bool setServerName(std::set<std::string> server_names);
 		bool setListeningPort(std::set<unsigned int> listening_ports);
+
+		//Individual getter
+		std::set<std::string> getServerName(void) const;
+		std::set<unsigned int> getListeningPort(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const s_server_params& params);
+std::ostream& operator<<(std::ostream& os, const ServerBlock &server_params);
 
 class LocationBlock : public ADirective {
 	private:
@@ -113,11 +125,18 @@ class LocationBlock : public ADirective {
 		bool setUri(std::string uri_args);
 		bool setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
-		bool isGetAllowed(void);
-		bool isPostAllowed(void);
-		bool isDeleteAllowed(void);
+		void setIsCgi(bool value);
+
+		// Individual getter
+		std::string getCgiPath(void) const;
+		std::string getAlias(void) const;
+		std::string getUri(void) const;
+		bool isDirectiveCgi(void) const;
+		bool isGetAllowed(void) const;
+		bool isPostAllowed(void) const;
+		bool isDeleteAllowed(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const s_loc_params& params);
+std::ostream& operator<<(std::ostream& os, const LocationBlock& location_params);
 
 #endif

@@ -78,7 +78,7 @@ bool ADirective::setIndex(std::set <std::string>index_args) {
 	if (index_args.empty())
 		return (false);
 	for (std::set<std::string>::iterator it = index_args.begin(); it != index_args.end(); ++it)
-		_common_params._index.push_back(*it);
+		_common_params._index.insert(*it);
 	return (true);
 }
 
@@ -94,16 +94,28 @@ std::string ADirective::getRoot(void) const {
 	return (this->_common_params._root);
 }
 
-// std::ostream& operator<<(std::ostream& os, const s_common_params& params) {
-// 	os << "Root: " << params._root << "\n"
-// 		<< "Index: ";
-// 	for (const std::string& idx : params._index) {
-// 		os << idx << " ";
-// 	}
-// 	os << "\nAutoIndex: " << (params._auto_index ? "enabled" : "disabled") << "\n"
-// 		<< "Client Max Body Size: " << params._client_max_body_size;
-// 	return (os);
-// }
+std::set<std::string> ADirective::getIndex(void) const {
+	return (this->_common_params._index);
+}
+
+bool ADirective::getAutoIndex(void) const {
+	return (this->_common_params._auto_index);
+}
+
+unsigned int ADirective::getClientMaxBodySize(void) const {
+	return (this->_common_params._client_max_body_size);
+}
+
+std::ostream& operator<<(std::ostream& os, const ADirective &params) {
+	os 	<< "Server Block content" << "\n"
+		<< "Root : " << params.getRoot() << "\n"
+		<< "Auto index : " << params.getAutoIndex() << "\n";
+	for (std::set<std::string>::iterator it = params.getIndex().begin(); it != params.getIndex().end(); it++) {
+		os << "Index : " << (*it) << "\n";
+	}
+	os	<< "Client Max Body Size : " << params.getClientMaxBodySize() << "\n";
+	return (os);
+}
 
 // ServerBlock
 
@@ -153,17 +165,24 @@ bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	return (true);
 }
 
-// std::ostream& operator<<(std::ostream& os, const s_server_params& params) {
-// 	os << "Server Names: ";
-// 	for (const std::string& name : params._server_name) {
-// 		os << name << " ";
-// 	}
-// 	os << "\nListen Ports: ";
-// 	for (const unsigned int& port : params._listen) {
-// 		os << port << " ";
-// 	}
-// 	return (os);
-// }
+std::set <std::string> ServerBlock::getServerName(void) const {
+	return (this->_server_params._server_name);
+}
+
+std::set <unsigned int> ServerBlock::getListeningPort(void) const {
+	return (this->_server_params._listen);
+}
+
+std::ostream& operator<<(std::ostream& os, const ServerBlock& params) {
+	os << static_cast<const ADirective&>(params);
+	for (std::set<unsigned int>::iterator it = params.getListeningPort().begin(); it != params.getListeningPort().end(); it++) {
+		os << "Listening ports : " << (*it) << "\n"; 
+	}
+	for (std::set<std::string>::iterator it = params.getServerName().begin(); it != params.getServerName().end(); it++) {
+		os << "Server name : " << (*it) << "\n";
+	}
+	return (os);
+}
 
 // LocationBlock
 
@@ -193,6 +212,10 @@ LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
 
 s_loc_params LocationBlock::getLocationParams(void) const {
 	return (this->_location_params);
+}
+
+void LocationBlock::setIsCgi(bool value) {
+	this->_location_params._is_cgi = value;
 }
 
 bool LocationBlock::setCgiPath(std::string path_args) {
@@ -237,26 +260,44 @@ bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
 	return (true);
 }
 
-bool LocationBlock::isGetAllowed(void) {
+std::string LocationBlock::getCgiPath(void) const {
+	return (this->_location_params._cgi_path);
+}
+
+std::string LocationBlock::getAlias(void) const {
+	return (this->_location_params._alias);
+}
+
+std::string LocationBlock::getUri(void) const {
+	return (this->_location_params._uri);
+}
+
+bool LocationBlock::isDirectiveCgi(void) const {
+	return (this->_location_params._is_cgi);
+}
+
+bool LocationBlock::isGetAllowed(void) const {
 	return ((_location_params._allowed_methods & GET) != 0);
 }
 
-bool LocationBlock::isPostAllowed(void) {
+bool LocationBlock::isPostAllowed(void) const {
 	return ((_location_params._allowed_methods & POST) != 0);
 }
 
-bool LocationBlock::isDeleteAllowed(void) {
+bool LocationBlock::isDeleteAllowed(void) const {
 	return ((_location_params._allowed_methods & DELETE) != 0);
 }
 
-// std::ostream& operator<<(std::ostream& os, const s_loc_params& params) {
-// 	os << "Is CGI: " << (params._is_cgi ? "true" : "false") << "\n"
-// 		<< "CGI Path: " << params._cgi_path << "\n"
-// 		<< "URI: " << params._uri << "\n"
-// 		<< "Alias: " << params._alias << "\n"
-// 		<< "Allowed Methods: ";
-// 	if (params._allowed_methods & GET) os << "GET ";
-// 	if (params._allowed_methods & POST) os << "POST ";
-// 	if (params._allowed_methods & DELETE) os << "DELETE ";
-// 	return (os);
-// }
+std::ostream& operator<<(std::ostream& os, const LocationBlock &params) {
+	os	<< "CGI Path: " << params.getCgiPath() << "\n"
+		<< "URI: " << params.getUri() << "\n"
+		<< "Alias: " << params.getAlias() << "\n"
+		<< "Allowed Methods: ";
+	if (params.isGetAllowed()) 
+		os << "GET ";
+	if (params.isPostAllowed()) 
+		os << "POST ";
+	if (params.isDeleteAllowed()) 
+		os << "DELETE ";
+	return (os);
+}
