@@ -15,7 +15,8 @@ FILES	=	src/main \
 			src/HttpRequestUtils \
 			src/HttpRequestDir \
 			src/HttpRequestParsing \
-			src/DirectoryHandler
+			src/DirectoryHandler \
+			src/RequestResponseState
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
@@ -25,7 +26,8 @@ HEADER	=	src/ServerHandler.hpp \
 			src/HttpResponseHandler.hpp \
 			src/Logger.hpp \
 			src/ErrorHandler.hpp \
-			src/DirectoryHandler.hpp
+			src/DirectoryHandler.hpp \
+			src/RequestResponseState.hpp
 
 GREEN	= \e[92m
 YELLOW	= \e[93m

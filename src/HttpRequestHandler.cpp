@@ -62,18 +62,7 @@ HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock)
             return request;
         }
     }
-    try
-    {
-        request = httpParsing(requestData);
-        HttpResponseHandler response;
-        response.handleResponse(request, client_sock);
-    }
-    catch (const std::exception& e)
-    {
-        HttpResponseHandler response;
-        // Send a 500 Internal Server Error using HttpResponseHandler
-        response.sendError(client_sock, 500, "Internal Server Error", e.what());
-    }
+    request = httpParsing(requestData);
     request.setFd(1);
     return request;
 }
