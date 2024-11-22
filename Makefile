@@ -10,6 +10,10 @@ FILES	=	src/main \
 			src/ServerBase \
 			src/HttpRequestHandler \
 			src/HttpResponseHandler \
+			src/HttpRequestUtils \
+			src/HttpRequestParsing \
+			src/HttpRequestDir \
+			src/DirectoryHandler \
 			src/RequestResponseState \
 			src/Logger \
 			src/ErrorHandler \

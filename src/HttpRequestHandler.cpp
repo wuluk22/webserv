@@ -22,7 +22,7 @@ HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock)
     bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
     if (bytesRead <= 0)
     {
-        close(client_sock);
+        // close(client_sock);
         request.setFd(bytesRead);
         return request;
     }

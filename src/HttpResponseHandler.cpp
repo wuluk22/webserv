@@ -1,4 +1,5 @@
 #include "HttpResponseHandler.hpp"
+#include "HttpRequestHandler.hpp"
 
 HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
 {

@@ -1,9 +1,8 @@
 
 #include "ServerBase.hpp"
 #include "ServerHandler.hpp"
+#include "RequestResponseState.hpp"
 #include "configuration_file_parsing/ServerConfig.hpp"
-#include "HttpRequestHandler.hpp"
-#include "HttpResponseHandler.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -16,7 +15,7 @@ ServerBase::ServerBase() : max_sock(0) {
 
 ServerBase::~ServerBase() {
 	for (std::vector<ServerHandler>::iterator it = Servers.begin(); it != Servers.end(); it++) {
-		int sock = it->get_sock();
+		int sock = it->getSock();
 		FD_CLR(sock, &readfds);
 		FD_CLR(sock, &writefds);
 		close(sock);
@@ -34,13 +33,13 @@ void	ServerBase::addPortAndServers()
 	s_server_params		server_params;
 	server_params._listen.push_back(8080);
 	server_params._listen.push_back(4242);
-	server_params._listen.push_back(1010);
+	server_params._listen.push_back(1050);
 	for (std::vector<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);
 		// std::cout << "NewServer: " << NewServer.get_port() << std::endl;
-		FD_SET(NewServer.get_sock(), &get_readfds());
-		this->max_sock = std::max(this->max_sock, NewServer.get_sock());
+		FD_SET(NewServer.getSock(), &get_readfds());
+		this->max_sock = std::max(this->max_sock, NewServer.getSock());
 		Servers.push_back(NewServer);
 	}
 	// getaddrinfo(¨http://coucou.be¨, ¨8080¨, )
@@ -48,7 +47,7 @@ void	ServerBase::addPortAndServers()
 
 void	ServerBase::accept_connection(ServerHandler	Server)
 {
-    int new_socket = accept(Server.get_sock(), Server.get_address(), &Server.get_addrlen());
+    int new_socket = accept(Server.getSock(), Server.get_address(), &Server.get_addrlen());
     if (new_socket < 0) {
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	}
@@ -87,7 +86,7 @@ void	ServerBase::processClientConnections()
 
         // If activity on server socket, it's an incoming connection
 		for (unsigned long i = 0; i < this->Servers.size(); i++) {
-			int serverSocket = this->Servers[i].get_sock();
+			int serverSocket = this->Servers[i].getSock();
 			if (FD_ISSET(serverSocket, &cpyReadFds)) {
 				accept_connection(this->Servers[(int)i]);
 			}
@@ -97,31 +96,41 @@ void	ServerBase::processClientConnections()
 		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++) {
 			int client_sock = it->first;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
-				it->second->_request = httpRequest.handleRequest(client_sock); // return class request
-				std::cout << "RESULTEQUEST : " << resultRequest << std::endl;
-				if (resultRequest <= 0 ) { // Client Disconnected
+				HttpRequestHandler request = it->second.getRequest();
+				request = request.handleRequest(client_sock);
+				it->second.setRequest(request);
+				//std::cout << "ResultRecv() : " << it->second.getResultRecv() << std::endl;
+				// std::cout << "RESULTEQUEST : " << it->second.getRequest() << std::endl;
+				std::cout << "Request reponse : " << request.getFd() << std::endl;
+				if (request.getFd() <= 0 ) { // Client Disconnected
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
 					FD_CLR(client_sock, &writefds);
 					clientToRemove.push_back(client_sock);
 					continue ;
 				}
-				// FD_CLR(client_sock, &readfds);
+				FD_CLR(client_sock, &readfds);
 				FD_SET(client_sock, &cpyWriteFds);
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
-                it->second->_response = httpResponse.handleResponse(client_sock);
+				HttpResponseHandler response = it->second.getResponse();
+                response.handleResponse(it->second.getRequest(), client_sock);
+				it->second.setResponse(response);
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
 			for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end();) {
-				if (it->first == clientToRemove[(int)i])
-					it = ClientSockets.erase(it);
-				else
+				if (it->first == clientToRemove[(int)i]) {
+					std::map<int, RRState>::iterator toErase = it;
+					++it;
+					ClientSockets.erase(toErase);
+				}
+				else {
 				 	it++;
+				}
 			}
 		}
 		// std::cout << "END OF PROGRAM" << std::endl;

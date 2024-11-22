@@ -22,8 +22,8 @@ ServerHandler::ServerHandler() : addrlen(sizeof(address)){
 ServerHandler::~ServerHandler() {}
 
 // GETTER //
-int&	ServerHandler::get_sock() { return this->sock; }
-int   ServerHandler::get_port() { return this->port; }
+int&  ServerHandler::getSock() { return this->sock; }
+int&  ServerHandler::getPort() { return this->port; }
 struct sockaddr* ServerHandler::get_address() { return reinterpret_cast<struct sockaddr*>(&address); }
 socklen_t&	ServerHandler::get_addrlen() { return addrlen; }
 

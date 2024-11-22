@@ -15,7 +15,7 @@ class	RRState
 		bool requestComplete;
 		std::string responseBuffer;
 		size_t bytesSent;
-		int resultrecv;
+		int _resultRecv;
 		HttpRequestHandler	_request;
 		HttpResponseHandler	_response;
 	
@@ -25,9 +25,15 @@ class	RRState
 	~RRState();
 
 	//GETTER
-	std::string getRequestBuffer();
-	
+	// std::string&			getRequestBuffer();
+	HttpRequestHandler&		getRequest();
+	HttpResponseHandler&	getResponse();
+	int&					getResultRecv();
+;	
 	//SETTER
+	void				setRequest(HttpRequestHandler& req);
+	void				setResponse(HttpResponseHandler& res);
+	void				setResultRecv(int& resultRecv);
 };
 
 #endif

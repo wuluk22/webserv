@@ -25,10 +25,10 @@ class ServerHandler
 		// METHODS
 		ServerHandler();
 		~ServerHandler();
-		int&	get_sock();
-		int		get_port();
-		struct sockaddr* get_address();
-		socklen_t&	get_addrlen();
+		int&				getSock();
+		int&				getPort();
+		struct sockaddr*	get_address();
+		socklen_t&			get_addrlen();
 
 		void	InitializeServerSocket(int port, const int backlog);
 		int		create_socket();
