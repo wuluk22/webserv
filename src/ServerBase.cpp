@@ -52,7 +52,7 @@ void	ServerBase::accept_connection(ServerHandler	Server)
 	std::cout << "New accepted connection : " << new_socket << std::endl;
 	FD_SET(new_socket, &readfds);
 	if (ClientSockets.find(new_socket) == ClientSockets.end()) {
-		ConnectionState NewConnectionState;
+		RRState NewConnectionState;
         ClientSockets.insert(std::make_pair(new_socket, NewConnectionState));
 	}
 	if (new_socket > max_sock)
@@ -87,7 +87,7 @@ void	ServerBase::processClientConnections()
 		}
 
 		// Handling Request/Response
-		for (std::map<int, ConnectionState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++) {
+		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++) {
 			int client_sock = it->first;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
 				int resultRequest = HttpRequestHandler::handle_request(client_sock);
@@ -109,7 +109,7 @@ void	ServerBase::processClientConnections()
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
-			for (std::map<int, ConnectionState>::iterator it = ClientSockets.begin(); it != ClientSockets.end();) {
+			for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end();) {
 				if (it->first == clientToRemove[(int)i])
 					it = ClientSockets.erase(it);
 				else

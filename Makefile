@@ -10,6 +10,7 @@ FILES	=	src/main \
 			src/ServerBase \
 			src/HttpRequestHandler \
 			src/HttpResponseHandler \
+			src/RequestResponseState \
 			src/Logger \
 			src/ErrorHandler \
 			src/configuration_file_parsing/ConfigException \
@@ -25,6 +26,7 @@ HEADER	=	src/ServerHandler.hpp \
 			src/ServerHandler.hpp \
 			src/HttpRequestHandler.hpp \
 			src/HttpResponseHandler.hpp \
+			src/RequestResponseState.hpp \
 			src/Logger.hpp \
 			src/ErrorHandler.hpp \
 			src/configuration_file_parsing/ConfigException.hpp \
