@@ -1,8 +1,10 @@
 
 #include "ServerBase.hpp"
 #include "ServerHandler.hpp"
+#include "configuration_file_parsing/ServerConfig.hpp"
 #include "HttpRequestHandler.hpp"
 #include "HttpResponseHandler.hpp"
+
 #include <algorithm>
 #include <cstring>
 
@@ -29,11 +31,11 @@ std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 ////////// PUBLIC /////////////
 void	ServerBase::addPortAndServers()
 {
-	std::vector<int>	ports;
-	ports.push_back(8080);
-	ports.push_back(4242);
-	ports.push_back(1025);
-	for (std::vector<int>::iterator it = ports.begin(); it != ports.end(); it++) {
+	s_server_params		server_params;
+	server_params._listen.push_back(8080);
+	server_params._listen.push_back(4242);
+	server_params._listen.push_back(1010);
+	for (std::vector<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);
 		// std::cout << "NewServer: " << NewServer.get_port() << std::endl;
@@ -52,12 +54,13 @@ void	ServerBase::accept_connection(ServerHandler	Server)
 	}
 	std::cout << "New accepted connection : " << new_socket << std::endl;
 	FD_SET(new_socket, &readfds);
-	if (std::find(clientSockets.begin(), clientSockets.end(), new_socket) == clientSockets.end()) {
-		clientSockets.push_back(new_socket); // don't forget to delete the clientfd when it's not used anymore
+	if (ClientSockets.find(new_socket) == ClientSockets.end()) {
+		RRState NewConnectionState;
+        ClientSockets.insert(std::make_pair(new_socket, NewConnectionState));
 	}
 	if (new_socket > max_sock)
 		max_sock = new_socket;
-	std::cout << "max_sock : " << max_sock << std::endl;
+	// std::cout << "max_sock : " << max_sock << std::endl;
 }
 
 void	ServerBase::processClientConnections()
@@ -91,10 +94,8 @@ void	ServerBase::processClientConnections()
 		}
 
 		// Handling Request/Response
-		for (std::vector<int>::iterator it = clientSockets.begin(); it != clientSockets.end(); it++) {
-			int client_sock = *it;
-			HttpRequestHandler	httpRequest;
-			HttpResponseHandler	httpResponse;
+		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++) {
+			int client_sock = it->first;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
 				it->second->_request = httpRequest.handleRequest(client_sock); // return class request
 				std::cout << "RESULTEQUEST : " << resultRequest << std::endl;
@@ -116,11 +117,16 @@ void	ServerBase::processClientConnections()
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
-			clientSockets.erase(std::remove(clientSockets.begin(), clientSockets.end(), clientToRemove[(int)i]), clientSockets.end());
+			for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end();) {
+				if (it->first == clientToRemove[(int)i])
+					it = ClientSockets.erase(it);
+				else
+				 	it++;
+			}
 		}
-		std::cout << "END OF PROGRAM" << std::endl;
-		print_fd_set(cpyReadFds, "cpyReadFds");
-		print_fd_set(cpyWriteFds, "cpyWriteFds");
+		// std::cout << "END OF PROGRAM" << std::endl;
+		// print_fd_set(cpyReadFds, "cpyReadFds");
+		// print_fd_set(cpyWriteFds, "cpyWriteFds");
 		// to verify the content of clientSockets
 		// for (unsigned long i = 0; i < clientSockets.size(); i++) {
 		// 	std::cout << i << " : " << clientSockets[i] << std::endl;

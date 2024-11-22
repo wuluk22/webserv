@@ -3,17 +3,19 @@
 
 #include "ServerHandler.hpp"
 #include "ErrorHandler.hpp"
+#include "RequestResponseState.hpp"
 
 #include <iostream>
 #include <sys/select.h>
 // #include <netdb.h>
 #include <vector>
+#include <map>
 
 class	ServerBase
 {
 	private:
 		int							max_sock;
-		std::vector<int>			clientSockets; // replace vector clientSockets with map int socket + class request
+		std::map<int, RRState>		ClientSockets;
 		std::vector<ServerHandler>	Servers;
 		fd_set 						readfds, writefds;
 
@@ -26,9 +28,9 @@ class	ServerBase
 		std::vector<ServerHandler>	get_servers();
 
 
-		void	processClientConnections();
-		void	accept_connection(ServerHandler	Server);
-		void	addPortAndServers();
+		void						processClientConnections();
+		void						accept_connection(ServerHandler	Server);
+		void						addPortAndServers();
 };
 
 #endif
