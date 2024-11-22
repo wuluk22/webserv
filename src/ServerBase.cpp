@@ -47,7 +47,7 @@ void	ServerBase::addPortAndServers()
 
 void	ServerBase::accept_connection(ServerHandler	Server)
 {
-    int new_socket = accept(Server.getSock(), Server.get_address(), &Server.get_addrlen());
+    int new_socket = accept(Server.getSock(), Server.getAddress(), &Server.getAddrlen());
     if (new_socket < 0) {
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	}

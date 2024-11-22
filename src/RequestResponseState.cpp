@@ -1,6 +1,6 @@
 #include "RequestResponseState.hpp"
 
-RRState::RRState() : requestBuffer(""), requestComplete(false), responseBuffer(""), bytesSent(0) {}
+RRState::RRState() : _requestBuffer(""), _requestComplete(false), _responseBuffer(""), _bytesSent(0) {}
 
 RRState::~RRState() {}
 

@@ -11,11 +11,11 @@ class	HttpResponseHandler;
 class	RRState
 {
 	private:
-		std::string requestBuffer;
-		bool requestComplete;
-		std::string responseBuffer;
-		size_t bytesSent;
-		int _resultRecv;
+		std::string 		_requestBuffer;
+		bool 				_requestComplete;
+		std::string			_responseBuffer;
+		size_t				_bytesSent;
+		int 				_resultRecv;
 		HttpRequestHandler	_request;
 		HttpResponseHandler	_response;
 	
