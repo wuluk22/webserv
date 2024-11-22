@@ -10,6 +10,7 @@ class	RRState
 		bool requestComplete;
 		std::string responseBuffer;
 		size_t bytesSent;
+		int resultrecv;
 	
 	public:
 	//METHODS
