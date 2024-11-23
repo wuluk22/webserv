@@ -55,7 +55,10 @@ bool ServerConfig::correctAmmountOfServerDirective(void) {
 
 // ADirective class
 
-ADirective::ADirective(void) {}
+ADirective::ADirective(void) {
+	this->_common_params._auto_index = false;
+	this->_common_params._client_max_body_size = 1;
+}
 
 ADirective::~ADirective() {}
 
@@ -107,10 +110,11 @@ unsigned int ADirective::getClientMaxBodySize(void) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const ADirective &params) {
-	os 	<< "Server Block content" << "\n"
-		<< "Root : " << params.getRoot() << "\n"
-		<< "Auto index : " << params.getAutoIndex() << "\n";
-	for (std::set<std::string>::iterator it = params.getIndex().begin(); it != params.getIndex().end(); it++) {
+	const std::set<std::string> indexSet = params.getIndex();
+
+	os << "Root : " << params.getRoot() << "\n"
+	<< "Auto index : " << params.getAutoIndex() << "\n";
+	for (std::set<std::string>::const_iterator it = indexSet.begin(); it != indexSet.end(); ++it) {
 		os << "Index : " << (*it) << "\n";
 	}
 	os	<< "Client Max Body Size : " << params.getClientMaxBodySize() << "\n";
@@ -174,13 +178,15 @@ std::set <unsigned int> ServerBlock::getListeningPort(void) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock& params) {
+	const std::set<unsigned int> listening_ports = params.getListeningPort();
+	const std::set<std::string> server_names = params.getServerName();
+
+	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
 	os << static_cast<const ADirective&>(params);
-	for (std::set<unsigned int>::iterator it = params.getListeningPort().begin(); it != params.getListeningPort().end(); it++) {
+	for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
 		os << "Listening ports : " << (*it) << "\n"; 
-	}
-	for (std::set<std::string>::iterator it = params.getServerName().begin(); it != params.getServerName().end(); it++) {
+	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
 		os << "Server name : " << (*it) << "\n";
-	}
 	return (os);
 }
 
@@ -289,6 +295,9 @@ bool LocationBlock::isDeleteAllowed(void) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const LocationBlock &params) {
+	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
+	
+	os << static_cast<const ADirective&>(params);
 	os	<< "CGI Path: " << params.getCgiPath() << "\n"
 		<< "URI: " << params.getUri() << "\n"
 		<< "Alias: " << params.getAlias() << "\n"
