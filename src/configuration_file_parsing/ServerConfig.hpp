@@ -131,6 +131,7 @@ class LocationBlock : public ADirective {
 		std::string getCgiPath(void) const;
 		std::string getAlias(void) const;
 		std::string getUri(void) const;
+		bool isCgiAllowed(void) const;
 		bool isDirectiveCgi(void) const;
 		bool isGetAllowed(void) const;
 		bool isPostAllowed(void) const;
