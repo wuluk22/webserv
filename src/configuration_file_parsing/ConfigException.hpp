@@ -15,12 +15,15 @@
 #define TOKEN_POSITION_MISMATCH "Token is not within any block, aborting"
 #define BAD_INSTRUCTION "Bad instruction within a directive, aborting"
 #define NO_URI_LOCATION "Location token contain no URI, aborting"
+#define BAD_URI "Bad URI, aborting"
 #define DUPE_ELEMS "Duplicate elements discovered, aborting"
 #define NO_ELEMENTS "Lack of proper arguments, aborting"
 #define DOUBLE_DIRECTIVE "Double server directive, aborting"
 #define EXCEEDING_LIMIT "Size limit exceeded, aborting"
 #define PATH_NOT_RECOGNIZED "Path isn't recognized, aborting"
-#define AL "at line : "
+#define ROOT_PRIORITY "Root redefinition should be declared before inbricked location, aborting"
+#define NO_ROOT_DEFINITION "No root definition, vacant URI prefix, aborting"
+#define AL " at line : "
 #define RESET "\e[0m"
 
 // EXCEPTIONS MESSAGES
