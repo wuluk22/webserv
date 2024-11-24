@@ -46,7 +46,7 @@ bool ConfigParser::is_only_whitespace(const std::string& str) {
 bool ConfigParser::is_token_valid_multiple(const std::string& line, const std::vector <std::string> tokens) {
 	for (size_t i = 0; i < tokens.size(); ++i) {
 		if (line.find(tokens[i]) != std::string::npos) {
-			return true;
+			return (true);
 		}
 	}
 	return false;
@@ -95,4 +95,19 @@ bool ConfigParser::isValidServerName(std::string name) {
 			return (false);
 	}
 	return (true);
+}
+
+std::string ConfigParser::returnSecondArgs(std::string args) {
+	std::string trimmed_line;
+	std::string uri;
+	std::size_t i;
+
+	trimmed_line = trim(args);
+	i = trimmed_line.find(' ');
+	if (i == std::string::npos) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		return ("");
+	}
+	uri = trimmed_line.substr(i + 1, std::string::npos);
+	return (uri);
 }
