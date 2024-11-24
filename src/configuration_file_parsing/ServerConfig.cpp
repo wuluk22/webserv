@@ -194,6 +194,7 @@ std::ostream& operator<<(std::ostream& os, const ServerBlock& params) {
 
 LocationBlock::LocationBlock(void) {
 	this->_common_params.server_level = false;
+	this->_location_params._is_cgi = false;
 }
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
@@ -266,6 +267,10 @@ bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
 	return (true);
 }
 
+bool LocationBlock::isCgiAllowed(void) const {
+	return (this->_location_params._is_cgi);
+}
+
 std::string LocationBlock::getCgiPath(void) const {
 	return (this->_location_params._cgi_path);
 }
@@ -298,8 +303,10 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock &params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
 	os << static_cast<const ADirective&>(params);
-	os	<< "CGI Path: " << params.getCgiPath() << "\n"
-		<< "URI: " << params.getUri() << "\n"
+	if (params.isCgiAllowed()) {
+		os	<< "CGI Path: " << params.getCgiPath() << "\n";
+	}
+	os	<< "URI: " << params.getUri() << "\n"
 		<< "Alias: " << params.getAlias() << "\n"
 		<< "Allowed Methods: ";
 	if (params.isGetAllowed()) 
