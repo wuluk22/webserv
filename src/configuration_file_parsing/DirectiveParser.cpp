@@ -120,13 +120,17 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock &directive) {
 	std::set <std::string> server_names;
 	
-	if (args.empty() || args.size()) {
+	if (args.empty() || args.size() == 1) {
 		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
 	args.erase(args.begin());
 	for (int i = 0; i < args.size(); i++) {
-		if (!server_names.insert(args[i]).second) {
+		if (!isValidServerName(args[i])) {
+			std::cerr << ERROR_HEADER << "Invalid server name" << RESET << std::endl;
+			return (false);
+		}
+		else if (!server_names.insert(args[i]).second) {
 			std::cerr << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
 			return (false);
 		}
@@ -139,7 +143,7 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	std::string current_string;
 	unsigned int value;
 
-	if (args.empty() || args.size() == 1) {
+	if (args.empty() || args.size()) {
 		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
@@ -154,36 +158,6 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 		}
 	}
 	return (directive.setListeningPort(ports));
-}
-
-bool ConfigParser::ProcessLocationUri(LocationBlock &location_directve, ServerBlock &server_directive, std::string location_line) {
-	std::string current_uri;
-	std::string server_root_path;
-	std::string location_root_path;
-	std::string path;
-	size_t i;
-	std::string trimmed_command;
-
-	location_root_path = location_directve.getRoot();
-	server_root_path = server_directive.getRoot();
-	trimmed_command = trim(location_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos) {
-		std::cout << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
-		return (false);
-	}
-	path = trimmed_command.substr(i + 1, std::string::npos);
-
-	if (location_root_path.empty() && server_root_path.empty())
-		return (false);
-	if (!location_root_path.empty()) {
-		current_uri = location_root_path + path;
-		return (location_directve.setUri(current_uri));
-	} else if (!server_root_path.empty()) {
-		current_uri = server_root_path + path;
-		return (location_directve.setUri(current_uri));
-	}
-	return (false);
 }
 
 void ConfigParser::processCommonDirective(ADirective &directive, std::string working_line, std::vector<std::string> args, bool &command_status) {
