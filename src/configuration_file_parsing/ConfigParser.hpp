@@ -57,6 +57,7 @@ class ConfigParser {
 		bool endsWith(const std::string path, const std::string extension);
 		bool isStringDigit(std::string args);
 		bool isValidServerName(std::string name);
+		std::string returnSecondArgs(std::string args);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
@@ -65,7 +66,7 @@ class ConfigParser {
 		void processCommonDirective(ADirective &directive, std::string working_line, std::vector<std::string> args, bool &command_status);
 		void processDirectiveLoc(LocationBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line);
 		void processDirectiveServ(ServerBlock &directive,  std::string working_line, std::vector<std::string> args, size_t current_line);
-		bool ProcessLocationUri(LocationBlock &directive, ServerBlock &server_config, std::string location_line);
+		bool ProcessLocationData(LocationBlock &directive, ServerBlock &server_config, std::string location_line);
 		
 		// Parsing methods for each tokens
 		// Common

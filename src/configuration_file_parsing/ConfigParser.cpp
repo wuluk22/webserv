@@ -1,18 +1,17 @@
 #include "ConfigException.hpp"
 #include "ServerConfig.hpp"
 #include "ConfigParser.hpp"
-#include <map>
 
 ConfigParser* ConfigParser::instance = NULL;
 
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
-	std::string l_items[] = { "cgi_path", "cgi_extensions", "alias", "allowed_method"};
+	std::string l_items[] = { "cgi_path", "cgi_extensions", "cgi_allowed" "alias", "allowed_method"};
     initializeVector(l_params, l_items, ARRAY_SIZE(l_items));
     std::string s_items[] = { "server_name", "listen" };
     initializeVector(s_params, s_items, ARRAY_SIZE(s_items));
-    std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size" };
+    std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size"};
     initializeVector(c_params, c_items, ARRAY_SIZE(c_items));
     std::string non_repeat_s[] = { "root" };
     initializeVector(non_repeat_s_token, non_repeat_s,ARRAY_SIZE(non_repeat_s));
@@ -36,7 +35,7 @@ ConfigParser::~ConfigParser() {
 	delete (this->instance);
 }
 
-ConfigParser* ConfigParser::getInstance(const std::string init_path = "" ) {
+ConfigParser* ConfigParser::getInstance(const std::string init_path = "") {
 	if (!instance)
 		instance = new ConfigParser(init_path);
 	return (instance);
@@ -61,14 +60,32 @@ void ConfigParser::setServerConfig(size_t server_id, ServerConfig current_server
 	this->_servers_config.insert(std::make_pair(server_id, current_server));
 }
 
+bool ConfigParser::ProcessLocationData(LocationBlock &directive, ServerBlock &server_config, std::string uri) {
+	std::string server_root = server_config.getRoot();
+	std::string location_root = directive.getRoot();
+	std::string root;
+
+	if (location_root.empty() && server_root.empty()) {
+		std::cerr << ERROR_HEADER << NO_ROOT_DEFINITION << RESET << std::endl;
+		return (false);
+	} else if (!server_root.empty() && location_root.empty())
+		directive.setRoot(server_root);
+	root = directive.getRoot();
+	if (!directive.setUri(root + uri)) {
+		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
+		return (false);
+	}
+	return (true);
+}
+
 void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerBlock &current_server, LocationBlock *loc_directive = NULL) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	LocationBlock location_directive;
-	std::string location_line;
-	std::string root;
+	bool went_in_directive = false;
+	std::string uri;
 
-	location_line = working_line;
+	uri = returnSecondArgs(working_line);
 	token_counter.enterBlock();
 	while (std::getline(config_file, working_line)) {
 		current_line++;
@@ -82,7 +99,15 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
 				throw ConfigException();
 			}
+			if (location_directive.getRoot().empty()) {
+				if (current_server.getRoot().empty()) {
+					std::cerr << ERROR_HEADER << NO_ROOT_DEFINITION << AL << current_line << RESET << std::endl;
+					throw ConfigException();
+				}
+				location_directive.setRoot(current_server.getRoot());
+			}
 			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, loc_directive);
+			went_in_directive = true;
 		} else if (is_token_valid(working_line_splitted[0], LOC_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], l_params) || is_token_valid_multiple(working_line_splitted[0], c_params)) {
@@ -91,19 +116,21 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
+			if (went_in_directive && working_line_splitted[0] == "root") {
+				std::cerr << ERROR_HEADER << ROOT_PRIORITY << AL << current_line << RESET << std::endl;
+				throw ConfigException();
+			}
 			processDirectiveLoc(location_directive, working_line, working_line_splitted, current_line);
 		} else {
 			std::cerr << ERROR_HEADER << INVALID_TOKEN << AL << current_line << RESET << std::endl;
 			throw ConfigException();
 		}
 	}
-	// if (!ProcessLocationUri(location_directive, current_server, location_line)) {
-	// 	std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << AL << current_line << RESET << std::endl;
-	// 	std::cout << location_directive.getLocationParams()._uri << std::endl;
-	// 	throw ConfigException();
-	// }
+	if (!ProcessLocationData(location_directive, current_server, uri))
+		throw ConfigException();
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
+	std::cout << location_directive << std::endl;
 }
 
 void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig &current_server) {
@@ -111,8 +138,6 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 	std::streampos last_position;
 	TokenCounter token_counter;
 	ServerBlock server_directive;
-
-	// Need to check accessibility of some values
 
 	token_counter.enterBlock();
 	if (current_server.correctAmmountOfServerDirective()) {
@@ -150,6 +175,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 	}
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
+	std::cout << server_directive << std::endl;
 }
 
 void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
