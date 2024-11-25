@@ -32,12 +32,12 @@ void	ServerBase::addPortAndServers()
 {
 	s_server_params		server_params;
 	server_params._listen.push_back(8080);
-	server_params._listen.push_back(4242);
+	server_params._listen.push_back(8080);
 	server_params._listen.push_back(1050);
 	for (std::vector<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);
-		// std::cout << "NewServer: " << NewServer.get_port() << std::endl;
+		// std::cout << "NewServer: " << NewServer.getPort() << std::endl;
 		FD_SET(NewServer.getSock(), &get_readfds());
 		this->max_sock = std::max(this->max_sock, NewServer.getSock());
 		Servers.push_back(NewServer);
@@ -134,11 +134,11 @@ void	ServerBase::processClientConnections()
 			}
 		}
 		// std::cout << "END OF PROGRAM" << std::endl;
-		// print_fd_set(cpyReadFds, "cpyReadFds");
-		// print_fd_set(cpyWriteFds, "cpyWriteFds");
+		print_fd_set(cpyReadFds, "cpyReadFds");
+		print_fd_set(cpyWriteFds, "cpyWriteFds");
 		// to verify the content of clientSockets
-		// for (unsigned long i = 0; i < clientSockets.size(); i++) {
-		// 	std::cout << i << " : " << clientSockets[i] << std::endl;
+		// for (unsigned long i = 0; i < ClientSockets.size(); i++) {
+		// 	std::cout << i << " : " << ClientSockets[i] << std::endl;
 		// }
     }
 }
