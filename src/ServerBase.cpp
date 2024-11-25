@@ -109,10 +109,8 @@ void	ServerBase::processClientConnections()
 					clientToRemove.push_back(client_sock);
 					continue ;
 				}
-				if (request.getIsComplete() == true) {
-					FD_CLR(client_sock, &readfds);
-					FD_SET(client_sock, &cpyWriteFds);
-				}
+				FD_CLR(client_sock, &readfds);
+				FD_SET(client_sock, &cpyWriteFds);
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
@@ -121,7 +119,6 @@ void	ServerBase::processClientConnections()
 				it->second.setResponse(response);
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);
-				clientToRemove.push_back(client_sock); // new line ---- KAM
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++) {
