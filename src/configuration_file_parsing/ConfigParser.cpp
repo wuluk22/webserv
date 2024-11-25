@@ -52,17 +52,18 @@ ServerConfig ConfigParser::getServerConfig(unsigned int id) const {
 	if (it != this->_servers_config.end()) {
 		return (it->second);
 	}
-	std::cout << ERROR_HEADER << NO_SERVER_CONFIG << std::endl;
+	std::cout << ERROR_HEADER << NO_SERVER_CONFIG << RESET << std::endl;
 	throw ConfigException();
 }
 
 void ConfigParser::setServerConfig(size_t server_id, ServerConfig &current_server) {
-	this->_servers_config.insert(std::make_pair(server_id, current_server));
+	ServerConfig server(current_server);
+	this->_servers_config.insert(std::make_pair(server_id, server));
 }
 
-bool ConfigParser::ProcessLocationData(LocationBlock &directive, ServerBlock &server_config, std::string uri) {
-	std::string server_root = server_config.getRoot();
-	std::string location_root = directive.getRoot();
+bool ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri) {
+	std::string server_root = server_config->getRoot();
+	std::string location_root = directive->getRoot();
 	std::string root;
 	std::set<std::string> default_index;
 
@@ -70,29 +71,29 @@ bool ConfigParser::ProcessLocationData(LocationBlock &directive, ServerBlock &se
 		std::cerr << ERROR_HEADER << NO_ROOT_DEFINITION << RESET << std::endl;
 		return (false);
 	} else if (!server_root.empty() && location_root.empty())
-		directive.setRoot(server_root);
-	root = directive.getRoot();
-	if (!directive.setUri(root + uri)) {
+		directive->setRoot(server_root);
+	root = directive->getRoot();
+	if (!directive->setUri(root + uri)) {
 		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
 		return (false);
 	}
-	if (directive.getIndex().empty() && server_config.getIndex().empty()) {
+	if (directive->getIndex().empty() && server_config->getIndex().empty()) {
 		default_index.insert("index.html");
 		default_index.insert("index.htm");
-		directive.setIndex(default_index);
-	} else if (directive.getIndex().empty() && !server_config.getIndex().empty())
-		directive.setIndex(server_config.getIndex());
-	if (!directive.hasAutoIndexModified())
-		directive.setAutoIndex(server_config.getAutoIndex());
-	if (!directive.hasClientMaxBodySizeModified())
-		directive.setClientMaxBodySize(server_config.getClientMaxBodySize());
+		directive->setIndex(default_index);
+	} else if (directive->getIndex().empty() && !server_config->getIndex().empty())
+		directive->setIndex(server_config->getIndex());
+	if (!directive->hasAutoIndexModified())
+		directive->setAutoIndex(server_config->getAutoIndex());
+	if (!directive->hasClientMaxBodySizeModified())
+		directive->setClientMaxBodySize(server_config->getClientMaxBodySize());
 	return (true);
 }
 
 void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerBlock &current_server, ServerConfig &server_config) {
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
-	LocationBlock location_directive;
+	LocationBlock *location_directive = new LocationBlock();
 	bool went_in_directive = false;
 	std::string uri;
 
@@ -111,12 +112,12 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
 				throw ConfigException();
 			}
-			if (location_directive.getRoot().empty()) {
-				if (current_server.getRoot().empty()) {
+			if (location_directive->getRoot().empty()) {
+				if (current_server->getRoot().empty()) {
 					std::cerr << ERROR_HEADER << NO_ROOT_DEFINITION << AL << current_line << RESET << std::endl;
 					throw ConfigException();
 				}
-				location_directive.setRoot(current_server.getRoot());
+				location_directive->setRoot(current_server.getRoot());
 			}
 			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, server_config);
 			went_in_directive = true;
@@ -142,7 +143,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 			throw ConfigException();
 		}
 	}
-	if (!ProcessLocationData(location_directive, current_server, uri))
+	if (!finalizeLocationBlock(location_directive, current_server, uri))
 		throw ConfigException();
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
@@ -153,12 +154,12 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	TokenCounter token_counter;
-	ServerBlock server_directive;
+	ServerBlock *server_directive = new ServerBlock();
 
 	token_counter.enterBlock();
 	if (server_config.correctAmmountOfServerDirective()) {
 		server_config.setDirective(server_directive);
-	} else {
+	} else {  
 		std::cout << ERROR_HEADER << DOUBLE_DIRECTIVE << AL << current_line << std::endl;
 		throw ConfigException();
 	}
@@ -226,9 +227,5 @@ int main(void) {
 		std::cout << e.what() <<std::endl;
 	}
 	ServerConfig c = config->getServerConfig(0);
-	std::vector<ADirective> directives =  c.getAllDirectives();
-	for (int i = 0; i < directives.size(); i++) {
-		
-	}
-	
+	std::vector <ADirective> all_directives = c.getAllDirectives();
 }

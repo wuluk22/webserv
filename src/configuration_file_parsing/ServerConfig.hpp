@@ -44,17 +44,15 @@ class ADirective;
 
 class ServerConfig {
 	private:
-		std::vector<ADirective> _all_directives;
+		std::vector<ADirective*> all_directives;
 		bool _server_params_defined;
 	public:
 		ServerConfig(void);
 		ServerConfig(const ServerConfig &copy);
 		~ServerConfig();
 		ServerConfig& operator=(const ServerConfig& rhs);
-		std::vector<ADirective> getAllDirectives(void) const;
-		void setDirective(ADirective &new_directive);
-		void addLocationDirective(s_common_params c_params, s_loc_params l_params);
-		void addServerDirective(s_common_params c_params, s_server_params s_params);
+		std::vector<ADirective*> getAllDirectives(void) const;
+		void setDirective(ADirective *new_directive);
 		bool correctAmmountOfServerDirective(void);
 };
 
@@ -83,7 +81,7 @@ class ADirective {
 		unsigned int getClientMaxBodySize(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const s_common_params& params);
+std::ostream& operator<<(std::ostream& os, const s_common_params *params);
 
 class ServerBlock : public ADirective {
 	private:
@@ -105,7 +103,7 @@ class ServerBlock : public ADirective {
 		std::set<unsigned int> getListeningPort(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const ServerBlock &server_params);
+std::ostream& operator<<(std::ostream& os, const ServerBlock *server_params);
 
 class LocationBlock : public ADirective {
 	private:
@@ -144,6 +142,6 @@ class LocationBlock : public ADirective {
 		bool hasAutoIndexModified(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const LocationBlock& location_params);
+std::ostream& operator<<(std::ostream& os, const LocationBlock *location_params);
 
 #endif

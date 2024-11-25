@@ -63,10 +63,10 @@ class ConfigParser {
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock &current_server, ServerConfig &server_config);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig &server_config);
-		void processCommonDirective(ADirective &directive, std::string working_line, std::vector<std::string> args, bool &command_status);
-		void processDirectiveLoc(LocationBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line);
-		void processDirectiveServ(ServerBlock &directive,  std::string working_line, std::vector<std::string> args, size_t current_line);
-		bool ProcessLocationData(LocationBlock &directive, ServerBlock &server_config, std::string location_line);
+		void processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, bool &command_status);
+		void processDirectiveLoc(LocationBlock *directive, std::string working_line, std::vector<std::string> args, size_t current_line);
+		void processDirectiveServ(ServerBlock *directive,  std::string working_line, std::vector<std::string> args, size_t current_line);
+		bool finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string location_line);
 		
 		// Parsing methods for each tokens
 		// Common

@@ -10,42 +10,25 @@ ServerConfig::ServerConfig(const ServerConfig &copy) {
 	(*this) = copy;
 }
 
-ServerConfig::~ServerConfig() {}
-
-ServerConfig& ServerConfig::operator=(const ServerConfig& rhs) {
-	if (this != &rhs)
-	{
-		this->_server_params_defined = rhs._server_params_defined;
-		this->_all_directives.assign(rhs._all_directives.begin(), rhs._all_directives.end());
+ServerConfig::~ServerConfig() {
+	for (int i = 0; i < all_directives.size(); i++) {
+		delete all_directives[i];
 	}
-	return (*this);
 }
 
-std::vector<ADirective> ServerConfig::getAllDirectives(void) const {
-	return (this->_all_directives);
+std::vector<ADirective *> ServerConfig::getAllDirectives(void) const {
+	return (this->all_directives);
 }
 
-void ServerConfig::setDirective(ADirective &new_directive) {
-	this->_all_directives.push_back(new_directive);
-}
-
-void ServerConfig::addLocationDirective(s_common_params c_params, s_loc_params l_params) {
-	LocationBlock new_location_directive(c_params, l_params);
-	setDirective(new_location_directive);
-}
-
-void ServerConfig::addServerDirective(s_common_params c_params, s_server_params s_params) {
-	if (this->_server_params_defined)
-		throw std::exception();
-	ServerBlock new_server_directive(c_params, s_params);
-	setDirective(new_server_directive);
+void ServerConfig::setDirective(ADirective *new_directive) {
+	this->all_directives.push_back(new_directive);
 }
 
 bool ServerConfig::correctAmmountOfServerDirective(void) {
 	int server_block_count;
 	
-	for(std::vector<ADirective>::iterator it = _all_directives.begin(); it != _all_directives.end(); it++) {
-		if ((*it).getCommonParams().server_level)
+	for(std::vector<ADirective *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
+		if ((*it)->getCommonParams().server_level)
 			server_block_count++;
 		if (server_block_count > 1)
 			return (false);
@@ -109,15 +92,15 @@ unsigned int ADirective::getClientMaxBodySize(void) const {
 	return (this->_common_params._client_max_body_size);
 }
 
-std::ostream& operator<<(std::ostream& os, const ADirective &params) {
-	const std::set<std::string> indexSet = params.getIndex();
+std::ostream& operator<<(std::ostream& os, const ADirective *params) {
+	const std::set<std::string> indexSet = params->getIndex();
 
-	os << "Root : " << params.getRoot() << "\n"
-	<< "Auto index : " << params.getAutoIndex() << "\n";
+	os << "Root : " << params->getRoot() << "\n"
+	<< "Auto index : " << params->getAutoIndex() << "\n";
 	for (std::set<std::string>::const_iterator it = indexSet.begin(); it != indexSet.end(); ++it) {
 		os << "Index : " << (*it) << "\n";
 	}
-	os	<< "Client Max Body Size : " << params.getClientMaxBodySize() << "\n";
+	os	<< "Client Max Body Size : " << params->getClientMaxBodySize() << "\n";
 	return (os);
 }
 
@@ -154,9 +137,7 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 bool ServerBlock::setServerName(std::set<std::string> server_names) {
 	if (server_names.empty())
 		return (false);
-	// for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++) {
-		
-	// }
+	this->_server_params._server_name = server_names;
 	return (true);
 }
 
@@ -175,12 +156,12 @@ std::set <unsigned int> ServerBlock::getListeningPort(void) const {
 	return (this->_server_params._listen);
 }
 
-std::ostream& operator<<(std::ostream& os, const ServerBlock& params) {
-	const std::set<unsigned int> listening_ports = params.getListeningPort();
-	const std::set<std::string> server_names = params.getServerName();
+std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
+	const std::set<unsigned int> listening_ports = params->getListeningPort();
+	const std::set<std::string> server_names = params->getServerName();
 
 	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
-	os << static_cast<const ADirective&>(params);
+	os << static_cast<const ADirective *>(params);
 	for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
 		os << "Listening ports : " << (*it) << "\n"; 
 	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
@@ -309,21 +290,21 @@ bool LocationBlock::isDeleteAllowed(void) const {
 	return ((_location_params._allowed_methods & DELETE) != 0);
 }
 
-std::ostream& operator<<(std::ostream& os, const LocationBlock &params) {
+std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
-	os << static_cast<const ADirective&>(params);
-	if (params.isCgiAllowed()) {
-		os	<< "CGI Path: " << params.getCgiPath() << "\n";
+	os << static_cast<const ADirective *>(params);
+	if (params->isCgiAllowed()) {
+		os	<< "CGI Path: " << params->getCgiPath() << "\n";
 	}
-	os	<< "URI: " << params.getUri() << "\n"
-		<< "Alias: " << params.getAlias() << "\n"
+	os	<< "URI: " << params->getUri() << "\n"
+		<< "Alias: " << params->getAlias() << "\n"
 		<< "Allowed Methods: ";
-	if (params.isGetAllowed()) 
+	if (params->isGetAllowed()) 
 		os << "GET ";
-	if (params.isPostAllowed()) 
+	if (params->isPostAllowed()) 
 		os << "POST ";
-	if (params.isDeleteAllowed()) 
+	if (params->isDeleteAllowed()) 
 		os << "DELETE ";
 	return (os);
 }
