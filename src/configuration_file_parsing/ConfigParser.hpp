@@ -61,8 +61,8 @@ class ConfigParser {
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
-		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock &current_server ,LocationBlock *loc_directive);
-		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig &current_server);
+		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock &current_server, ServerConfig &server_config);
+		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig &server_config);
 		void processCommonDirective(ADirective &directive, std::string working_line, std::vector<std::string> args, bool &command_status);
 		void processDirectiveLoc(LocationBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line);
 		void processDirectiveServ(ServerBlock &directive,  std::string working_line, std::vector<std::string> args, size_t current_line);
@@ -90,7 +90,7 @@ class ConfigParser {
 		static ConfigParser* getInstance(const std::string init_path);
 		const std::string& getPathOfConfigurationFile(void) const;
 		ServerConfig getServerConfig(unsigned int id) const;
-		void setServerConfig(size_t server_id, ServerConfig current_server);
+		void setServerConfig(size_t server_id, ServerConfig &current_server);
 };
 
 #endif
