@@ -23,7 +23,7 @@ std::vector<std::string> ConfigParser::split(const std::string& str, char delimi
 	if (!token.empty()) {
 		tokens.push_back(token);
 	}
-	return tokens;
+	return (tokens);
 }
 
 std::string ConfigParser::trim(const std::string& str) {
