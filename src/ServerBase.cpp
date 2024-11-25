@@ -107,8 +107,10 @@ void	ServerBase::processClientConnections()
 					clientToRemove.push_back(client_sock);
 					continue ;
 				}
-				FD_CLR(client_sock, &readfds);
-				FD_SET(client_sock, &cpyWriteFds);
+				if (request.getIsComplete() == true) {
+					FD_CLR(client_sock, &readfds);
+					FD_SET(client_sock, &cpyWriteFds);
+				}
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
