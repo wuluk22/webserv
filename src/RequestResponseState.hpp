@@ -1,6 +1,7 @@
 #ifndef REQUESTRESPONSESTATE_HPP
 # define REQUESTRESPONSESTATE_HPP
 
+#include <cstddef>
 # include <iostream>
 # include "HttpRequestHandler.hpp"
 # include "HttpResponseHandler.hpp"
@@ -15,6 +16,7 @@ class	RRState
 		bool 				_requestComplete;
 		std::string			_responseBuffer;
 		size_t				_bytesSent;
+		size_t				_bytesReceived;
 		int 				_resultRecv;
 		HttpRequestHandler	_request;
 		HttpResponseHandler	_response;

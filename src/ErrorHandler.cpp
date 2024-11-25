@@ -1,5 +1,4 @@
 #include "ErrorHandler.hpp"
-#include "HttpRequestHandler.hpp"
 
 std::string toStr(const char* value)
 {

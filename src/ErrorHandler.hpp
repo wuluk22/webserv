@@ -3,6 +3,7 @@
 
 #include <string>
 #include <exception>
+#include <sstream>
 
 class Error : public std::exception {
 	protected:
@@ -24,5 +25,8 @@ class ServerBaseError : public Error {
 		explicit ServerBaseError(const std::string& msg, const char* function, int line);
 		virtual ~ServerBaseError() throw();
 };
+
+std::string toStrInt(int value);
+std::string toStr(const char* value);
 
 #endif
