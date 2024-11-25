@@ -27,6 +27,8 @@ struct s_loc_params {
 	std::string _uri;
 	std::string _alias;
 	unsigned char _allowed_methods;
+	bool modified_client_max_body_size;
+	bool modified_auto_index;
 };
 
 enum e_allowed_methods {
@@ -50,7 +52,7 @@ class ServerConfig {
 		~ServerConfig();
 		ServerConfig& operator=(const ServerConfig& rhs);
 		std::vector<ADirective> getAllDirectives(void) const;
-		void setDirective(ADirective new_directive);
+		void setDirective(ADirective &new_directive);
 		void addLocationDirective(s_common_params c_params, s_loc_params l_params);
 		void addServerDirective(s_common_params c_params, s_server_params s_params);
 		bool correctAmmountOfServerDirective(void);
@@ -121,6 +123,8 @@ class LocationBlock : public ADirective {
 		void getUpperLocation(void) const;
 
 		// Individual setter
+		void clientMaxBodySizeModified(void);
+		void autoIndexModified(void);
 		bool setCgiPath(std::string path_args);
 		bool setUri(std::string uri_args);
 		bool setAlias(std::string alias_path);
@@ -136,6 +140,8 @@ class LocationBlock : public ADirective {
 		bool isGetAllowed(void) const;
 		bool isPostAllowed(void) const;
 		bool isDeleteAllowed(void) const;
+		bool hasClientMaxBodySizeModified(void) const;
+		bool hasAutoIndexModified(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const LocationBlock& location_params);

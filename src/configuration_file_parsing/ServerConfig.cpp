@@ -25,7 +25,7 @@ std::vector<ADirective> ServerConfig::getAllDirectives(void) const {
 	return (this->_all_directives);
 }
 
-void ServerConfig::setDirective(ADirective new_directive) {
+void ServerConfig::setDirective(ADirective &new_directive) {
 	this->_all_directives.push_back(new_directive);
 }
 
@@ -154,18 +154,16 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 bool ServerBlock::setServerName(std::set<std::string> server_names) {
 	if (server_names.empty())
 		return (false);
-	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++) {
+	// for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++) {
 		
-	}
+	// }
 	return (true);
 }
 
 bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
-	std::set <unsigned int> unique_ports;
 	if (listening_ports.empty())
 		return (false);
-	for (std::set<unsigned int>::iterator it = unique_ports.begin(); it != unique_ports.end(); ++it)
-		_server_params._listen.insert(*it);
+	this->_server_params._listen = listening_ports;
 	return (true);
 }
 
@@ -195,6 +193,10 @@ std::ostream& operator<<(std::ostream& os, const ServerBlock& params) {
 LocationBlock::LocationBlock(void) {
 	this->_common_params.server_level = false;
 	this->_location_params._is_cgi = false;
+	this->_common_params._client_max_body_size = 1;
+	this->_location_params.modified_auto_index = false;
+	this->_location_params.modified_client_max_body_size = false;
+	this->_location_params._allowed_methods = 0;
 }
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
@@ -219,6 +221,14 @@ LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
 
 s_loc_params LocationBlock::getLocationParams(void) const {
 	return (this->_location_params);
+}
+
+void LocationBlock::clientMaxBodySizeModified(void) {
+	this->_location_params.modified_client_max_body_size = true;
+}
+
+void LocationBlock::autoIndexModified(void) {
+	this->_location_params.modified_auto_index = true;
 }
 
 void LocationBlock::setIsCgi(bool value) {
@@ -316,4 +326,12 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock &params) {
 	if (params.isDeleteAllowed()) 
 		os << "DELETE ";
 	return (os);
+}
+
+bool LocationBlock::hasClientMaxBodySizeModified(void) const {
+	return (this->_location_params.modified_client_max_body_size);
+}
+
+bool LocationBlock::hasAutoIndexModified(void) const {
+	return (this->_location_params.modified_auto_index);
 }
