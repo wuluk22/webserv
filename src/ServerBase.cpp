@@ -71,7 +71,7 @@ void	ServerBase::processClientConnections()
 		cpyWriteFds = writefds;
 		std::vector<int> clientToRemove;
 
-		std::cout << "BEGIN PROGRAM" << std::endl;
+		// std::cout << "BEGIN PROGRAM" << std::endl;
 		// print_fd_set(readfds, "readfds");
 		// print_fd_set(writefds, "writefds");
 		// print_fd_set(cpyReadFds, "cpyReadFds");
@@ -99,9 +99,7 @@ void	ServerBase::processClientConnections()
 				HttpRequestHandler request = it->second.getRequest();
 				request = request.handleRequest(client_sock);
 				it->second.setRequest(request);
-				//std::cout << "ResultRecv() : " << it->second.getResultRecv() << std::endl;
-				// std::cout << "RESULTEQUEST : " << it->second.getRequest() << std::endl;
-				std::cout << "Request reponse : " << request.getFd() << std::endl;
+				// std::cout << "Request reponse : " << request.getFd() << std::endl;
 				if (request.getFd() <= 0 ) { // Client Disconnected
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
@@ -109,8 +107,10 @@ void	ServerBase::processClientConnections()
 					clientToRemove.push_back(client_sock);
 					continue ;
 				}
-				FD_CLR(client_sock, &readfds);
-				FD_SET(client_sock, &cpyWriteFds);
+				if (request.getIsComplete() == true) {
+					FD_CLR(client_sock, &readfds);
+					FD_SET(client_sock, &cpyWriteFds);
+				}
 			}
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
