@@ -2,24 +2,16 @@
 #include "ConfigParser.hpp"
 
 bool ConfigParser::parseRoot(std::string working_line, ADirective &directive) {
-	std::string trimmed_command;
-	bool valid_command;
 	std::string path;
-	int i;
 
-	trimmed_command = trim(working_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos) {
-		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+	path = returnSecondArgs(working_line);
+	if (path.empty())
+		return (false);
+	if (!directive.setRoot(path)) {
+		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
 		return (false);
 	}
-	path = trimmed_command.substr(i + 1, std::string::npos);
-	valid_command = directive.setRoot(path);
-	if (!valid_command) {
-		std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
-		return (valid_command);
-	}
-	return (valid_command);
+	return (true);
 }
 
 bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective &directive) {
@@ -40,7 +32,7 @@ bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective
 }
 
 bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective &directive) {
-	if (args.size()) {
+	if (args.size() != 2) {
 		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
@@ -68,29 +60,29 @@ bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirec
 }
 
 bool ConfigParser::parseCgiPath(std::string working_line, LocationBlock &directive) {
-	std::string trimmed_command;
 	std::string path;
-	int i;
 
-	trimmed_command = trim(working_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos)
+	path = returnSecondArgs(working_line);
+	if (path.empty())
 		return (false);
-	path = trimmed_command.substr(i + 1, std::string::npos);
-	return (directive.setCgiPath(path));
+	if (!directive.setCgiPath(path)) {
+		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
+		return (false);
+	}
+	return (true);
 }
 
 bool ConfigParser::parseAlias(std::string working_line, LocationBlock &directive) {
-	std::string trimmed_command;
 	std::string path;
-	int i;
 
-	trimmed_command = trim(working_line);
-	i = trimmed_command.find(' ');
-	if (i == std::string::npos)
+	path = returnSecondArgs(working_line);
+	if (path.empty())
 		return (false);
-	path = trimmed_command.substr(i + 1, std::string::npos);
-	return (directive.setAlias(path));
+	if (!directive.setAlias(path)) {
+		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
+		return (false);
+	}
+	return (true);
 }
 
 bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationBlock &directive) {
@@ -116,6 +108,8 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 	}
 	return (true);
 }
+
+// Need to be checked, faulty method
 
 bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock &directive) {
 	std::set <std::string> server_names;
@@ -143,7 +137,7 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	std::string current_string;
 	unsigned int value;
 
-	if (args.empty() || args.size()) {
+	if (args.empty() || args.size() < 2) {
 		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
