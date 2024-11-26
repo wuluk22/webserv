@@ -36,6 +36,7 @@ class HttpRequestHandler
 		std::string									httpVersion;
 		std::map<std::string, std::string>			headers;
 		std::string									body;
+		bool										isRequestComplete;
 		static std::string							extractBoundary(const std::string& content_type);
     	static std::string							generateErrorResponse(const std::string& message);
 	public:
@@ -56,6 +57,7 @@ class HttpRequestHandler
 		void										setHeader(const std::string &headerName, const std::string &headerValue);
 		void										setBody(const std::string &body);
 		void										setFd(const int &nb);
+		void										setIsComplete(const bool& is);
 
 		std::string									getMethod(void) const;
 		std::string									getPath(void) const;
@@ -64,6 +66,7 @@ class HttpRequestHandler
 		const std::map<std::string, std::string>&	getHeaders() const;
 		std::string									getBody() const;
 		int											getFd() const;
+		bool										getIsComplete() const;
 
 		HttpRequestHandler							handleRequest(int client_sock);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);

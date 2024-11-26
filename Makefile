@@ -1,15 +1,43 @@
 NAME	= webserv
 
 CC	= c++
-FLAGS	= -Wall -Werror -Wextra -std=c++98
+FLAGS	= -g -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
-FILES	= src/main src/SocketHandler src/HttpRequestHandler src/HttpRequestUtils src/HttpRequestDir src/HttpRequestParsing src/Logger src/HttpResponseHandler src/DirectoryHandler
+FILES	=	src/main \
+			src/ServerHandler \
+			src/ServerBase \
+			src/HttpRequestHandler \
+			src/HttpResponseHandler \
+			src/HttpResponseMethod \
+			src/HttpRequestUtils \
+			src/HttpRequestParsing \
+			src/HttpRequestDir \
+			src/DirectoryHandler \
+			src/RequestResponseState \
+			src/Logger \
+			src/ErrorHandler \
+			src/configuration_file_parsing/ConfigException \
+			src/configuration_file_parsing/PathValidator \
+			src/configuration_file_parsing/ConfigParser \
+			src/configuration_file_parsing/ServerConfig \
+			src/configuration_file_parsing/ConfigParserUtils \
+			src/configuration_file_parsing/TokenCounter
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
-HEADER	= src/SocketHandler.hpp src/HttpRequestHandler.hpp src/Logger.hpp src/HttpResponseHandler.hpp src/DirectoryHandler.hpp
+HEADER	=	src/ServerHandler.hpp \
+			src/ServerHandler.hpp \
+			src/HttpRequestHandler.hpp \
+			src/HttpResponseHandler.hpp \
+			src/RequestResponseState.hpp \
+			src/Logger.hpp \
+			src/ErrorHandler.hpp \
+			src/configuration_file_parsing/ConfigException.hpp \
+			src/configuration_file_parsing/ConfigParser.hpp \
+			src/configuration_file_parsing/ServerConfig.hpp \
+			src/configuration_file_parsing/PathValidator.hpp
 
 GREEN	= \e[92m
 YELLOW	= \e[93m

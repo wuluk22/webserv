@@ -1,4 +1,62 @@
 #include "HttpResponseHandler.hpp"
+#include "HttpRequestHandler.hpp"
+
+#include <iostream>
+#include <string>
+#include <cstdlib>
+
+std::string url_decode(const std::string& url) {
+    std::string decoded;
+    size_t length = url.length();
+    
+    for (size_t i = 0; i < length; ++i) {
+        if (url[i] == '%') {
+            // Ensure we have two more characters for the hex code
+            if (i + 2 < length) {
+                // Convert the next two characters to a hex value using strtol
+                std::string hex_value = url.substr(i + 1, 2);
+                char decoded_char = static_cast<char>(strtol(hex_value.c_str(), NULL, 16));
+                decoded += decoded_char;
+                i += 2; // Skip the next two characters as they are part of the encoding
+            }
+        } else if (url[i] == '+') {
+            // Convert '+' to a space
+            decoded += ' ';
+        } else {
+            // Copy the character as is
+            decoded += url[i];
+        }
+    }
+
+    return decoded;
+}
+
+
+bool isCgiRequest(const std::string& path) {
+    const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
+    std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
+
+    const std::string cgiDirectory = "/cgi-bin";
+
+    if (path.find(cgiDirectory) == 0) {
+        return true;
+    }
+
+    /*for (std::vector<std::string>::const_iterator it = cgiExtensions.begin(); it != cgiExtensions.end(); ++it) {
+        const std::string& ext = *it;
+        if (path.length() >= ext.length() &&
+            path.compare(path.length() - ext.length(), ext.length(), ext) == 0) {
+            struct stat fileStat;
+            std::string fullPath = "cgi-bin" + path.substr(cgiDirectory.length());
+            if (stat(fullPath.c_str(), &fileStat) == 0 && (fileStat.st_mode & S_IXUSR)) {
+                return true;
+            }
+        }
+    }*/
+    return false;
+}
+
+
 
 HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
 {
@@ -10,63 +68,48 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
 
 	filePath = staticDir + request.getPath();
 	// Handle file upload
+    if (isCgiRequest(request.getPath()))
+    {
+        std::cout << " oioi! " << std::endl;
+        setErrorResponse(request, response, 200, "CGI Braowsss");
+        return response;
+    }
 	if (request.getMethod() == "POST")
 	{
 		request.handleFileUpload(request.getBody(), request.getPath(), response);
 		return response;
 	}
-	// Check if path is a directory
-    if (request.getPath() == "/static")
+	if (request.getMethod() == "DELETE")
 	{
-        if (stat(filePath.c_str(), &pathStat) == 0)
-	    {
-	    	if (S_ISDIR(pathStat.st_mode))
-	    	{
-				request.handleDirectoryRequest(request.getPath(), response);
-	    		return response;
-	    	}
-	    }
+		std::string path;
+		path = staticDir + request.getPath();
+		path = url_decode(path);
+		std::cout << " MAAA! " << std::endl;
+		std::cout << request << std::endl;
+    	if (remove(path.c_str()) == 0) {
+        	// Si la suppression a réussi
+        	response.setStatusCode(200); // OK
+        	response.setStatusMsg("OK");
+        	response.setBody("Resource deleted successfully.");
+			std::cout << " MOOO! " << std::endl;
+			return response;
+    	} else {
+        	// Si la suppression a échoué
+        	response.setStatusCode(404); // Not Found
+        	response.setStatusMsg("Not Found");
+        	response.setBody("Resource not found.");
+			std::cout << " Miii! " << std::endl;
+			return response;
+		}
     }
-    // Handle default page
-    if (request.getPath() == "/")
+    if (request.getMethod() == "GET")
     {
-        filePath = staticDir + "/index.html";
-    }
-    // Basic security check to prevent directory traversal
-    if (filePath.find("..") != std::string::npos)
-    {
-        response.setStatusCode(403);
-        response.setStatusMsg("Forbidden");
-        errorPage = request.createErrorPage(403, "Forbidden");
-        response.setBody(errorPage);
-        response.setHeader("Content-Type", "text/html");
-        response.setHeader("Content-Length", request.toString(errorPage.length()));
+        response = handleGet(request, response);
         return response;
     }
-    if (!request.fileExists(filePath))
-    {
-        response.setStatusCode(404);
-        response.setStatusMsg("Not Found");
-        errorPage = request.createErrorPage(404, "Not Found");
-        response.setBody(errorPage);
-        response.setHeader("Content-Type", "text/html");
-        response.setHeader("Content-Length", request.toString(errorPage.length()));
-    }
-    else
-    {
-        content = request.readFile(filePath);
-        response.setStatusCode(200);
-        response.setStatusMsg("OK");
-        response.setBody(content);
-        response.setHeader("Content-Type", request.getMimeType(filePath));
-        response.setHeader("Content-Length", request.toString(content.length()));
-    }
-    response.setHttpVersion("HTTP/1.1");
-    // Add security headers
-    response.setHeader("X-Content-Type-Options", "nosniff");
-    response.setHeader("X-Frame-Options", "SAMEORIGIN");
-    response.setHeader("X-XSS-Protection", "1; mode=block");
-    std::cout << response << std::endl;
+    /*
+    else -> invalid method
+    */
     return response;
 }
 

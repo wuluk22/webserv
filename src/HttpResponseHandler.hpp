@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/19 15:48:21 by clegros          ###   ########.fr       */
+/*   Updated: 2024/11/26 12:47:21 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <sstream>
 # include <map>
 # include "HttpRequestHandler.hpp"
+# include <sys/stat.h> // For stat()
+# include <string>
 
 class HttpRequestHandler;
 
@@ -36,8 +38,8 @@ class HttpResponseHandler
 		std::string	getBody() const;
 		std::string	getAll() const;
 		HttpResponseHandler	handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
-		void handleResponse(HttpRequestHandler& request, int client_sock);
-		void sendError(int client_sock, int statusCode, const std::string& statusMsg, const std::string& body);
+		void		handleResponse(HttpRequestHandler& request, int client_sock);
+		void		sendError(int client_sock, int statusCode, const std::string& statusMsg, const std::string& body);
 	private:
 		std::string	httpVersion;
 		int			code;
@@ -46,5 +48,9 @@ class HttpResponseHandler
 		std::string	body;
 };
 std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i);
+std::string		url_decode(const std::string& url);
+HttpResponseHandler	handleGet(HttpRequestHandler& request, HttpResponseHandler& response);
+void			setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg);
+bool			isCgiRequest(const std::string& path);
 
 #endif

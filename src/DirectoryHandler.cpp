@@ -129,8 +129,7 @@ std::vector<FileInfo> DirectoryHandler::get_directory_listing(const std::string&
     return files;
 }
 
-std::string DirectoryHandler::generate_directory_page(const std::string& path, const std::vector<FileInfo>& files)
-{
+std::string DirectoryHandler::generate_directory_page(const std::string& path, const std::vector<FileInfo>& files) {
     std::ostringstream html;
     
     html << "<!DOCTYPE html>\n"
@@ -152,7 +151,30 @@ std::string DirectoryHandler::generate_directory_page(const std::string& path, c
          << ".upload-form input[type='submit']:hover { background: #1e4b8f; }\n"
          << "a { color: #2c5aa0; text-decoration: none; }\n"
          << "a:hover { text-decoration: underline; }\n"
+         << "button { padding: 6px 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }\n"
+         << "button:hover { background-color: #c82333; }\n"
          << "</style>\n"
+         << "<script>\n"
+         << "function deleteFile(event, url) {\n"
+         << "    event.preventDefault();\n"
+         << "    if (confirm('Are you sure you want to delete this file?')) {\n"
+         << "        fetch(url, { method: 'DELETE' })\n"
+         << "            .then(response => {\n"
+         << "                if (response.ok) {\n"
+         << "                    alert('File deleted successfully.');\n"
+         << "                    window.location.reload();\n"
+         << "                } else {\n"
+         << "                    alert('Failed to delete the file.');\n"
+         << "                }\n"
+         << "            })\n"
+         << "            .catch(error => {\n"
+         << "                console.error('Error:', error);\n"
+         << "                alert('An error occurred while trying to delete the file.');\n"
+         << "            });\n"
+         << "    }\n"
+         << "    return false;\n"
+         << "}\n"
+         << "</script>\n"
          << "</head>\n<body>\n"
          << "<div class='container'>\n";
 
@@ -167,42 +189,41 @@ std::string DirectoryHandler::generate_directory_page(const std::string& path, c
          << "</div>\n";
 
     html << "<table>\n"
-         << "<tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>\n";
+         << "<tr><th>Name</th><th>Size</th><th>Last Modified</th><th>Action</th></tr>\n";
 
-    std::vector<FileInfo>::const_iterator it;
-    for (it = files.begin(); it != files.end(); ++it)
-    {
+    for (std::vector<FileInfo>::const_iterator it = files.begin(); it != files.end(); ++it) {
         const FileInfo& file = *it;
         html << "<tr>\n<td>";
         
-        if (file.is_directory)
-        {
+        if (file.is_directory) {
             html << "<span class='folder'>[] </span>";
-        }
-        else
-        {
+        } else {
             html << "<span class='file'>|| </span>";
         }
         
         std::string link_path;
-        if (path == "/")
-        {
+        if (path == "/") {
             link_path = path + file.name;
-        }
-        else
-        {
+        } else {
             link_path = path + "/" + file.name;
         }
         
         html << "<a href='" << link_path << "'>" << file.name << "</a></td>\n"
              << "<td>" << file.size << "</td>\n"
              << "<td>" << file.modified << "</td>\n"
-             << "</tr>\n";
+             << "<td>\n";
+
+        if (!file.is_directory) {
+            html << "<button onclick=\"deleteFile(event, '" << link_path << "')\">Delete</button>\n";
+        }
+
+        html << "</td>\n</tr>\n";
     }
-    
+
     html << "</table>\n</div>\n</body>\n</html>";
     return html.str();
 }
+
 
 bool DirectoryHandler::create_directory(const std::string& path)
 {

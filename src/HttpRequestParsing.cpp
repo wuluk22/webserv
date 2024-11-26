@@ -13,6 +13,7 @@ HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
 	size_t				pathEnd;
 	size_t				colonPos;
     
+
     // Parse request line
     if (std::getline(stream, line))
 	{
@@ -33,6 +34,7 @@ HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
     // Parse headers
     while (std::getline(stream, line) && !line.empty() && line != "\r")
 	{
+        line = request.trim(line);
         colonPos = line.find(':');
         if (colonPos != std::string::npos)
 		{
