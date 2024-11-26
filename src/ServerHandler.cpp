@@ -1,4 +1,4 @@
-git #include "ServerHandler.hpp"
+#include "ServerHandler.hpp"
 #include "ErrorHandler.hpp"
 #include "Logger.hpp"
 
@@ -49,17 +49,17 @@ void ServerHandler::InitializeServerSocket(int port, const int backlog)
 
 int ServerHandler::createSocket()
 {
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
-		throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
-    return sock;
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+  throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
+  return sock;
 }
 
 void ServerHandler::setSocketOptions(int sock)
 {
-    int opt = 1;
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
-		throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
+  int opt = 1;
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
+    throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0)
 		throw ServerHandlerError("setsockopt failed with SO_REUSEPORT", __FUNCTION__, __LINE__);
 }

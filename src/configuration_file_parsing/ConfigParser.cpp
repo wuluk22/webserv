@@ -220,14 +220,14 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
-int main(void) {
-	ConfigParser *config;
-	try {
-		 config = ConfigParser::getInstance("test.conf");
-	} catch (ConfigException &e)
-	{
-		std::cout << e.what() <<std::endl;
-	}
-	ServerConfig* c = config->getServerConfig(0);
-	std::vector <ADirective *> all_directives = c->getAllDirectives();
-}
+// int main(void) {
+// 	ConfigParser *config;
+// 	try {
+// 		 config = ConfigParser::getInstance("test.conf");
+// 	} catch (ConfigException &e)
+// 	{
+// 		std::cout << e.what() <<std::endl;
+// 	}
+// 	ServerConfig* c = config->getServerConfig(0);
+// 	std::vector <ADirective *> all_directives = c->getAllDirectives();
+// }

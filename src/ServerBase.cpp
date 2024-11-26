@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <vector>
 
 //METHODS
 ServerBase::ServerBase() : max_sock(0) {
@@ -31,10 +32,10 @@ std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 void	ServerBase::addPortAndServers()
 {
 	s_server_params		server_params;
-	server_params._listen.push_back(8080);
-	server_params._listen.push_back(8080);
-	server_params._listen.push_back(1050);
-	for (std::vector<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
+	server_params._listen.insert(4242);
+	server_params._listen.insert(8080);
+	server_params._listen.insert(1050);
+	for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);
 		// std::cout << "NewServer: " << NewServer.getPort() << std::endl;
