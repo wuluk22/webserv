@@ -1,20 +1,20 @@
 #include "ConfigException.hpp"
 #include "ConfigParser.hpp"
 
-bool ConfigParser::parseRoot(std::string working_line, ADirective &directive) {
+bool ConfigParser::parseRoot(std::string working_line, ADirective *directive) {
 	std::string path;
 
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		return (false);
-	if (!directive.setRoot(path)) {
+	if (!directive->setRoot(path)) {
 		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
 		return (false);
 	}
 	return (true);
 }
 
-bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective &directive) {
+bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective *directive) {
 	std::set <std::string> index_file;
 
 	working_line.erase(working_line.begin());
@@ -28,18 +28,18 @@ bool ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective
 			return (false);
 		}
 	}
-	return (directive.setIndex(index_file));
+	return (directive->setIndex(index_file));
 }
 
-bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective &directive) {
+bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective *directive) {
 	if (args.size() != 2) {
 		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
 	}
 	if (args[1] == "on")
-		directive.setAutoIndex(true);
+		directive->setAutoIndex(true);
 	else if (args[1] == "off")
-		directive.setAutoIndex(false);
+		directive->setAutoIndex(false);
 	else {
 		std::cerr << ERROR_HEADER << INVALID_TOKEN << RESET << std::endl;
 		return (false);
@@ -47,7 +47,7 @@ bool ConfigParser::parseAutoIndex(std::vector<std::string> args, ADirective &dir
 	return (true);
 }
 
-bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirective &directive) {
+bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirective *directive) {
 	unsigned int value;
 
 	value = atol(args[1].c_str());
@@ -55,37 +55,37 @@ bool ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirec
 		std::cerr << ERROR_HEADER << EXCEEDING_LIMIT << RESET << std::endl;
 		return (false);
 	}
-	directive.setClientMaxBodySize(value);
+	directive->setClientMaxBodySize(value);
 	return (true);
 }
 
-bool ConfigParser::parseCgiPath(std::string working_line, LocationBlock &directive) {
+bool ConfigParser::parseCgiPath(std::string working_line, LocationBlock *directive) {
 	std::string path;
 
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		return (false);
-	if (!directive.setCgiPath(path)) {
+	if (!directive->setCgiPath(path)) {
 		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
 		return (false);
 	}
 	return (true);
 }
 
-bool ConfigParser::parseAlias(std::string working_line, LocationBlock &directive) {
+bool ConfigParser::parseAlias(std::string working_line, LocationBlock *directive) {
 	std::string path;
 
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		return (false);
-	if (!directive.setAlias(path)) {
+	if (!directive->setAlias(path)) {
 		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
 		return (false);
 	}
 	return (true);
 }
 
-bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationBlock &directive) {
+bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationBlock *directive) {
 	bool valid_entry;
 	
 	if (args.empty() || args.size() < 2 || args.size() > 4) {
@@ -95,12 +95,12 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 	args.erase(args.begin());
 	for (int i = 0; i < args.size() ; i++) {
 		valid_entry = false;
-		if (args[i] == "GET" && !directive.isGetAllowed()) {
-			valid_entry = directive.setAllowedMethods(GET);
-		} else if (args[i] == "POST" && !directive.isPostAllowed()) {
-			valid_entry = directive.setAllowedMethods(POST);
-		} else if (args[i] == "DELETE" && !directive.isDeleteAllowed()) {
-			valid_entry = directive.setAllowedMethods(DELETE);
+		if (args[i] == "GET" && !directive->isGetAllowed()) {
+			valid_entry = directive->setAllowedMethods(GET);
+		} else if (args[i] == "POST" && !directive->isPostAllowed()) {
+			valid_entry = directive->setAllowedMethods(POST);
+		} else if (args[i] == "DELETE" && !directive->isDeleteAllowed()) {
+			valid_entry = directive->setAllowedMethods(DELETE);
 		} if (!valid_entry) {
 			std::cerr << ERROR_HEADER << BAD_INSTRUCTION << RESET << std::endl;
 			return (false);
@@ -111,7 +111,7 @@ bool ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 
 // Need to be checked, faulty method
 
-bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock &directive) {
+bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *directive) {
 	std::set <std::string> server_names;
 	
 	if (args.empty() || args.size() == 1) {
@@ -129,10 +129,11 @@ bool ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock &
 			return (false);
 		}
 	}
+	directive->setServerName(server_names);
 	return (true);
 }
 
-bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlock &directive) {
+bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlock *directive) {
 	std::set <unsigned int> ports;
 	std::string current_string;
 	unsigned int value;
@@ -151,10 +152,10 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 			return (false);
 		}
 	}
-	return (directive.setListeningPort(ports));
+	return (directive->setListeningPort(ports));
 }
 
-void ConfigParser::processCommonDirective(ADirective &directive, std::string working_line, std::vector<std::string> args, bool &command_status) {
+void ConfigParser::processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, bool &command_status) {
 	if (args[0] == "root")
 		command_status = parseRoot(working_line, directive);
 	else if (args[0] == "index")
@@ -165,7 +166,7 @@ void ConfigParser::processCommonDirective(ADirective &directive, std::string wor
 		command_status = parseClientMaxBodySize(args, directive);
 }
 
-void ConfigParser::processDirectiveLoc(LocationBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
+void ConfigParser::processDirectiveLoc(LocationBlock *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	bool command_status;
 
 	command_status = false;
@@ -182,7 +183,7 @@ void ConfigParser::processDirectiveLoc(LocationBlock &directive, std::string wor
 	}
 }
 
-void ConfigParser::processDirectiveServ(ServerBlock &directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
+void ConfigParser::processDirectiveServ(ServerBlock *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	bool command_status;
 
 	command_status = false;
