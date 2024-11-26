@@ -10,38 +10,46 @@ ServerConfig::ServerConfig(const ServerConfig &copy) {
 	(*this) = copy;
 }
 
-ServerConfig::~ServerConfig() {}
-
-ServerConfig& ServerConfig::operator=(const ServerConfig& rhs) {
-	if (this != &rhs)
-	{
-		this->_server_params_defined = rhs._server_params_defined;
-		this->_all_directives.assign(rhs._all_directives.begin(), rhs._all_directives.end());
+ServerConfig& ServerConfig::operator=(const ServerConfig& other) {
+	if (this != &other) {
+		this->all_directives = other.all_directives;
+		this->_server_params_defined = other._server_params_defined;
 	}
 	return (*this);
 }
 
-std::vector<ADirective> ServerConfig::getAllDirectives(void) const {
-	return (this->_all_directives);
+ServerConfig::~ServerConfig() {
+	for (int i = 0; i < all_directives.size(); i++) {
+		delete all_directives[i];
+	}
 }
 
-void ServerConfig::setDirective(ADirective new_directive) {
-	this->_all_directives.push_back(new_directive);
+std::vector<ADirective *> ServerConfig::getAllDirectives(void) const {
+	return (this->all_directives);
 }
 
-void ServerConfig::addLocationDirective(s_common_params c_params, s_loc_params l_params) {
-	LocationBlock new_location_directive(c_params, l_params);
-	setDirective(new_location_directive);
+void ServerConfig::setDirective(ADirective *new_directive) {
+	this->all_directives.push_back(new_directive);
 }
 
-void ServerConfig::addServerDirective(s_common_params c_params, s_server_params s_params) {
-	if (this->_server_params_defined)
-		throw std::exception();
-	ServerBlock new_server_directive(c_params, s_params);
-	setDirective(new_server_directive);
+bool ServerConfig::correctAmmountOfServerDirective(void) {
+	int server_block_count;
+	
+	for(std::vector<ADirective *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
+		if ((*it)->getCommonParams().server_level)
+			server_block_count++;
+		if (server_block_count > 1)
+			return (false);
+	}
+	return (true);
 }
 
-ADirective::ADirective(void) {}
+// ADirective class
+
+ADirective::ADirective(void) {
+	this->_common_params._auto_index = false;
+	this->_common_params._client_max_body_size = 1;
+}
 
 ADirective::~ADirective() {}
 
@@ -60,13 +68,11 @@ bool ADirective::setRoot(std::string root_args) {
 	return (false);
 }
 
-bool ADirective::setIndex(std::vector<std::string>index_args) {
-	std::set <std::string> unique_index;
+bool ADirective::setIndex(std::set <std::string>index_args) {
 	if (index_args.empty())
 		return (false);
-	unique_index.insert(index_args.begin(), index_args.end());
-	for (std::set<std::string>::iterator it = unique_index.begin(); it != unique_index.end(); ++it)
-		_common_params._index.push_back(*it);
+	for (std::set<std::string>::iterator it = index_args.begin(); it != index_args.end(); ++it)
+		_common_params._index.insert(*it);
 	return (true);
 }
 
@@ -78,9 +84,39 @@ void ADirective::setClientMaxBodySize(unsigned int body_size_value) {
 	_common_params._client_max_body_size = body_size_value;
 }
 
+std::string ADirective::getRoot(void) const {
+	return (this->_common_params._root);
+}
+
+std::set<std::string> ADirective::getIndex(void) const {
+	return (this->_common_params._index);
+}
+
+bool ADirective::getAutoIndex(void) const {
+	return (this->_common_params._auto_index);
+}
+
+unsigned int ADirective::getClientMaxBodySize(void) const {
+	return (this->_common_params._client_max_body_size);
+}
+
+std::ostream& operator<<(std::ostream& os, const ADirective *params) {
+	const std::set<std::string> indexSet = params->getIndex();
+
+	os << "Root : " << params->getRoot() << "\n"
+	<< "Auto index : " << params->getAutoIndex() << "\n";
+	for (std::set<std::string>::const_iterator it = indexSet.begin(); it != indexSet.end(); ++it) {
+		os << "Index : " << (*it) << "\n";
+	}
+	os	<< "Client Max Body Size : " << params->getClientMaxBodySize() << "\n";
+	return (os);
+}
+
 // ServerBlock
 
-ServerBlock::ServerBlock(void) {}
+ServerBlock::ServerBlock(void) {
+	this->_common_params.server_level = true;
+}
 
 ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {
 	this->_common_params = common_params;
@@ -92,31 +128,6 @@ ServerBlock::ServerBlock(const ServerBlock &copy) {
 }
 
 ServerBlock::~ServerBlock() {}
-
-bool ServerBlock::isValidServerName(std::string name) {
-	bool last_dot_occurence;
-
-	last_dot_occurence = false;
-	if (name.empty())
-		return (false);
-	if (!std::isalpha(name[0]))
-		return (false);
-	for (int i = 0; i < name.size(); i++) {
-		char c = name[i];
-		if (std::isalnum(c) || c == '-' || c == '.') {
-			if ((i == 0 || i == name.size() - 1) && (c == '.' || c == '-')) 
-				return false;
-			if (c == '.') {
-				if (last_dot_occurence) 
-					return (false);
-				last_dot_occurence = true;
-			} else
-				last_dot_occurence = false;
-		} else
-			return (false);
-	}
-	return (true);
-}
 
 s_server_params ServerBlock::getServerParams(void) const {
 	return (this->_server_params);
@@ -131,30 +142,51 @@ ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
 	return (*this);
 }
 
-bool ServerBlock::setServerName(std::vector<std::string> server_names) {
+bool ServerBlock::setServerName(std::set<std::string> server_names) {
 	if (server_names.empty())
 		return (false);
-	for (int i = 0; i < server_names.size(); i++) {
-		if (isValidServerName(server_names[i])) {
-			_server_params._server_name.push_back(server_names[i]);
-		} else
-			return (false);
-	}
+	this->_server_params._server_name = server_names;
 	return (true);
 }
 
-bool ServerBlock::setListeningPort(std::vector<unsigned int> listening_ports) {
-	std::set <unsigned int> unique_ports;
+bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	if (listening_ports.empty())
 		return (false);
-	for (std::set<unsigned int>::iterator it = unique_ports.begin(); it != unique_ports.end(); ++it)
-    	_server_params._listen.push_back(*it);
+	this->_server_params._listen = listening_ports;
 	return (true);
+}
+
+std::set <std::string> ServerBlock::getServerName(void) const {
+	return (this->_server_params._server_name);
+}
+
+std::set <unsigned int> ServerBlock::getListeningPort(void) const {
+	return (this->_server_params._listen);
+}
+
+std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
+	const std::set<unsigned int> listening_ports = params->getListeningPort();
+	const std::set<std::string> server_names = params->getServerName();
+
+	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
+	os << static_cast<const ADirective *>(params);
+	for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
+		os << "Listening ports : " << (*it) << "\n"; 
+	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
+		os << "Server name : " << (*it) << "\n";
+	return (os);
 }
 
 // LocationBlock
 
-LocationBlock::LocationBlock(void) {}
+LocationBlock::LocationBlock(void) {
+	this->_common_params.server_level = false;
+	this->_location_params._is_cgi = false;
+	this->_common_params._client_max_body_size = 1;
+	this->_location_params.modified_auto_index = false;
+	this->_location_params.modified_client_max_body_size = false;
+	this->_location_params._allowed_methods = 0;
+}
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
 	this->_common_params = common_params;
@@ -178,6 +210,18 @@ LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
 
 s_loc_params LocationBlock::getLocationParams(void) const {
 	return (this->_location_params);
+}
+
+void LocationBlock::clientMaxBodySizeModified(void) {
+	this->_location_params.modified_client_max_body_size = true;
+}
+
+void LocationBlock::autoIndexModified(void) {
+	this->_location_params.modified_auto_index = true;
+}
+
+void LocationBlock::setIsCgi(bool value) {
+	this->_location_params._is_cgi = value;
 }
 
 bool LocationBlock::setCgiPath(std::string path_args) {
@@ -216,21 +260,67 @@ bool LocationBlock::setAlias(std::string alias_path) {
 }
 
 bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
-	if (allowed_method == 0) {
+	if (allowed_method == 0)
 		return (false);
-	}
-	_location_params._allowed_methods = allowed_method;
+	_location_params._allowed_methods |= allowed_method;
 	return (true);
 }
 
-bool LocationBlock::isGetAllowed(void) {
-	return (_location_params._allowed_methods & GET) != 0;
+bool LocationBlock::isCgiAllowed(void) const {
+	return (this->_location_params._is_cgi);
 }
 
-bool LocationBlock::isPostAllowed(void) {
-	return (_location_params._allowed_methods & POST) != 0;
+std::string LocationBlock::getCgiPath(void) const {
+	return (this->_location_params._cgi_path);
 }
 
-bool LocationBlock::isDeleteAllowed(void) {
-	return (_location_params._allowed_methods & DELETE) != 0;
+std::string LocationBlock::getAlias(void) const {
+	return (this->_location_params._alias);
+}
+
+std::string LocationBlock::getUri(void) const {
+	return (this->_location_params._uri);
+}
+
+bool LocationBlock::isDirectiveCgi(void) const {
+	return (this->_location_params._is_cgi);
+}
+
+bool LocationBlock::isGetAllowed(void) const {
+	return ((_location_params._allowed_methods & GET) != 0);
+}
+
+bool LocationBlock::isPostAllowed(void) const {
+	return ((_location_params._allowed_methods & POST) != 0);
+}
+
+bool LocationBlock::isDeleteAllowed(void) const {
+	return ((_location_params._allowed_methods & DELETE) != 0);
+}
+
+std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
+	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
+	
+	os << static_cast<const ADirective *>(params);
+	if (params->isCgiAllowed()) {
+		os	<< "CGI Path: " << params->getCgiPath() << "\n";
+	}
+	os	<< "URI: " << params->getUri() << "\n"
+		<< "Alias: " << params->getAlias() << "\n"
+		<< "Allowed Methods: ";
+	if (params->isGetAllowed()) 
+		os << "GET ";
+	if (params->isPostAllowed()) 
+		os << "POST ";
+	if (params->isDeleteAllowed()) 
+		os << "DELETE ";
+	return (os);
+}
+
+bool LocationBlock::hasClientMaxBodySizeModified(void) const {
+	return (this->_location_params.modified_client_max_body_size);
+}
+
+bool LocationBlock::hasAutoIndexModified(void) const {
+	return (this->_location_params.modified_auto_index);
 }
