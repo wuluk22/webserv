@@ -220,6 +220,36 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
+bool ConfigParser::checkPathServerDirective(ADirective *server_block) {
+	
+}
+
+bool ConfigParser::checkPathLocationDirective(ADirective *location_block) {
+	
+	
+	if (!location_block->getRoot().empty())
+}
+
+bool ConfigParser::areAllPathAccessible(void) {
+	ServerConfig *current_server;
+	ADirective *current_directive;
+	std::vector <ADirective*> all_server_directives;
+	bool status;
+	
+	for (int i = 0; i < this->_servers_config.size(); i++) {
+		current_server = _servers_config[i];
+		all_server_directives = current_server->getAllDirectives();
+		for (int y = 0; y < all_server_directives.size(); y++) {
+			current_directive = all_server_directives[i];
+			if (current_directive->isDirectiveServerLevel()) {
+				checkPathServerDirective(current_directive)
+			}
+				
+
+		}
+	}
+}
+
 int main(void) {
 	ConfigParser *config;
 	try {

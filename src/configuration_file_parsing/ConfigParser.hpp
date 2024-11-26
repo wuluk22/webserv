@@ -43,6 +43,7 @@ class ConfigParser {
 		static ConfigParser* instance;
 		std::string _path_of_configuration_file;
 		std::map<size_t , ServerConfig *> _servers_config;
+		PathValidator _validator;
 		
 		// Constructor
 		ConfigParser(const std::string init_path);
@@ -58,6 +59,8 @@ class ConfigParser {
 		bool isStringDigit(std::string args);
 		bool isValidServerName(std::string name);
 		std::string returnSecondArgs(std::string args);
+		bool checkPathLocationDirective(ADirective *location_block);
+		bool checkPathServerDirective(ADirective *server_block);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
@@ -91,6 +94,7 @@ class ConfigParser {
 		const std::string& getPathOfConfigurationFile(void) const;
 		ServerConfig* getServerConfig(unsigned int id) const;
 		void setServerConfig(size_t server_id, ServerConfig *current_server);
+		bool areAllPathAccessible(void);
 };
 
 #endif

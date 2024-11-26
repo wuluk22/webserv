@@ -100,6 +100,10 @@ unsigned int ADirective::getClientMaxBodySize(void) const {
 	return (this->_common_params._client_max_body_size);
 }
 
+bool ADirective::isDirectiveServerLevel(void) const {
+	return (this->_common_params.server_level);
+}
+
 std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 	const std::set<std::string> indexSet = params->getIndex();
 

@@ -79,6 +79,7 @@ class ADirective {
 		std::set <std::string> getIndex(void) const;
 		bool getAutoIndex(void) const;
 		unsigned int getClientMaxBodySize(void) const;
+		bool isDirectiveServerLevel(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const s_common_params *params);
