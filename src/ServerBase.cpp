@@ -65,6 +65,10 @@ void	ServerBase::accept_connection(ServerHandler	Server)
 void	ServerBase::processClientConnections()
 {
 	fd_set	cpyReadFds, cpyWriteFds;
+	struct timeval timeout;
+
+	timeout.tv_sec = 30;
+	
 	while (true)
     {
 		cpyReadFds = readfds;
@@ -78,7 +82,7 @@ void	ServerBase::processClientConnections()
 		// print_fd_set(cpyWriteFds, "cpyWriteFds");
 		std::cout << std::endl;
         // Wait for an activity on one of the sockets
-        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0) {
+        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, &timeout) < 0) {
 			print_fd_set(cpyReadFds, "IN SELECT cpyReadFds");
 			print_fd_set(cpyWriteFds, "cpyWriteFds");
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
