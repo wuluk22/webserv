@@ -10,6 +10,14 @@ ServerConfig::ServerConfig(const ServerConfig &copy) {
 	(*this) = copy;
 }
 
+ServerConfig& ServerConfig::operator=(const ServerConfig& other) {
+	if (this != &other) {
+		this->all_directives = other.all_directives;
+		this->_server_params_defined = other._server_params_defined;
+	}
+	return (*this);
+}
+
 ServerConfig::~ServerConfig() {
 	for (int i = 0; i < all_directives.size(); i++) {
 		delete all_directives[i];
