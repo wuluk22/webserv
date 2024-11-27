@@ -21,6 +21,14 @@
 // ARRAY SIZE MACRO
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
+// IS LINUX FLAG - FOR RESERVED PORTS
+#define IS_LINUX 0
+
+#if defined(__linux__)
+    #undef IS_LINUX
+    #define IS_LINUX 1
+#endif
+
 class TokenCounter {
 	private:
 		std::stack<std::map<std::string, int> > blockStack;
