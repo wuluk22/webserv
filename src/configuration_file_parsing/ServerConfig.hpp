@@ -37,6 +37,11 @@ enum e_allowed_methods {
 	DELETE = 1 << 2
 };
 
+#if defined(__linux__)
+    #undef IS_LINUX
+    #define IS_LINUX 1
+#endif
+
 class LocationBlock;
 class ServerBlock;
 
