@@ -3,7 +3,7 @@
 // Server Configuration class
 
 ServerConfig::ServerConfig(void) {
-	this->_server_params_defined = false;
+	this->server_header = NULL;
 }
 
 ServerConfig::ServerConfig(const ServerConfig &copy) {
@@ -12,36 +12,34 @@ ServerConfig::ServerConfig(const ServerConfig &copy) {
 
 ServerConfig& ServerConfig::operator=(const ServerConfig& other) {
 	if (this != &other) {
-		this->all_directives = other.all_directives;
-		this->_server_params_defined = other._server_params_defined;
+		this->directives = other.directives;
+		this->server_header = other.server_header;
 	}
 	return (*this);
 }
 
 ServerConfig::~ServerConfig() {
-	for (int i = 0; i < all_directives.size(); i++) {
-		delete all_directives[i];
+	for (int i = 0; i < directives.size(); i++) {
+		delete directives[i];
 	}
+	if (server_header)
+		delete server_header;
 }
 
-std::vector<ADirective *> ServerConfig::getAllDirectives(void) const {
-	return (this->all_directives);
+std::vector<LocationBlock *> ServerConfig::getDirectives(void) const {
+	return (this->directives);
 }
 
-void ServerConfig::setDirective(ADirective *new_directive) {
-	this->all_directives.push_back(new_directive);
+void ServerConfig::setDirective(LocationBlock *new_directive) {
+	this->directives.push_back(new_directive);
 }
 
-bool ServerConfig::correctAmmountOfServerDirective(void) {
-	int server_block_count;
-	
-	for(std::vector<ADirective *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
-		if ((*it)->getCommonParams().server_level)
-			server_block_count++;
-		if (server_block_count > 1)
-			return (false);
-	}
-	return (true);
+void ServerConfig::setServerHeader(ServerBlock *server_header) {
+	this->server_header = server_header;
+}
+
+ServerBlock* ServerConfig::getServerHeader(void) const {
+	return (this->server_header);
 }
 
 // ADirective class
@@ -120,6 +118,7 @@ std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 
 ServerBlock::ServerBlock(void) {
 	this->_common_params.server_level = true;
+	this->_server_params._listen.insert(80);
 }
 
 ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {

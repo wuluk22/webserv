@@ -23,6 +23,8 @@
 #define PATH_NOT_RECOGNIZED "Path isn't recognized, aborting"
 #define ROOT_PRIORITY "Root redefinition should be declared before inbricked location, aborting"
 #define NO_ROOT_DEFINITION "No root definition, vacant URI prefix, aborting"
+#define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
+#define UNDEFINED_PARAMS "Undefined parameter"
 #define AL " at line : "
 #define RESET "\e[0m"
 

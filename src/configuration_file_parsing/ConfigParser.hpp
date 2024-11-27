@@ -59,8 +59,7 @@ class ConfigParser {
 		bool isStringDigit(std::string args);
 		bool isValidServerName(std::string name);
 		std::string returnSecondArgs(std::string args);
-		bool checkPathLocationDirective(ADirective *location_block);
-		bool checkPathServerDirective(ADirective *server_block);
+		bool checkPathLocationDirective(LocationBlock *location_block);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);

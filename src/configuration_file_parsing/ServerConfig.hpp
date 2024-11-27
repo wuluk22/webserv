@@ -37,23 +37,23 @@ enum e_allowed_methods {
 	DELETE = 1 << 2
 };
 
-#define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
-#define UNDEFINED_PARAMS "Undefined parameter"
-
-class ADirective;
+class LocationBlock;
+class ServerBlock;
 
 class ServerConfig {
 	private:
-		std::vector<ADirective*> all_directives;
-		bool _server_params_defined;
+		std::vector<LocationBlock *> directives;
+		ServerBlock *server_header;
 	public:
 		ServerConfig(void);
 		ServerConfig(const ServerConfig &copy);
 		~ServerConfig();
 		ServerConfig& operator=(const ServerConfig& rhs);
-		std::vector<ADirective*> getAllDirectives(void) const;
-		void setDirective(ADirective *new_directive);
-		bool correctAmmountOfServerDirective(void);
+		
+		std::vector<LocationBlock *> getDirectives(void) const;
+		void setDirective(LocationBlock *new_directive);
+		ServerBlock* getServerHeader(void) const;
+		void setServerHeader(ServerBlock *server_header);
 };
 
 // Directive class sole purpose is to enable a composite design pattern for the ServerConfig class

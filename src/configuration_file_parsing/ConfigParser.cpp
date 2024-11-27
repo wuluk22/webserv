@@ -159,12 +159,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 	ServerBlock *server_directive = new ServerBlock();
 
 	token_counter.enterBlock();
-	if (server_config->correctAmmountOfServerDirective()) {
-		server_config->setDirective(server_directive);
-	} else {  
-		std::cout << ERROR_HEADER << DOUBLE_DIRECTIVE << AL << current_line << std::endl;
-		throw ConfigException();
-	}
+	server_config->setServerHeader(server_directive);
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
@@ -220,35 +215,27 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
-bool ConfigParser::checkPathServerDirective(ADirective *server_block) {
-	
-}
+// bool ConfigParser::checkPathLocationDirective(LocationBlock *location_block) {
+// 	if (!location_block->getRoot().empty())
+		
+// }
 
-bool ConfigParser::checkPathLocationDirective(ADirective *location_block) {
+// bool ConfigParser::areAllPathAccessible(void) {
+// 	ServerConfig *current_server;
+// 	std::vector <LocationBlock *> all_server_directives;
+// 	ServerBlock *server_header;
 	
+// 	bool status;
 	
-	if (!location_block->getRoot().empty())
-}
-
-bool ConfigParser::areAllPathAccessible(void) {
-	ServerConfig *current_server;
-	ADirective *current_directive;
-	std::vector <ADirective*> all_server_directives;
-	bool status;
-	
-	for (int i = 0; i < this->_servers_config.size(); i++) {
-		current_server = _servers_config[i];
-		all_server_directives = current_server->getAllDirectives();
-		for (int y = 0; y < all_server_directives.size(); y++) {
-			current_directive = all_server_directives[i];
-			if (current_directive->isDirectiveServerLevel()) {
-				checkPathServerDirective(current_directive)
-			}
-				
-
-		}
-	}
-}
+// 	for (int i = 0; i < this->_servers_config.size(); i++) {
+// 		current_server = _servers_config[i];
+// 		all_server_directives = current_server->getDirectives();
+// 		server_header = current_server->getServerHeader();
+// 		for (int y = 0; y < all_server_directives.size(); y++) {
+// 			checkPathLocationDirective(all_server_directives[y]);
+// 		}
+// 	}
+// }
 
 int main(void) {
 	ConfigParser *config;
@@ -258,6 +245,5 @@ int main(void) {
 	{
 		std::cout << e.what() <<std::endl;
 	}
-	ServerConfig* c = config->getServerConfig(0);
-	std::vector <ADirective *> all_directives = c->getAllDirectives();
+	// ServerConfig* c = config->getServerConfig(0);
 }
