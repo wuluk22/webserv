@@ -11,6 +11,7 @@ FILES	=	src/main \
 			src/HttpRequestHandler \
 			src/HttpResponseHandler \
 			src/HttpResponseMethod \
+			src/HttpResponseUtils \
 			src/HttpRequestUtils \
 			src/HttpRequestParsing \
 			src/HttpRequestDir \

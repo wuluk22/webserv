@@ -18,6 +18,9 @@
 # include "HttpRequestHandler.hpp"
 # include <sys/stat.h> // For stat()
 # include <string>
+# include <iostream>
+# include <string>
+# include <cstdlib>
 
 class HttpRequestHandler;
 

@@ -23,7 +23,6 @@ std::string DirectoryHandler::human_readable_size(size_t bytes)
         size /= 1024;
         unit++;
     }
-    
     std::ostringstream oss;
     oss.precision(2);
     oss.setf(std::ios::fixed);
@@ -76,7 +75,6 @@ std::string DirectoryHandler::get_mime_type(const std::string& path)
         ext = path.substr(dot_pos);
         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     }
-
     if (ext == ".html" || ext == ".htm") return "text/html";
     if (ext == ".css") return "text/css";
     if (ext == ".js") return "application/javascript";
@@ -191,13 +189,17 @@ std::string DirectoryHandler::generate_directory_page(const std::string& path, c
     html << "<table>\n"
          << "<tr><th>Name</th><th>Size</th><th>Last Modified</th><th>Action</th></tr>\n";
 
-    for (std::vector<FileInfo>::const_iterator it = files.begin(); it != files.end(); ++it) {
+    for (std::vector<FileInfo>::const_iterator it = files.begin(); it != files.end(); ++it)
+    {
         const FileInfo& file = *it;
         html << "<tr>\n<td>";
         
-        if (file.is_directory) {
+        if (file.is_directory)
+        {
             html << "<span class='folder'>[] </span>";
-        } else {
+        }
+        else
+        {
             html << "<span class='file'>|| </span>";
         }
         

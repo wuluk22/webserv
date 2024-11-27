@@ -1,5 +1,60 @@
 #include "HttpResponseHandler.hpp"
 
+HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
+{
+    const std::string	staticDir = "public";
+    std::string			filePath;
+	struct stat			pathStat;
+	std::string			errorPage;
+	std::string			content;
+
+	filePath = staticDir + request.getPath();
+	// Handle file upload
+    if (isCgiRequest(request.getPath()))
+    {
+        std::cout << " oioi! " << std::endl;
+        setErrorResponse(request, response, 200, "CGI Braowsss");
+        return response;
+    }
+	if (request.getMethod() == "POST")
+	{
+		request.handleFileUpload(request.getBody(), request.getPath(), response);
+		return response;
+	}
+	if (request.getMethod() == "DELETE")
+	{
+		std::string path;
+		path = staticDir + request.getPath();
+		path = url_decode(path);
+		std::cout << " MAAA! " << std::endl;
+		std::cout << request << std::endl;
+    	if (remove(path.c_str()) == 0) {
+        	// Si la suppression a réussi
+        	response.setStatusCode(200); // OK
+        	response.setStatusMsg("OK");
+        	response.setBody("Resource deleted successfully.");
+			std::cout << " MOOO! " << std::endl;
+			return response;
+    	} else {
+        	// Si la suppression a échoué
+        	response.setStatusCode(404); // Not Found
+        	response.setStatusMsg("Not Found");
+        	response.setBody("Resource not found.");
+			std::cout << " Miii! " << std::endl;
+			return response;
+		}
+    }
+    if (request.getMethod() == "GET")
+    {
+        response = handleGet(request, response);
+        return response;
+    }
+    /*
+    else -> invalid method
+    */
+    return response;
+}
+
 HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& response)
 {
     std::string staticDir = "public";
