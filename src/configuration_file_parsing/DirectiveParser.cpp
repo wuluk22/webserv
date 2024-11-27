@@ -78,7 +78,7 @@ bool ConfigParser::parseAlias(std::string working_line, LocationBlock *directive
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		return (false);
-	if (!directive->setAlias(path)) {
+	if (!directive->setAlias(removeExcessiveSlashes(path))) {
 		std::cerr << ERROR_HEADER << PATH_NOT_RECOGNIZED << RESET << std::endl;
 		return (false);
 	}
@@ -144,11 +144,17 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	}
 	args.erase(args.begin());
 	for (int i = 0; i < args.size(); i++) {
-		if (!isStringDigit(args[i]))
+		if (!isStringDigit(args[i])) {
+			std::cerr << ERROR_HEADER << NUMERICAL_VALUE_EXPECTED << RESET << std::endl;
 			return (false);
+		}
 		value = std::strtoul(args[i].c_str(), NULL, 10);
+		if (IS_LINUX && value < 1024) {
+			std::cerr << ERROR_HEADER << RESERVED_PORTS_LINUX << RESET << std::endl;
+			return (false);
+		}
 		if (!ports.insert(value).second) {
-			std::cout << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
+			std::cerr << ERROR_HEADER << DUPE_ELEMS << RESET << std::endl;
 			return (false);
 		}
 	}

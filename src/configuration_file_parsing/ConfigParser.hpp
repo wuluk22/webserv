@@ -21,6 +21,14 @@
 // ARRAY SIZE MACRO
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
+// IS LINUX FLAG - FOR RESERVED PORTS
+#define IS_LINUX 0
+
+#if defined(__linux__)
+    #undef IS_LINUX
+    #define IS_LINUX 1
+#endif
+
 class TokenCounter {
 	private:
 		std::stack<std::map<std::string, int> > blockStack;
@@ -32,6 +40,14 @@ class TokenCounter {
 		int getTokenCount(const std::string& token) const;
 		bool oneOccurenceCheck(std::vector <std::string> unrepeatable_tokens);
 };
+
+typedef struct s_parser_flags {
+	bool went_in_directive;
+	bool root_defined;
+	bool alias_defined;
+	bool cgi_allowed_defined;
+	bool cgi_path_defined;
+}t_parser_flags;
 
 class ConfigParser {
 	private:
@@ -60,6 +76,7 @@ class ConfigParser {
 		bool isValidServerName(std::string name);
 		std::string returnSecondArgs(std::string args);
 		bool checkPathLocationDirective(LocationBlock *location_block);
+		std::string removeExcessiveSlashes(const std::string& path);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
@@ -94,7 +111,7 @@ class ConfigParser {
 		ServerConfig* getServerConfig(unsigned int id) const;
 		std::map <size_t, ServerConfig *> getAllServerConfig(void) const;
 		void setServerConfig(size_t server_id, ServerConfig *current_server);
-		bool areAllPathAccessible(void);
+		bool areAllPathAccessible(ServerConfig *current_server_config);
 };
 
 #endif
