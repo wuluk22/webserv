@@ -62,6 +62,7 @@ void ServerHandler::setSocketOptions(int sock)
     throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0)
 		throw ServerHandlerError("setsockopt failed with SO_REUSEPORT", __FUNCTION__, __LINE__);
+  // check to reuse port 
 }
 
 void ServerHandler::bindSocket(int port)

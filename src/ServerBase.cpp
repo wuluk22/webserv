@@ -31,17 +31,16 @@ std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 ////////// PUBLIC /////////////
 void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig)
 {
-	s_server_params		server_params;
-	server_params._listen.insert(4242);
-	server_params._listen.insert(8080);
-	server_params._listen.insert(1023);
-	for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
-		ServerHandler NewServer;
-		NewServer.InitializeServerSocket(*it, 3);
-		// std::cout << "NewServer: " << NewServer.getPort() << std::endl;
-		FD_SET(NewServer.getSock(), &get_readfds());
-		this->max_sock = std::max(this->max_sock, NewServer.getSock());
-		Servers.push_back(NewServer);
+	for (std::map<size_t, ServerConfig *>::iterator it = AllServersConfig.begin(); it != AllServersConfig.end(); it++) {
+		s_server_params server_params = it->second->getServerHeader()->getServerParams();
+		for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
+			ServerHandler NewServer;
+			NewServer.InitializeServerSocket(*it, 3);
+			std::cout << "NewServer: " << NewServer.getPort() << std::endl;
+			FD_SET(NewServer.getSock(), &get_readfds());
+			this->max_sock = std::max(this->max_sock, NewServer.getSock());
+			Servers.push_back(NewServer);
+		}
 	}
 	// getaddrinfo(¨http://coucou.be¨, ¨8080¨, )
 }
