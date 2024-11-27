@@ -12,9 +12,9 @@ int main()
 	try {
 		config = ConfigParser::getInstance("test.conf");
 		ServerConfig* c = config->getServerConfig(0);
-		std::vector <ADirective *> all_directives = c->getAllDirectives();
-		
-		ServerBase.addPortAndServers(c);
+		// std::vector <LocationBlock *> all_directives = c->getDirectives();
+		ServerBlock *server_header = c->getServerHeader();
+		ServerBase.addPortAndServers(config->getAllServerConfig());
 		for (unsigned long i = 0; i < ServerBase.get_servers().size(); i++) {
 			std::cout << "nbr of servers : " << ServerBase.get_servers().size() << std::endl;
 			ServerBase.processClientConnections();

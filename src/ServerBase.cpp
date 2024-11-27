@@ -29,12 +29,12 @@ fd_set&	ServerBase::get_writefds() { return writefds; }
 std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 
 ////////// PUBLIC /////////////
-void	ServerBase::addPortAndServers()
+void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig)
 {
 	s_server_params		server_params;
 	server_params._listen.insert(4242);
 	server_params._listen.insert(8080);
-	server_params._listen.insert(1050);
+	server_params._listen.insert(1023);
 	for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++) {
 		ServerHandler NewServer;
 		NewServer.InitializeServerSocket(*it, 3);

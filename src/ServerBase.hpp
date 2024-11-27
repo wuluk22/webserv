@@ -4,6 +4,7 @@
 # include "ServerHandler.hpp"
 # include "ErrorHandler.hpp"
 # include "RequestResponseState.hpp"
+# include "configuration_file_parsing/ConfigParser.hpp"
 
 # include <iostream>
 # include <sys/select.h>
@@ -31,7 +32,7 @@ class	ServerBase
 
 		void						processClientConnections();
 		void						accept_connection(ServerHandler	Server);
-		void						addPortAndServers();
+		void						addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
 };
 
 #endif
