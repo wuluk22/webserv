@@ -29,7 +29,7 @@ fd_set&	ServerBase::get_writefds() { return writefds; }
 std::vector<ServerHandler>	ServerBase::get_servers() { return Servers; }
 
 ////////// PUBLIC /////////////
-void	ServerBase::addPortAndServers()
+void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig)
 {
 	s_server_params		server_params;
 	server_params._listen.insert(4242);
