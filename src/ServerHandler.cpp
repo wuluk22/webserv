@@ -69,7 +69,7 @@ void ServerHandler::bindSocket(int port)
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
 	this->_address.sin_port = htons(port);
-
+  // std::cout << "PORT : " << port << std::endl;
 	// std::cout << "address.sin_addr.s_addr : " << address.sin_addr.s_addr << std::endl;
 	// std::cout << "address.sin_port :" << address.sin_port << std::endl;
 	if (bind(this->_sock, (struct sockaddr*)&this->_address, sizeof(this->_address)) < 0) {
