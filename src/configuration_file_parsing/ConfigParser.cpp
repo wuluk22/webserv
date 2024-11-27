@@ -59,6 +59,10 @@ ServerConfig* ConfigParser::getServerConfig(unsigned int id) const {
 	throw ConfigException();
 }
 
+std::map <size_t, ServerConfig *> ConfigParser::getAllServerConfig(void) const {
+	return (this->_servers_config);
+}
+
 void ConfigParser::setServerConfig(size_t server_id, ServerConfig *current_server) {
 	this->_servers_config.insert(std::make_pair(server_id, current_server));
 }

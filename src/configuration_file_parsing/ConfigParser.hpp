@@ -92,6 +92,7 @@ class ConfigParser {
 		static ConfigParser* getInstance(const std::string init_path);
 		const std::string& getPathOfConfigurationFile(void) const;
 		ServerConfig* getServerConfig(unsigned int id) const;
+		std::map <size_t, ServerConfig *> getAllServerConfig(void) const;
 		void setServerConfig(size_t server_id, ServerConfig *current_server);
 		bool areAllPathAccessible(void);
 };
