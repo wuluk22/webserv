@@ -111,3 +111,26 @@ std::string ConfigParser::returnSecondArgs(std::string args) {
 	uri = trimmed_line.substr(i + 1, std::string::npos);
 	return (uri);
 }
+
+std::string ConfigParser::removeExcessiveSlashes(const std::string& path) {
+	std::string result;
+	bool was_last_slash = false;
+
+	for (std::string::size_type i = 0; i < path.size(); ++i) {
+		char c = path[i];
+
+		if (c == '/') {
+			if (!was_last_slash) {
+				result += c;
+				was_last_slash = true;
+			}
+		} else {
+			result += c;
+			was_last_slash = false;
+		}
+	}
+	if (!result.empty() && result[result.size() - 1] != '/') {
+		result = result + "/";
+	}
+    return (result);
+}
