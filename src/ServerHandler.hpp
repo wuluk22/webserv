@@ -2,6 +2,7 @@
 # define SOCKETHANDLER_HPP
 
 # include "ErrorHandler.hpp"
+# include "configuration_file_parsing/ServerConfig.hpp"
 
 # include <netinet/in.h>
 # include <sys/select.h>
@@ -9,25 +10,30 @@
 # include <netinet/in.h>
 # include <fcntl.h>
 # include <unistd.h>
+# include <vector>
 
 class ServerHandler
 {
 	private:
 		// struct addrinfo 	hints; // for getaddrinfo();
-		struct sockaddr_in	_address;
-		socklen_t			_addrlen;
-		int					_sock;
-		int					_port;
-		std::string			_serverName;
+		struct sockaddr_in				_address;
+		socklen_t						_addrlen;
+		int								_sock;
+		int								_port;
+		std::vector<LocationBlock *>	_locations;
 
 	public:
 		// METHODS
 		ServerHandler();
 		~ServerHandler();
-		int&				getSock();
-		int&				getPort();
-		struct sockaddr*	getAddress();
-		socklen_t&			getAddrlen();
+
+		int&							getSock();
+		int&							getPort();
+		struct sockaddr*				getAddress();
+		socklen_t&						getAddrlen();
+		std::vector<LocationBlock *>&	getLocations();
+
+		void							setLocations(std::vector<LocationBlock *>& locations);
 
 		void				InitializeServerSocket(int port, const int backlog);
 		int					createSocket();

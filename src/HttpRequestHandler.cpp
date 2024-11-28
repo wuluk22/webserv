@@ -6,7 +6,7 @@ HttpRequestHandler::HttpRequestHandler()
 HttpRequestHandler::~HttpRequestHandler()
 {}
 
-HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock) {
+HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock, std::vector<LocationBlock *> locationsBlock) {
     const size_t bufferSize = 1024;
     char buffer[bufferSize];
     std::string requestData;
@@ -57,7 +57,7 @@ HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock) {
                     request = httpParsing(requestData);
                     request.setFd(1);
 					request.setIsComplete(true);
-					std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
+					// std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
                     return request;
                 }
             }
@@ -86,7 +86,7 @@ HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock) {
             request = httpParsing(requestData);
             request.setFd(1);
 			request.setIsComplete(isRequestComplete);
-			std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
+			// std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
             return request;
         }
         
@@ -100,6 +100,6 @@ HttpRequestHandler HttpRequestHandler::handleRequest(int client_sock) {
     request = httpParsing(requestData);
     request.setFd(1);
 	request.setIsComplete(isRequestComplete);
-	std::cout << " c! " << request.getIsComplete() << " c! " << std::endl;
+	// std::cout << " c! " << request.getIsComplete() << " c! " << std::endl;
     return request;
 }

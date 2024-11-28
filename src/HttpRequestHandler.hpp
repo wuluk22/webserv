@@ -14,6 +14,7 @@
 # define HTTPREQUESTHANDLER_HPP
 # include "HttpResponseHandler.hpp"
 # include "DirectoryHandler.hpp"
+# include "configuration_file_parsing/ServerConfig.hpp"
 # include <sys/socket.h> // recv | send
 # include <iostream>
 # include <unistd.h> // close
@@ -68,7 +69,7 @@ class HttpRequestHandler
 		int											getFd() const;
 		bool										getIsComplete() const;
 
-		HttpRequestHandler							handleRequest(int client_sock);
+		HttpRequestHandler							handleRequest(int client_sock, std::vector<LocationBlock *> locationsBlock);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
 		//HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
 		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);
