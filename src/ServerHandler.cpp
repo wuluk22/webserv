@@ -14,37 +14,27 @@ void print_fd_set(const fd_set& fdset, std::string functionName) {
 }
 
 // METHODS //
-ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){
-  // memset(&this->hints, 0, sizeof this->hints); // Initialise la structure
-  // this->hints.ai_family = AF_UNSPEC; // IPv4 ou IPv6
-  // this->hints.ai_socktype = SOCK_STREAM; // TCP
-}
+ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){}
 ServerHandler::~ServerHandler() {}
 
 // GETTER //
-int&                          ServerHandler::getSock() { return this->_sock; }
-int&                          ServerHandler::getPort() { return this->_port; }
-struct sockaddr*              ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
-socklen_t&                    ServerHandler::getAddrlen() { return this->_addrlen; }
-std::vector<LocationBlock *>& ServerHandler::getLocations() { return this->_locations; }
+int&                         	ServerHandler::getSock() { return this->_sock; }
+int&                         	ServerHandler::getPort() { return this->_port; }
+struct sockaddr*             	ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
+socklen_t&                   	ServerHandler::getAddrlen() { return this->_addrlen; }
+std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
 
-void							            ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
+// SETTER //
+void							ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
 {
 	this->_port = port;
   this->_sock = createSocket();
 
-  // Set server socket to reuse address
   setSocketOptions(this->_sock);
-
-  // Bind the server socket to a port
   bindSocket(this->_port);
-
-  // Set server socket to non-blocking
   setNonblocking(this->_sock);
-
-  // Start listening for connections
   listenSocket(this->_sock, backlog);
   Logger::log("Server listening for connections");
 }
@@ -53,18 +43,17 @@ int ServerHandler::createSocket()
 {
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0)
-  throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
+	throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
   return sock;
 }
 
 void ServerHandler::setSocketOptions(int sock)
 {
-  int opt = 1;
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
-    throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
+	int opt = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
+  		throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0)
 		throw ServerHandlerError("setsockopt failed with SO_REUSEPORT", __FUNCTION__, __LINE__);
-  // check to reuse port 
 }
 
 void ServerHandler::bindSocket(int port)

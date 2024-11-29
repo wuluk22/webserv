@@ -118,9 +118,9 @@ std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 
 ServerBlock::ServerBlock(void) {
 	this->_common_params.server_level = true;
-	if (IS_LINUX)
-		this->_server_params._listen.insert(1024);
-	else
+	// if (IS_LINUX)
+	// 	this->_server_params._listen.insert(1024);
+	// else
 		this->_server_params._listen.insert(80);
 }
 

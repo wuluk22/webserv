@@ -38,7 +38,7 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 			ServerHandler NewServer;
 			NewServer.InitializeServerSocket(*it, 3);
 			NewServer.setLocations(directives);
-			std::cout << "NewServer: " << NewServer.getPort() << std::endl;
+			std::cout << "NewServer -> " << "FD : " << NewServer.getSock() << "|| PORT : " << NewServer.getPort() << std::endl;
 			FD_SET(NewServer.getSock(), &get_readfds());
 			this->max_sock = std::max(this->max_sock, NewServer.getSock());
 			Servers.push_back(NewServer);
@@ -57,10 +57,10 @@ void	ServerBase::accept_connection(ServerHandler	Server)
 	// if (ClientSockets.find(new_socket) == ClientSockets.end()) {
 		RRState NewConnectionState;
 		NewConnectionState.setLocations(Server.getLocations());
-		for (std::vector<LocationBlock *>::iterator it = NewConnectionState.getLocations().begin(); it != NewConnectionState.getLocations().end(); it++) {
-			std::cout << "SOCKETPART : ";
-			std::cout << *it << std::endl;
-		}
+		// for (std::vector<LocationBlock *>::iterator it = NewConnectionState.getLocations().begin(); it != NewConnectionState.getLocations().end(); it++) {
+		// 	std::cout << "SOCKETPART : ";
+		// 	std::cout << *it << std::endl;
+		// }
         ClientSockets.insert(std::make_pair(new_socket, NewConnectionState));
 	// }
 	if (new_socket > max_sock)
@@ -74,7 +74,6 @@ void	ServerBase::processClientConnections()
 	// struct timeval timeout;
 
 	// timeout.tv_sec = 30;
-	
 	while (true)
     {
 		cpyReadFds = readfds;
@@ -93,7 +92,6 @@ void	ServerBase::processClientConnections()
 			// print_fd_set(cpyWriteFds, "cpyWriteFds");
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 		}
-
         // If activity on server socket, it's an incoming connection
 		for (unsigned long i = 0; i < this->Servers.size(); i++) {
 			int serverSocket = this->Servers[i].getSock();
@@ -101,7 +99,6 @@ void	ServerBase::processClientConnections()
 				accept_connection(this->Servers[(int)i]);
 			}
 		}
-
 		// Handling Request/Response
 		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++) {
 			int client_sock = it->first;
