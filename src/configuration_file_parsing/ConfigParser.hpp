@@ -22,7 +22,10 @@
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 // IS LINUX FLAG - FOR RESERVED PORTS
-#define IS_LINUX 0
+
+#ifndef IS_LINUX
+	#define IS_LINUX 0
+#endif
 
 #if defined(__linux__)
     #undef IS_LINUX
