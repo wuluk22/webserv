@@ -79,7 +79,9 @@ bool ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 	} else if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
-	if (!directive->setUri(removeExcessiveSlashes(root + uri) )) {
+	if (directive->getContentPath().empty())
+		directive->setContentPath(removeExcessiveSlashes(root + uri));
+	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root))) {
 		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
 		return (false);
 	}
