@@ -23,11 +23,11 @@
 #define PATH_NOT_RECOGNIZED "Path isn't recognized, aborting"
 #define ROOT_PRIORITY "Root redefinition should be declared before inbricked location, aborting"
 #define NO_ROOT_DEFINITION "No root definition, vacant URI prefix, aborting"
-#define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
 #define UNDEFINED_PARAMS "Undefined parameter"
 #define NUMERICAL_VALUE_EXPECTED "Numerical value expected, aborting"
 #define RESERVED_PORTS_LINUX "Ports under 1024 are reserved, aborting"
 #define AMBIGUOUS_URI_DEFINITION "Root and alias cannot be declared inside the same location, aborting"
+#define WRONG_ERROR_PAGES_SCOPE "Wrong error pages scope, aborting"
 #define AL " at line : "
 #define RESET "\e[0m"
 
