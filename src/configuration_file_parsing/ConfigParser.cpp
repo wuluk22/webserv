@@ -7,9 +7,9 @@ ConfigParser* ConfigParser::instance = NULL;
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
-	std::string l_items[] = { "cgi_path", "cgi_extensions", "cgi_allowed", "alias", "allowed_method"};
+	std::string l_items[] = { "cgi_path", "alias", "allowed_method"};
     initializeVector(l_params, l_items, ARRAY_SIZE(l_items));
-    std::string s_items[] = { "server_name", "listen" };
+    std::string s_items[] = { "server_name", "listen", "error_pages" };
     initializeVector(s_params, s_items, ARRAY_SIZE(s_items));
     std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size"};
     initializeVector(c_params, c_items, ARRAY_SIZE(c_items));
@@ -249,15 +249,3 @@ bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
 	}
 	return (true);
 }
-
-// int main(void) {
-// 	ConfigParser *config;
-// 	try {
-// 		 config = ConfigParser::getInstance("test.conf");
-// 	} catch (ConfigException &e)
-// 	{
-// 		std::cout << e.what() <<std::endl;
-// 	}
-// 	ServerConfig* c = config->getServerConfig(0);
-// 	std::vector <ADirective *> all_directives = c->getAllDirectives();
-// }

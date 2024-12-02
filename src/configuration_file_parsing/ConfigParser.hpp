@@ -106,6 +106,7 @@ class ConfigParser {
 		// Server
 		bool parseServerName(std::vector <std::string> args, ServerBlock *directive);
 		bool parseListeningPorts(std::vector <std::string> args, ServerBlock *directive);
+		bool parseErrorPages(std::vector <std::string> args, ServerBlock *directive);
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);
