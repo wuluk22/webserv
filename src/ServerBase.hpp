@@ -29,7 +29,7 @@ class	ServerBase
 
 		void						processClientConnections();
 		void						accept_connection(ServerHandler	Server);
-		void						addPortAndServers();
+		void						addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
 };
 
 #endif

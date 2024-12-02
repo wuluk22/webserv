@@ -1,18 +1,36 @@
 #include "HttpResponseHandler.hpp"
+//#include "CGI/Cgi.hpp"
 
 HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
 {
-    const std::string	staticDir = "public";
+    const std::string	staticDir = request.getRootDirectory();
     std::string			filePath;
 	struct stat			pathStat;
 	std::string			errorPage;
 	std::string			content;
 
 	filePath = staticDir + request.getPath();
+
+	std::vector<std::string> allow = request.getAllowedMethods();
+	std::cerr << "handlePath 1-\n" << request << "end!" << std::endl;
+	std::cerr << "request method: " << request.getMethod() << "request allowed: " << allow[0] << std::endl;
+	//std::cerr << "momom" << std::endl;
+	if (!request.isMethodAllowed(request, request.getMethod()))
+	{
+			std::vector<std::string> alles = request.getAllowedMethods();
+			//std::cout << "4577" << alles[0] << "4577" << std::endl;
+			std::cout << request.isMethodAllowed(request, request.getMethod()) << std::endl;
+			std::cout << "all3s" << std::endl;
+			setErrorResponse(request, response, 405, "Method_not_allowed");
+			std::cout << response << std::endl;
+			return response;
+	}
 	// Handle file upload
     if (isCgiRequest(request.getPath()))
     {
         std::cout << " oioi! " << std::endl;
+
+		// handleCGI(request);
         setErrorResponse(request, response, 200, "CGI Braowsss");
         return response;
     }
@@ -57,7 +75,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
 
 HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& response)
 {
-    std::string staticDir = "public";
+    std::string staticDir = request.getRootDirectory();
     std::string filePath;
     struct stat pathStat;
     std::string errorPage;

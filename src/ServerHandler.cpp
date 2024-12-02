@@ -14,11 +14,7 @@ void print_fd_set(const fd_set& fdset, std::string functionName) {
 }
 
 // METHODS //
-ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){
-  // memset(&this->hints, 0, sizeof this->hints); // Initialise la structure
-  // this->hints.ai_family = AF_UNSPEC; // IPv4 ou IPv6
-  // this->hints.ai_socktype = SOCK_STREAM; // TCP
-}
+ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){}
 ServerHandler::~ServerHandler() {}
 
 // GETTER //
@@ -26,6 +22,9 @@ int&  ServerHandler::getSock() { return this->_sock; }
 int&  ServerHandler::getPort() { return this->_port; }
 struct sockaddr* ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
 socklen_t&	ServerHandler::getAddrlen() { return _addrlen; }
+std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
+
+void	ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
 
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)

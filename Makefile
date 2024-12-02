@@ -24,7 +24,8 @@ FILES	=	src/main \
 			src/configuration_file_parsing/ConfigParser \
 			src/configuration_file_parsing/ServerConfig \
 			src/configuration_file_parsing/ConfigParserUtils \
-			src/configuration_file_parsing/TokenCounter
+			src/configuration_file_parsing/TokenCounter \
+			src/configuration_file_parsing/DirectiveParser
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
