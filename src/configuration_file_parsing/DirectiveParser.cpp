@@ -160,6 +160,35 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	}
 	return (directive->setListeningPort(ports));
 }
+bool ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *directive) {
+	std::map <unsigned int, std::string> error_pages_record;
+	std::string path;
+	unsigned error_code;
+
+	if (args.empty() || args.size() < 3) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		return (false);
+	}
+	path = args.back();
+	_validator.setPath(path);
+	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable())) {
+		std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
+		return (false);
+	}
+	for (int i = 1; i < args.size() - 1; i++) {
+		std::pair<unsigned int, std::string> single_error_page_record;
+		error_code = std::strtoul(args[i].c_str(), NULL, 10);
+		if (error_code < 400 || error_code > 527) {
+			std::cerr << ERROR_HEADER << WRONG_ERROR_PAGES_SCOPE << RESET << std::endl;
+			return (false);
+		}
+		single_error_page_record.first = error_code;
+		single_error_page_record.second = path;
+		error_pages_record.erase(error_code);
+		error_pages_record.insert(single_error_page_record);
+	}
+	return (directive->setErrorPagesRecord(error_pages_record));
+}
 
 void ConfigParser::processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, bool &command_status) {
 	if (args[0] == "root")
@@ -171,6 +200,7 @@ void ConfigParser::processCommonDirective(ADirective *directive, std::string wor
 	else if (args[0] == "client_max_body_size")
 		command_status = parseClientMaxBodySize(args, directive);
 }
+
 
 void ConfigParser::processDirectiveLoc(LocationBlock *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	bool command_status;
@@ -198,6 +228,8 @@ void ConfigParser::processDirectiveServ(ServerBlock *directive, std::string work
 		command_status = parseServerName(args, directive);
 	else if (args[0] == "listen")
 		command_status = parseListeningPorts(args, directive);
+	else if (args[0] == "error_pages")
+		command_status = parseErrorPages(args, directive);
 	if (!command_status) {
 		std::cout << ERROR_HEADER << AL << current_line << RESET << std::endl;
 		throw ConfigException();
