@@ -111,6 +111,10 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	flag.root_defined = false;
 	flag.went_in_directive = false;
 	uri = returnSecondArgs(working_line);
+	if (!distinctUri(uri, server_config)) {
+		std::cerr << ERROR_HEADER << DOUBLE_LOCATION_URI << AL << current_line << RESET << std::endl;
+		throw ConfigException();
+	}
 	token_counter.enterBlock();
 	server_config->setDirective(location_directive);
 	while (std::getline(config_file, working_line)) {
@@ -234,6 +238,17 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
+bool ConfigParser::distinctUri(std::string current_uri, ServerConfig *current_server) {
+	std::vector <LocationBlock *> all_directives = current_server->getDirectives();
+	if (current_uri.empty())
+		return (false);
+	for (std::vector<LocationBlock *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
+		if ((*it)->getUri() == current_uri)
+			return (false);
+	}
+	return (true);
+}
+
 bool ConfigParser::checkPathLocationDirective(LocationBlock *location_block) {
 	return (true);
 }
@@ -249,3 +264,14 @@ bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
 	}
 	return (true);
 }
+
+// int main(void) {
+// 	ConfigParser *config;
+// 	try {
+// 		 config = ConfigParser::getInstance("test.conf");
+// 	} catch (ConfigException &e)
+// 	{
+// 		std::cout << e.what() <<std::endl;
+// 	}
+// 	// ServerConfig* c = config->getServerConfig(0);
+// }
