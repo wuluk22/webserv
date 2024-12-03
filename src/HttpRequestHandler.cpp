@@ -1,5 +1,4 @@
 #include "HttpRequestHandler.hpp"
-#include <algorithm>
 
 HttpRequestHandler::HttpRequestHandler()
 {}
@@ -18,15 +17,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 	int		i = 0;
 	root = "public";
 
-	/*std::cout << "010- " << locationsBlock[0]->getUri() << " -010-" << std::endl;
-	std::cout << "020- " << locationsBlock[1]->getUri() << " -010-" << std::endl;
-	
-
-	
-	std::cout << "030- " << locationsBlock[0]->isGetAllowed() << " -010-" << std::endl;
-	std::cout << "040- " << locationsBlock[0]->isPostAllowed() << " -010-" << std::endl;
-	std::cout << "050- " << locationsBlock[0]->isDeleteAllowed() << " -010-" << std::endl;*/
-
 	while (i < locationsBlock.size() && locationsBlock[i])
 	{
 			if (locationsBlock[i]->isGetAllowed())
@@ -39,27 +29,21 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 				if (std::find(methods.begin(), methods.end(), std::string("DELETE")) == methods.end())
 					methods.push_back("DELETE");
 
-
 			std::string uri = locationsBlock[i]->getUri();
 			if (!uri.empty())
 					paths.push_back(locationsBlock[i]->getUri());
 			i++;
 	}
-
 	tmpRequest.setAllowedMethods(methods);
 	tmpRequest.setAllowedPaths(paths);
 	tmpRequest.setRootDirectory(root);
-	
-
-	std::cerr << "\ntest 4: \n" << tmpRequest << "end!" << std::endl;
-
-
+	//std::cerr << "\ntest 4: \n" << tmpRequest << "end!" << std::endl;
 	return tmpRequest;
 }
 
 
 
-HttpRequestHandler	HttpRequestHandler::handleRequest(int client_sock, std::vector<LocationBlock *> locationsBlock) {
+HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock) {
     const size_t bufferSize = 1024;
     char buffer[bufferSize];
     std::string requestData;
@@ -77,12 +61,13 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int client_sock, std::vecto
 	std::cout << "?!?" << allowedMethods[1] << "?!?" << std::endl;
 	std::cout << "?!?" << allowedMethods[2] << "?!?" << std::endl;*/
 
-    while (true) {
+    while (true)
+	{
 		request.setIsComplete(false);
-        int bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
+        int bytesRead = recv(clientSock, buffer, bufferSize - 1, 0);
         i++;
-		std::cout << " MEOW " << i << " MEOW " << std::endl;
-        if (bytesRead <= 0) {
+        if (bytesRead <= 0)
+		{
             request.setFd(bytesRead);
             return request;
         }
@@ -90,72 +75,70 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int client_sock, std::vecto
         buffer[bytesRead] = '\0';
         requestData.append(buffer, bytesRead);
         
-        // If headers aren't complete yet, try to find the end of headers
-        if (!headersComplete) {
+        if (!headersComplete)
+		{
             std::string::size_type headerEnd = requestData.find("\r\n\r\n");
             
-            if (headerEnd != std::string::npos) {
+            if (headerEnd != std::string::npos)
+			{
                 headersComplete = true;
                 
-                // Get headers portion only
                 std::string headersPart = requestData.substr(0, headerEnd);
                 HttpRequestHandler tempRequest = httpParsing(headersPart);
                 std::string contentLengthStr = tempRequest.getHeader("Content-Length");
                 
-                // Get content length if it exists
-                if (!contentLengthStr.empty()) {
+                if (!contentLengthStr.empty())
+				{
                     std::istringstream iss(contentLengthStr);
                     iss >> contentLength;
                 }
                 
-                // Calculate current body length
                 bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
                 
-                // If it's a GET request or has no content length, we can parse immediately
-                if (contentLength == 0) {
+                if (contentLength == 0)
+				{
                     request = httpParsing(requestData);
                     request.setFd(1);
 					request.setIsComplete(true);
 					request = request.handleConfig(request, locationsBlock);
-					std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
-					std::cout << " \na! " << request << " a! " << std::endl;
+					//std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
+					//std::cout << " \na! " << request << " a! " << std::endl;
                     return request;
                 }
             }
-        } else {
+        }
+		else
+		{
             // Headers are complete, update body length
             std::string::size_type headerEnd = requestData.find("\r\n\r\n");
             bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
         }
-        
-        // Check if we have received all the content
         bool isRequestComplete = false;
-        if (headersComplete) {
-            if (contentLength > 0) {
-                // For requests with Content-Length
+        if (headersComplete)
+		{
+            if (contentLength > 0)
+			{
                 isRequestComplete = (bodyLength >= contentLength);
 				request.setIsComplete(isRequestComplete);
-            } else {
-                // For requests without Content-Length (like GET requests)
+            }
+			else
+			{
                 isRequestComplete = true;
 				request.setIsComplete(true);
             }
         }
-        
-        // Parse only when we have the complete request
-        if (isRequestComplete) {
+        if (isRequestComplete)
+		{
             request = httpParsing(requestData);
             request.setFd(1);
 			request.setIsComplete(isRequestComplete);
 			request = request.handleConfig(request, locationsBlock);
-			std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
-			std::cout << " \nb! " << request << " b! " << std::endl;
+			//std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
+			//std::cout << " \nb! " << request << " b! " << std::endl;
             return request;
         }
-        
-        // Break if we received less than buffer size (likely end of transmission)
-        // but only if we don't know we're waiting for more content
-        if (static_cast<unsigned int>(bytesRead) < bufferSize - 1 && !headersComplete) {
+        if (static_cast<unsigned int>(bytesRead) < bufferSize - 1 && !headersComplete)
+		{
             break;
         }
     }
@@ -164,6 +147,6 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int client_sock, std::vecto
     request.setFd(1);
 	request.setIsComplete(isRequestComplete);
 	request = request.handleConfig(request, locationsBlock);
-	std::cout << " \nc! " << request.getIsComplete() << " c! " << std::endl;
+	//std::cout << " \nc! " << request.getIsComplete() << " c! " << std::endl;
     return request;
 }

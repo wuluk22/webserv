@@ -1,24 +1,28 @@
 #include "HttpResponseHandler.hpp"
 
-std::string url_decode(const std::string& url) {
+std::string urlDecode(const std::string& url)
+{
     std::string decoded;
     size_t length = url.length();
     
-    for (size_t i = 0; i < length; ++i) {
-        if (url[i] == '%') {
-            // Ensure we have two more characters for the hex code
-            if (i + 2 < length) {
-                // Convert the next two characters to a hex value using strtol
+    for (size_t i = 0; i < length; ++i)
+	{
+        if (url[i] == '%')
+		{
+            if (i + 2 < length)
+			{
                 std::string hex_value = url.substr(i + 1, 2);
                 char decoded_char = static_cast<char>(strtol(hex_value.c_str(), NULL, 16));
                 decoded += decoded_char;
-                i += 2; // Skip the next two characters as they are part of the encoding
+                i += 2;
             }
-        } else if (url[i] == '+') {
-            // Convert '+' to a space
+        }
+		else if (url[i] == '+')
+		{
             decoded += ' ';
-        } else {
-            // Copy the character as is
+        }
+		else
+		{
             decoded += url[i];
         }
     }
@@ -26,13 +30,15 @@ std::string url_decode(const std::string& url) {
     return decoded;
 }
 
-bool isCgiRequest(const std::string& path) {
+bool isCgiRequest(const std::string& path)
+{
     const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
 
     const std::string cgiDirectory = "/cgi-bin";
 
-    if (path.find(cgiDirectory) == 0) {
+    if (path.find(cgiDirectory) == 0)
+	{
         return true;
     }
 
@@ -50,7 +56,7 @@ bool isCgiRequest(const std::string& path) {
     return false;
 }
 
-void HttpResponseHandler::sendError(int client_sock, int statusCode, const std::string& statusMsg, const std::string& body)
+void HttpResponseHandler::sendError(int clientSock, int statusCode, const std::string& statusMsg, const std::string& body)
 {
     try
     {
@@ -67,7 +73,7 @@ void HttpResponseHandler::sendError(int client_sock, int statusCode, const std::
 
         // Send the error response
         std::string responseStr = getAll();
-        send(client_sock, responseStr.c_str(), responseStr.length(), 0);
+        send(clientSock, responseStr.c_str(), responseStr.length(), 0);
     }
     catch (const std::exception& e)
     {

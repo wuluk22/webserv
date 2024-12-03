@@ -5,7 +5,8 @@
 # include <exception>
 # include <sstream>
 
-class Error : public std::exception {
+class Error : public std::exception
+{
 	protected:
 		std::string msg;
 	public:
@@ -14,13 +15,15 @@ class Error : public std::exception {
 		virtual ~Error() throw();
 };
 
-class ServerHandlerError : public Error {
+class ServerHandlerError : public Error
+{
 	public:
 		explicit ServerHandlerError(const std::string& msg, const char* function, int line);
 		virtual ~ServerHandlerError() throw();
 };
 
-class ServerBaseError : public Error {
+class ServerBaseError : public Error
+{
 	public:
 		explicit ServerBaseError(const std::string& msg, const char* function, int line);
 		virtual ~ServerBaseError() throw();

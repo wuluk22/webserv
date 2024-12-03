@@ -42,6 +42,6 @@ class ServerHandler
 		void				setNonblocking(int sock);
 };
 
-void print_fd_set(const fd_set& fdset, std::string functionName);
+void						printFdSet(const fd_set& fdset, std::string functionName);
 
 #endif

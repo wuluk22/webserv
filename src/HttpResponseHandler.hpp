@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/11/26 12:47:21 by clegros          ###   ########.fr       */
+/*   Updated: 2024/12/03 16:49:20 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,27 +33,27 @@ class HttpResponseHandler
 		void		setHeader(const std::string &headerName, const std::string &headerValue);
 		void		setBody(std::string body);
 		
-		std::string	getHttpVersion() const;
-		int			getStatusCode() const;
-		std::string getStatusMsg() const;
-		std::string	getHeader(const std::string &headerName) const;
-		std::map<std::string, std::string> getHeaders() const;
-		std::string	getBody() const;
-		std::string	getAll() const;
-		HttpResponseHandler	handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
-		void		handleResponse(HttpRequestHandler& request, int client_sock);
-		void		sendError(int client_sock, int statusCode, const std::string& statusMsg, const std::string& body);
+		std::string							getHttpVersion() const;
+		int									getStatusCode() const;
+		std::string							getStatusMsg() const;
+		std::string							getHeader(const std::string &headerName) const;
+		std::map<std::string, std::string>	getHeaders() const;
+		std::string							getBody() const;
+		std::string							getAll() const;
+		HttpResponseHandler					handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
+		void								handleResponse(HttpRequestHandler& request, int clientSock);
+		void								sendError(int clientSock, int statusCode, const std::string& statusMsg, const std::string& body);
 	private:
-		std::string	httpVersion;
-		int			code;
-		std::string	status;
-		std::map<std::string, std::string> headers;
-		std::string	body;
+		std::string							httpVersion;
+		int									code;
+		std::string							status;
+		std::map<std::string, std::string>	headers;
+		std::string							body;
 };
-std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i);
-std::string		url_decode(const std::string& url);
+std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);
+std::string			urlDecode(const std::string& url);
 HttpResponseHandler	handleGet(HttpRequestHandler& request, HttpResponseHandler& response);
-void			setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg);
-bool			isCgiRequest(const std::string& path);
+void				setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg);
+bool				isCgiRequest(const std::string& path);
 
 #endif

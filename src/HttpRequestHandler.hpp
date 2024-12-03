@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2024/12/02 15:42:34 by clegros          ###   ########.fr       */
+/*   Updated: 2024/12/03 16:43:33 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 # include <fstream>
 # include <sys/stat.h>
 # include <cstring>
+# include <algorithm>
 
 class HttpResponseHandler;
 
@@ -37,11 +38,13 @@ class HttpRequestHandler
 		std::string									httpVersion;
 		std::map<std::string, std::string>			headers;
 		std::string									body;
-		std::vector<std::string>					allowedMethods;
-		std::vector<std::string>					allowedPaths;
-		std::string									rootDirectory;
+
+		std::vector<std::string>					allowedMethods; // GET POST DELETE
+		std::vector<std::string>					allowedPaths; // /static/ / /upload
+		std::string									rootDirectory; // /public
+		
 		bool										isRequestComplete;
-		static std::string							extractBoundary(const std::string& content_type);
+		static std::string							extractBoundary(const std::string& contentType);
     	static std::string							generateErrorResponse(const std::string& message);
 	public:
 		HttpRequestHandler();
@@ -50,7 +53,7 @@ class HttpRequestHandler
 		std::string									trim(const std::string& str);
 		bool										endsWith(const std::string& str, const std::string& suffix);
 		std::string									getMimeType(const std::string& path);
-		std::string									createErrorPage(int status_code, const std::string& message);
+		std::string									createErrorPage(int statusCode, const std::string& message);
 		std::string									toString(size_t value);
 		static std::string							readFile(const std::string& path);
 		static bool									fileExists(const std::string& path);
@@ -80,7 +83,7 @@ class HttpRequestHandler
 		const std::vector<std::string>&				getAllowedMethods() const;
 		const std::vector<std::string>&				getAllowedPaths() const;
 
-		HttpRequestHandler							handleRequest(int client_sock, std::vector<LocationBlock *> locationsBlock);
+		HttpRequestHandler							handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
 		//HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
 		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);

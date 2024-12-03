@@ -45,7 +45,6 @@ bool HttpRequestHandler::isPathAllowed(const HttpRequestHandler& request, const 
 		return false;
 }
 
-// number to string conversion
 std::string HttpRequestHandler::toString(size_t value)
 {
     std::ostringstream	oss;
@@ -65,12 +64,12 @@ std::string HttpRequestHandler::getMimeType(const std::string& path)
     return "text/plain";
 }
 
-std::string HttpRequestHandler::createErrorPage(int status_code, const std::string& message)
+std::string HttpRequestHandler::createErrorPage(int statusCode, const std::string& message)
 {
     std::ostringstream	oss;
 
-    oss << "<html><head><title>" << status_code << " - " << message << "</title></head>";
-    oss << "<body><h1>" << status_code << " - " << message << "</h1></body></html>";
+    oss << "<html><head><title>" << statusCode << " - " << message << "</title></head>";
+    oss << "<body><h1>" << statusCode << " - " << message << "</h1></body></html>";
     return oss.str();
 }
 
@@ -83,6 +82,7 @@ bool HttpRequestHandler::fileExists(const std::string& path)
 
 std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 {
+	out << "\n---------------------------REQUEST---------------------------------\n";
     out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
     const std::map<std::string, std::string>&	headers = handler.getHeaders();
 	const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
@@ -102,6 +102,7 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 	{
 		out << *it << "\n";
 	}
+	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
 
@@ -119,14 +120,14 @@ std::string HttpRequestHandler::readFile(const std::string& path)
     return std::string(buffer.begin(), buffer.end());
 }
 
-std::string HttpRequestHandler::extractBoundary(const std::string& content_type)
+std::string HttpRequestHandler::extractBoundary(const std::string& contentType)
 {
     size_t	pos;
 
-	pos = content_type.find("boundary=");
+	pos = contentType.find("boundary=");
     if (pos != std::string::npos)
 	{
-        return "--" + content_type.substr(pos + 9);
+        return "--" + contentType.substr(pos + 9);
     }
     return "";
 }

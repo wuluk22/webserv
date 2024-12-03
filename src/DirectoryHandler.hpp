@@ -3,13 +3,19 @@
 
 # include <string>
 # include <vector>
+# include <dirent.h>
+# include <sys/stat.h>
+# include <algorithm>
+# include <ctime>
+# include <sstream>
+# include <iostream>
 
 struct FileInfo
 {
     std::string name;
     std::string size;
     std::string modified;
-    bool is_directory;
+    bool isDirectory;
     
     FileInfo(const std::string& n, const std::string& s, const std::string& m, bool d);
 };
@@ -17,20 +23,20 @@ struct FileInfo
 class DirectoryHandler
 {
     private:
-        static std::string human_readable_size(size_t bytes);
-        static std::string format_time(time_t time);
-        static bool compare_file_info(const FileInfo& a, const FileInfo& b);
-        static std::string generate_breadcrumbs(const std::string& path);
-        static std::string get_mime_type(const std::string& path);
+        static std::string				humanReadableSize(size_t bytes);
+        static std::string				formatTime(time_t time);
+        static bool						compareFileInfo(const FileInfo& a, const FileInfo& b);
+        static std::string				generateBreadcrumbs(const std::string& path);
+        static std::string				getMimeType(const std::string& path);
 
     public:
         DirectoryHandler();
         ~DirectoryHandler();
 
-        static std::vector<FileInfo> get_directory_listing(const std::string& dir_path);
-        static std::string generate_directory_page(const std::string& path, const std::vector<FileInfo>& files);
-        static bool create_directory(const std::string& path);
-        static bool is_directory(const std::string& path);
+        static std::vector<FileInfo>	getDirectoryListing(const std::string& dir_path);
+        static std::string				generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files);
+        static bool						createDirectory(const std::string& path);
+        static bool						isDirectory(const std::string& path);
 };
 
 #endif

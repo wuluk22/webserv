@@ -130,7 +130,7 @@ std::string ConfigParser::removeExcessiveSlashes(const std::string& path) {
 		}
 	}
 	if (!result.empty() && result[result.size() - 1] != '/') {
-		result = result + "/";
+		//result = result + "/";
 	}
     return (result);
 }

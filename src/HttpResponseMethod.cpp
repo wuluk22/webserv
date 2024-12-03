@@ -11,25 +11,13 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
 
 	filePath = staticDir + request.getPath();
 
-	std::vector<std::string> allow = request.getAllowedMethods();
-	std::cerr << "handlePath 1-\n" << request << "end!" << std::endl;
-	std::cerr << "request method: " << request.getMethod() << "request allowed: " << allow[0] << std::endl;
-	//std::cerr << "momom" << std::endl;
 	if (!request.isMethodAllowed(request, request.getMethod()))
 	{
-			std::vector<std::string> alles = request.getAllowedMethods();
-			//std::cout << "4577" << alles[0] << "4577" << std::endl;
-			std::cout << request.isMethodAllowed(request, request.getMethod()) << std::endl;
-			std::cout << "all3s" << std::endl;
 			setErrorResponse(request, response, 405, "Method_not_allowed");
-			std::cout << response << std::endl;
 			return response;
 	}
-	// Handle file upload
     if (isCgiRequest(request.getPath()))
     {
-        std::cout << " oioi! " << std::endl;
-
 		// handleCGI(request);
         setErrorResponse(request, response, 200, "CGI Braowsss");
         return response;
@@ -43,22 +31,17 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
 	{
 		std::string path;
 		path = staticDir + request.getPath();
-		path = url_decode(path);
-		std::cout << " MAAA! " << std::endl;
-		std::cout << request << std::endl;
+		path = urlDecode(path);
+		//std::cout << request << std::endl;
     	if (remove(path.c_str()) == 0) {
-        	// Si la suppression a réussi
-        	response.setStatusCode(200); // OK
+        	response.setStatusCode(200);
         	response.setStatusMsg("OK");
         	response.setBody("Resource deleted successfully.");
-			std::cout << " MOOO! " << std::endl;
 			return response;
     	} else {
-        	// Si la suppression a échoué
-        	response.setStatusCode(404); // Not Found
+        	response.setStatusCode(404);
         	response.setStatusMsg("Not Found");
         	response.setBody("Resource not found.");
-			std::cout << " Miii! " << std::endl;
 			return response;
 		}
     }
@@ -77,14 +60,25 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
 {
     std::string staticDir = request.getRootDirectory();
     std::string filePath;
+    std::string valid;
     struct stat pathStat;
     std::string errorPage;
     std::string content;
 
-	filePath = staticDir + request.getPath();
-    // Check if path is a directory
+    filePath = staticDir + request.getPath();
+	valid = "/" + staticDir + request.getPath();
+    // request.isPathAllowed(request, request.getPath())
+    std::cout << request << std::endl;
+    std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << request.getPath() << std::endl;
+    /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
+    {
+        setErrorResponse(request, response, 404, "Path not allowed");
+        std::cout << "\n--- ::" << valid << std::endl;
+        return response;
+    }*/
     if (request.getPath() == "/static")
 	{
+        std::cout << "------HERE------" << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
 	    {
 	    	if (S_ISDIR(pathStat.st_mode))
@@ -94,7 +88,6 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
 	    	}
 	    }
     }
-    // Handle default page
     if (request.getPath() == "/")
     {
         filePath = staticDir + "/index.html";
@@ -119,13 +112,12 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("X-Frame-Options", "SAMEORIGIN");
     response.setHeader("X-XSS-Protection", "1; mode=block");
-    std::cout << response << std::endl;
+    //std::cout << response << std::endl;
     return response;
 }
 
 void    setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg)
 {
-    std::cout << " here ! " << std::endl;
     response.setStatusCode(statusCode);
     response.setStatusMsg(statusMsg);
     std::string errorPage = request.createErrorPage(statusCode, statusMsg);
