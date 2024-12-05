@@ -15,7 +15,7 @@ ConfigParser::ConfigParser(const std::string init_path) {
     initializeVector(c_params, c_items, ARRAY_SIZE(c_items));
     std::string non_repeat_s[] = { "root" };
     initializeVector(non_repeat_s_token, non_repeat_s,ARRAY_SIZE(non_repeat_s));
-    std::string non_repeat_l[] = { "root", "cgi_extensions", "cgi_path" };
+    std::string non_repeat_l[] = { "root", "cgi_path" };
     initializeVector(non_repeat_l_token, non_repeat_l, ARRAY_SIZE(non_repeat_l));
 
 	if (init_path.empty() || !endsWith(init_path, FILE_EXT))
@@ -79,8 +79,10 @@ bool ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 	} else if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
-	if (directive->getContentPath().empty())
-		directive->setContentPath(removeExcessiveSlashes(root + uri));
+	if (!directive->setContentPath(removeExcessiveSlashes(root + uri))) {
+		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
+		return (false);
+	}
 	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root))) {
 		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
 		return (false);
