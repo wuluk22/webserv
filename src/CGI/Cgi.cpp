@@ -9,6 +9,10 @@
 # include "../Logger.hpp"
 # include "../HttpRequestHandler.hpp"
 
+std::string         getQuery(std::string path);
+std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scriptPath);
+void handleCGI(HttpRequestHandler request, std::string scriptPath);
+
 std::string         getQuery(std::string path)
 {
     std::string query;
@@ -17,22 +21,23 @@ std::string         getQuery(std::string path)
     return query;
 }
 
-std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string cgiPath)
+std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scriptPath)
 {
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
     
     stringEnv.push_back("REQUEST_METHOD=" + request.getMethod());
-    stringEnv.push_back("SCRIPT_PATH=" + cgiPath);
+    stringEnv.push_back("SCRIPT_PATH=" + scriptPath);
     if (request.getMethod() == "GET")
         stringEnv.push_back("QUERY_STRING=" + getQuery(request.getPath()));
     if (request.getMethod() == "POST") {
-        stringEnv.push_back("CONTENT_TYPE=" + request.getMimeTypeCgi(request.getPath()));
-        stringEnv.push_back("CONTENT_LENGTH=" + request.getHeader("CENTENT_LENGTH"));
+        // stringEnv.push_back("CONTENT_TYPE=" + request.getMimeTypeCgi(request.getPath()));
+        stringEnv.push_back("CONTENT_LENGTH=" + request.getHeader("CONTENT_LENGTH"));
     }
     stringEnv.push_back("SERVER_PROTOCOL=" + request.getHttpVersion());
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
-    stringEnv.push_back("SERVER_NAME=" + request.getServerName());
+    stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
+    // stringEnv.push_back("SERVER_NAME=" + request.getServerName());
 
     for (size_t i = 0; i < stringEnv.size(); i++) {
         envp.push_back(const_cast<char *>(stringEnv[i].c_str()));
@@ -41,17 +46,18 @@ std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string cgiPa
     return envp;
 }
 
-void handleCGI(HttpRequestHandler request, std::string cgiPath) {
+void handleCGI(HttpRequestHandler request, std::string scriptPath) {
     int pid = fork();
+    std::string cgiPath = "/usr/bin/python3";
     if (pid < 0) {
         // Gestion d'erreur : le fork a échoué
         Logger::log("Fork failed!");
         return;
     } else if (pid == 0) { // Processus enfant
-        std::vector<char *> envp = homeMadeSetEnv(request, cgiPath);
+        std::vector<char *> envp = homeMadeSetEnv(request, scriptPath);
         // Redirection des entrées/sorties si nécessaire
 
-        char* args[] = {const_cast<char*>(cgiPath.c_str()), NULL};
+        char* args[] = {const_cast <char*>(cgiPath.c_str()), const_cast<char*>(scriptPath.c_str()), NULL};
         if (access(cgiPath.c_str(), X_OK) == 0) {
             execve(cgiPath.c_str(), args, envp.data());
             // Si execve échoue
