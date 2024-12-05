@@ -172,7 +172,8 @@ bool ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *
 	if (directive->getRoot().empty()) {
 		std::cout << WARNING_HEADER << NO_ROOT_DEFINED_ERROR_PAGES << RESET << std::endl;
 		path = args.back();
-	}
+	} else
+		path = removeExcessiveSlashes(directive->getRoot() + args.back());  
 	_validator.setPath(path);
 	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable())) {
 		std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
