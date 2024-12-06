@@ -60,7 +60,6 @@ void HttpResponseHandler::sendError(int clientSock, int statusCode, const std::s
 {
     try
     {
-        // Create an error response
         setHttpVersion("HTTP/1.1");
         setStatusCode(statusCode);
         setStatusMsg(statusMsg);
@@ -71,7 +70,6 @@ void HttpResponseHandler::sendError(int clientSock, int statusCode, const std::s
         setHeader("Content-Length", oss.str());
         setBody(body);
 
-        // Send the error response
         std::string responseStr = getAll();
         send(clientSock, responseStr.c_str(), responseStr.length(), 0);
     }

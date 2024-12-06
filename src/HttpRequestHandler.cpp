@@ -20,18 +20,31 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 	while (i < locationsBlock.size() && locationsBlock[i])
 	{
 			if (locationsBlock[i]->isGetAllowed())
-				if (std::find(methods.begin(), methods.end(), std::string("GET")) == methods.end())
+				if (std::find(methods.begin(), methods.end(), "GET") == methods.end())
 					methods.push_back("GET");
 			if (locationsBlock[i]->isPostAllowed())
-				if (std::find(methods.begin(), methods.end(), std::string("POST")) == methods.end())
+				if (std::find(methods.begin(), methods.end(), "POST") == methods.end())
 					methods.push_back("POST");
 			if (locationsBlock[i]->isDeleteAllowed())
-				if (std::find(methods.begin(), methods.end(), std::string("DELETE")) == methods.end())
+				if (std::find(methods.begin(), methods.end(), "DELETE") == methods.end())
 					methods.push_back("DELETE");
-
 			std::string uri = locationsBlock[i]->getUri();
-			if (!uri.empty())
+			if (!uri.empty() && std::find(paths.begin(), paths.end(), uri) == paths.end())
 					paths.push_back(locationsBlock[i]->getUri());
+			/*if (block->hasRoot())
+            	root = block->getRoot();
+        
+        	if (block->hasServerName())
+        	    serverName = block->getServerName();
+			
+        	if (block->hasClientMaxBodySize())
+        	    clientMaxBodySize = block->getClientMaxBodySize();
+			
+        	if (block->hasRedirect())
+			{
+        	    redirectEnabled = true;
+        	    redirectUrl = block->getRedirectUrl();
+        	}*/
 			i++;
 	}
 	tmpRequest.setAllowedMethods(methods);
@@ -43,29 +56,21 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
 
 
-HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock) {
+HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock)
+{
     const size_t bufferSize = 1024;
     char buffer[bufferSize];
     std::string requestData;
     HttpRequestHandler request;
-    
-    // State tracking
     bool headersComplete = false;
     unsigned int contentLength = 0;
     unsigned int bodyLength = 0;
-	int	i = 0;
 	
 	request = request.handleConfig(request, locationsBlock);
-
-	/*std::cout << "?!?" << allowedMethods[0] << "?!?" << std::endl;
-	std::cout << "?!?" << allowedMethods[1] << "?!?" << std::endl;
-	std::cout << "?!?" << allowedMethods[2] << "?!?" << std::endl;*/
-
     while (true)
 	{
 		request.setIsComplete(false);
         int bytesRead = recv(clientSock, buffer, bufferSize - 1, 0);
-        i++;
         if (bytesRead <= 0)
 		{
             request.setFd(bytesRead);
@@ -109,7 +114,6 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector
         }
 		else
 		{
-            // Headers are complete, update body length
             std::string::size_type headerEnd = requestData.find("\r\n\r\n");
             bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
         }
