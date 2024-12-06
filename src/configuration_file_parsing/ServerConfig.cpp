@@ -98,6 +98,10 @@ unsigned int ADirective::getClientMaxBodySize(void) const {
 	return (this->_common_params._client_max_body_size);
 }
 
+bool ADirective::isDirectiveServerLevel(void) const {
+	return (this->_common_params.server_level);
+}
+
 std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 	const std::set<std::string> indexSet = params->getIndex();
 
@@ -113,6 +117,7 @@ std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 // ServerBlock
 
 ServerBlock::ServerBlock(void) {
+	this->_common_params.server_level = true;
 	if (IS_LINUX)
 		this->_server_params._listen.insert(1024);
 	else
@@ -164,21 +169,6 @@ bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	return (true);
 }
 
-bool ServerBlock::setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record) {
-	unsigned int error_value;
-	std::pair<unsigned int, std::string> current_pair;
-	
-	if (error_pages_record.empty())
-		return (false);
-	for (std::map<unsigned int, std::string>::iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
-		current_pair = (*it);
-		error_value = current_pair.first;
-		this->_server_params._error_pages_record.erase(error_value);
-		this->_server_params._error_pages_record.insert(*it);
-	}
-	return (true);
-}
-
 std::set <std::string> ServerBlock::getServerName(void) const {
 	return (this->_server_params._server_name);
 }
@@ -187,14 +177,9 @@ std::set <unsigned int> ServerBlock::getListeningPort(void) const {
 	return (this->_server_params._listen);
 }
 
-std::map<unsigned int, std::string> ServerBlock::getErrorPagesRecord(void) const {
-	return (this->_server_params._error_pages_record);
-}
-
 std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 	const std::set<unsigned int> listening_ports = params->getListeningPort();
 	const std::set<std::string> server_names = params->getServerName();
-	const std::map<unsigned int, std::string> error_pages_record = params->getErrorPagesRecord();
 
 	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
 	os << static_cast<const ADirective *>(params);
@@ -202,18 +187,14 @@ std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 		os << "Listening ports : " << (*it) << "\n"; 
 	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
 		os << "Server name : " << (*it) << "\n";
-	
-	for (std::map<unsigned int, std::string>::const_iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
-		if (it == error_pages_record.begin())
-			os << "Error pages redefinition" << "\n";
-		os << "Port : " << (*it).first << " | Path : " << (*it).second << std::endl;
-	}
 	return (os);
 }
 
 // LocationBlock
 
 LocationBlock::LocationBlock(void) {
+	this->_common_params.server_level = false;
+	this->_location_params._is_cgi = false;
 	this->_common_params._client_max_body_size = 1;
 	this->_location_params._modified_auto_index = false;
 	this->_location_params._modified_client_max_body_size = false;
@@ -250,6 +231,10 @@ void LocationBlock::clientMaxBodySizeModified(void) {
 
 void LocationBlock::autoIndexModified(void) {
 	this->_location_params._modified_auto_index = true;
+}
+
+void LocationBlock::setIsCgi(bool value) {
+	this->_location_params._is_cgi = value;
 }
 
 bool LocationBlock::setCgiPath(std::string path_args) {
@@ -306,7 +291,7 @@ bool LocationBlock::setContentPath(std::string content_path) {
 }
 
 bool LocationBlock::isCgiAllowed(void) const {
-	return (!this->_location_params._cgi_path.empty());
+	return (this->_location_params._is_cgi);
 }
 
 std::string LocationBlock::getCgiPath(void) const {
@@ -326,7 +311,7 @@ std::string LocationBlock::getContentPath(void) const {
 }
 
 bool LocationBlock::isDirectiveCgi(void) const {
-	return (!this->_location_params._cgi_path.empty());
+	return (this->_location_params._is_cgi);
 }
 
 bool LocationBlock::isGetAllowed(void) const {

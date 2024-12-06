@@ -1,16 +1,16 @@
 #ifndef SOCKETHANDLER_HPP
 # define SOCKETHANDLER_HPP
 
-# include "ErrorHandler.hpp"
-# include "configuration_file_parsing/ServerConfig.hpp"
+#include "ErrorHandler.hpp"
+#include "configuration_file_parsing/ServerConfig.hpp"
 
-# include <netinet/in.h>
-# include <sys/select.h>
-# include <sys/socket.h>
-# include <netinet/in.h>
-# include <fcntl.h>
-# include <unistd.h>
-# include <vector>
+#include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <vector>
 
 class ServerHandler
 {
@@ -26,15 +26,13 @@ class ServerHandler
 		// METHODS
 		ServerHandler();
 		~ServerHandler();
-
 		int&							getSock();
 		int&							getPort();
 		struct sockaddr*				getAddress();
 		socklen_t&						getAddrlen();
 		std::vector<LocationBlock *>&	getLocations();
 
-		void							setLocations(std::vector<LocationBlock *>& locations);
-
+		void				setLocations(std::vector<LocationBlock *>& locations);
 		void				InitializeServerSocket(int port, const int backlog);
 		int					createSocket();
 		void				setSocketOptions(int sock);
@@ -43,6 +41,6 @@ class ServerHandler
 		void				setNonblocking(int sock);
 };
 
-void print_fd_set(const fd_set& fdset, std::string functionName);
+void						printFdSet(const fd_set& fdset, std::string functionName);
 
 #endif

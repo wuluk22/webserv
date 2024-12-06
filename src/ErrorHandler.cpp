@@ -1,4 +1,8 @@
 #include "ErrorHandler.hpp"
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <ctime>
 
 std::string toStr(const char* value)
 {

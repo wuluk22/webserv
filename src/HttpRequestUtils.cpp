@@ -19,7 +19,32 @@ bool HttpRequestHandler::endsWith(const std::string& str, const std::string& suf
     return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
-// number to string conversion
+bool HttpRequestHandler::isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const
+{
+		std::vector<std::string> alwdMet = request.getAllowedMethods();
+		for (size_t i = 0; i < alwdMet.size(); i++)
+		{
+				if (alwdMet[i] == method)
+				{
+						return true;
+				}
+		}
+		return false;
+}
+
+bool HttpRequestHandler::isPathAllowed(const HttpRequestHandler& request, const std::string& path) const
+{
+		std::vector<std::string> alwdPat = request.getAllowedPaths();
+		for (size_t i = 0; i < alwdPat.size(); i++)
+		{
+				if (alwdPat[i] == path)
+				{
+						return true;
+				}
+		}
+		return false;
+}
+
 std::string HttpRequestHandler::toString(size_t value)
 {
     std::ostringstream	oss;
@@ -39,12 +64,12 @@ std::string HttpRequestHandler::getMimeType(const std::string& path)
     return "text/plain";
 }
 
-std::string HttpRequestHandler::createErrorPage(int status_code, const std::string& message)
+std::string HttpRequestHandler::createErrorPage(int statusCode, const std::string& message)
 {
     std::ostringstream	oss;
 
-    oss << "<html><head><title>" << status_code << " - " << message << "</title></head>";
-    oss << "<body><h1>" << status_code << " - " << message << "</h1></body></html>";
+    oss << "<html><head><title>" << statusCode << " - " << message << "</title></head>";
+    oss << "<body><h1>" << statusCode << " - " << message << "</h1></body></html>";
     return oss.str();
 }
 
@@ -57,13 +82,27 @@ bool HttpRequestHandler::fileExists(const std::string& path)
 
 std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 {
+	out << "\n---------------------------REQUEST---------------------------------\n";
     out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
     const std::map<std::string, std::string>&	headers = handler.getHeaders();
+	const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
+	const std::vector<std::string>&				allowedPaths = handler.getAllowedPaths();
     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); 
          it != headers.end(); ++it)
 	{
         out << it->first << ": " << it->second << "\n";
     }
+	out << "\nallowedMethods : \n";
+	for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
+	{
+		out << *it << "\n";
+	}
+	out << "\nallowedPaths : \n";
+	for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
+	{
+		out << *it << "\n";
+	}
+	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
 
@@ -81,14 +120,14 @@ std::string HttpRequestHandler::readFile(const std::string& path)
     return std::string(buffer.begin(), buffer.end());
 }
 
-std::string HttpRequestHandler::extractBoundary(const std::string& content_type)
+std::string HttpRequestHandler::extractBoundary(const std::string& contentType)
 {
     size_t	pos;
 
-	pos = content_type.find("boundary=");
+	pos = contentType.find("boundary=");
     if (pos != std::string::npos)
 	{
-        return "--" + content_type.substr(pos + 9);
+        return "--" + contentType.substr(pos + 9);
     }
     return "";
 }
@@ -112,6 +151,9 @@ void HttpRequestHandler::setHeader(const std::string& name, const std::string& v
 void HttpRequestHandler::setBody(const std::string& b) { body = b; }
 void HttpRequestHandler::setFd(const int& nb) { fd = nb; }
 void HttpRequestHandler::setIsComplete(const bool& is) { isRequestComplete = is; }
+void HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { allowedMethods = methods; }
+void HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { allowedPaths = paths; }
+void HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -125,3 +167,6 @@ std::string HttpRequestHandler::getHeader(const std::string& name) const
 const   std::map<std::string, std::string>& HttpRequestHandler::getHeaders() const { return headers; }
 int     HttpRequestHandler::getFd() const { return fd; }
 bool    HttpRequestHandler::getIsComplete() const { return isRequestComplete; }
+std::string	HttpRequestHandler::getRootDirectory() const { return rootDirectory; }
+const std::vector<std::string>& HttpRequestHandler::getAllowedMethods() const { return allowedMethods; }
+const std::vector<std::string>& HttpRequestHandler::getAllowedPaths() const { return allowedPaths; }

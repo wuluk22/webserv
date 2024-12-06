@@ -7,8 +7,8 @@ void	HttpRequestHandler::handleDirectoryRequest(const std::string& path, HttpRes
 	std::vector<FileInfo>	files;
 
 	dirPath	= "public" + path;
-	files = DirectoryHandler::get_directory_listing(dirPath);
-	content = DirectoryHandler::generate_directory_page(path, files);
+	files = DirectoryHandler::getDirectoryListing(dirPath);
+	content = DirectoryHandler::generateDirectoryPage(path, files);
 	response.setHttpVersion("HTTP/1.1");
 	response.setStatusCode(200);
 	response.setStatusMsg("OK");
@@ -81,9 +81,9 @@ void HttpRequestHandler::handleFileUpload(const std::string& requestData, const 
 
     // Ensure directory exists
     uploadPath = "public" + path;
-    if (!DirectoryHandler::is_directory(uploadPath.c_str()))
+    if (!DirectoryHandler::isDirectory(uploadPath.c_str()))
     {
-        if (!DirectoryHandler::create_directory(uploadPath.c_str()))
+        if (!DirectoryHandler::createDirectory(uploadPath.c_str()))
         {
             throw std::runtime_error("Failed to create upload directory");
         }

@@ -4,12 +4,12 @@
 #include <vector>
 #include <iostream>
 #include <set>
-#include <map>
 
 #include "ConfigException.hpp"
 #include "PathValidator.hpp"
 
 struct s_common_params {
+	bool server_level;
 	std::string _root;
 	std::set <std::string> _index;
 	bool _auto_index;
@@ -19,10 +19,10 @@ struct s_common_params {
 struct s_server_params {
 	std::set<std::string> _server_name;
 	std::set<unsigned int> _listen;
-	std::map<unsigned int, std::string> _error_pages_record;
 };
 
 struct s_loc_params {
+	bool _is_cgi;
 	std::string _cgi_path;
 	std::string _uri;
 	std::string _content_path;
@@ -88,6 +88,7 @@ class ADirective {
 		std::set <std::string> getIndex(void) const;
 		bool getAutoIndex(void) const;
 		unsigned int getClientMaxBodySize(void) const;
+		bool isDirectiveServerLevel(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const s_common_params *params);
@@ -107,12 +108,10 @@ class ServerBlock : public ADirective {
 		//Individual setters
 		bool setServerName(std::set<std::string> server_names);
 		bool setListeningPort(std::set<unsigned int> listening_ports);
-		bool setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record);
 
 		//Individual getter
 		std::set<std::string> getServerName(void) const;
 		std::set<unsigned int> getListeningPort(void) const;
-		std::map<unsigned int, std::string> getErrorPagesRecord(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock *server_params);
@@ -140,6 +139,7 @@ class LocationBlock : public ADirective {
 		bool setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
 		bool setContentPath(std::string content_path);
+		void setIsCgi(bool value);
 		// Individual getter
 		std::string getCgiPath(void) const;
 		std::string getAlias(void) const;

@@ -80,7 +80,6 @@ class ConfigParser {
 		std::string returnSecondArgs(std::string args);
 		bool checkPathLocationDirective(LocationBlock *location_block);
 		std::string removeExcessiveSlashes(const std::string& path);
-		bool distinctUri(std::string current_uri, ServerConfig *current_server);
 
 		// Main methods
 		void parseConfigurationFile(std::ifstream &configuration_file);
@@ -107,7 +106,6 @@ class ConfigParser {
 		// Server
 		bool parseServerName(std::vector <std::string> args, ServerBlock *directive);
 		bool parseListeningPorts(std::vector <std::string> args, ServerBlock *directive);
-		bool parseErrorPages(std::vector <std::string> args, ServerBlock *directive);
 	public:
 		~ConfigParser();
 		ConfigParser(const ConfigParser &copy);
