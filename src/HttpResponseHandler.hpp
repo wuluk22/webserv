@@ -6,7 +6,7 @@
 /*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/12/03 16:49:20 by clegros          ###   ########.fr       */
+/*   Updated: 2024/12/06 11:19:25 by clegros          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,5 +55,6 @@ std::string			urlDecode(const std::string& url);
 HttpResponseHandler	handleGet(HttpRequestHandler& request, HttpResponseHandler& response);
 void				setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg);
 bool				isCgiRequest(const std::string& path);
+void				handleCgi(HttpRequestHandler& request, HttpResponseHandler& response);
 
 #endif
