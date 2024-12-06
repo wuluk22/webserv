@@ -60,22 +60,23 @@ std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scrip
     return envp;
 }
 
-void handleCGI(HttpRequestHandler request, std::string scriptPath)
+void handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
 {
     int pid = fork();
     std::string cgiPath = "/usr/bin/python3";
+    std::string staticDir = request.getRootDirectory();
+    std::string scriptPath = staticDir + request.getPath();
     if (pid < 0) {
         // Gestion d'erreur : le fork a échoué
         Logger::log("Fork failed!");
         return;
     } else if (pid == 0) { // Processus enfant
-        std::cout << " CHILD PROCESS " << std::endl;
         std::vector<char *> envp = homeMadeSetEnv(request, scriptPath);
         // Redirection des entrées/sorties si nécessaire
 
         char* args[] = {const_cast <char*>(cgiPath.c_str()), const_cast<char*>(scriptPath.c_str()), NULL};
         for (int i = 0; args[i] != NULL; i++) {
-            std::cout << args[i] << std::endl;
+            std::cout << "ARGS : " << args[i] << std::endl;
         }
         if (access(cgiPath.c_str(), X_OK) == 0) {
             execve(cgiPath.c_str(), args, envp.data());

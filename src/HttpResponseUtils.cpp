@@ -36,6 +36,7 @@ bool isCgiRequest(const std::string& path)
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
 
     const std::string cgiDirectory = "/cgi-bin";
+	std::cout << "\nPATH: " << path << std::endl;
 
     if (path.find(cgiDirectory) == 0)
 	{
