@@ -57,6 +57,7 @@ std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scrip
         envp.push_back(const_cast<char *>(stringEnv[i].c_str()));
         std::cout << "ENV : " << envp[i] << std::endl;
     }
+    envp.push_back(NULL);
     return envp;
 }
 
@@ -64,29 +65,30 @@ void handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
 {
     int pid = fork();
     std::string cgiPath = "/usr/bin/python3";
-    std::string staticDir = request.getRootDirectory();
-    std::string scriptPath = staticDir + request.getPath();
+    // std::string staticDir = request.getRootDirectory();
+    // std::string scriptPath = staticDir + request.getPath();
+    std::vector<std::string> scriptPaths = request.getCgiPath();
+    for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++) {
+        std::cout << "scriptpath : " << *it << std::endl;
+    }
     if (pid < 0) {
-        // Gestion d'erreur : le fork a échoué
         Logger::log("Fork failed!");
         return;
     } else if (pid == 0) { // Processus enfant
         std::vector<char *> envp = homeMadeSetEnv(request, scriptPath);
         // Redirection des entrées/sorties si nécessaire
 
-        char* args[] = {const_cast <char*>(cgiPath.c_str()), const_cast<char*>(scriptPath.c_str()), NULL};
-        for (int i = 0; args[i] != NULL; i++) {
-            std::cout << "ARGS : " << args[i] << std::endl;
-        }
+        std::vector<char*> argv;
+        argv.push_back(const_cast<char*>(cgiPath.c_str()));
+        argv.push_back(const_cast<char*>(scriptPath.c_str()));
+        argv.push_back(NULL);
         if (access(cgiPath.c_str(), X_OK) == 0) {
-            execve(cgiPath.c_str(), args, envp.data());
+            execve(cgiPath.c_str(), argv.data(), envp.data());
             std::cout << "ICI" << std::endl;
             perror("execve failed");
             exit(1);
         }
     } else { // Processus parent
-        // Optionnel : attendre la fin du processus enfant
-        std::cout << " PARENT PROCESS " << std::endl;
         int status;
         waitpid(pid, &status, 0);
         if (WIFEXITED(status)) {

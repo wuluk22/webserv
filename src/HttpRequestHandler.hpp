@@ -42,6 +42,7 @@ class HttpRequestHandler
 		std::vector<std::string>					allowedMethods; // GET POST DELETE
 		std::vector<std::string>					allowedPaths; // /static/ / /upload
 		std::string									rootDirectory; // /public
+		std::vector<std::string>					_CgiPath;
 		
 		bool										isRequestComplete;
 		static std::string							extractBoundary(const std::string& contentType);
@@ -70,6 +71,7 @@ class HttpRequestHandler
 		void										setAllowedMethods(const std::vector<std::string>& methods);
 		void										setAllowedPaths(const std::vector<std::string>& paths);
 		void										setRootDirectory(const std::string& path);
+		void										setCgiPath(const std::vector<std::string>& cgiPath);
 
 		std::string									getMethod(void) const;
 		std::string									getPath(void) const;
@@ -82,6 +84,7 @@ class HttpRequestHandler
 		std::string									getRootDirectory() const;
 		const std::vector<std::string>&				getAllowedMethods() const;
 		const std::vector<std::string>&				getAllowedPaths() const;
+		const std::vector<std::string>&				getCgiPath() const;
 
 		HttpRequestHandler							handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);

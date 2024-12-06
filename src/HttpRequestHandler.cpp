@@ -12,6 +12,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 	std::vector<std::string>	paths;
 	std::vector<std::string>	methods;
 	std::string					root;
+	std::vector<std::string>	cgiPath;
 
 	bool	completed("false");
 	int		i = 0;
@@ -28,6 +29,10 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 			if (locationsBlock[i]->isDeleteAllowed())
 				if (std::find(methods.begin(), methods.end(), "DELETE") == methods.end())
 					methods.push_back("DELETE");
+			if (locationsBlock[i]->isCgiAllowed()) {
+				if (std::find(_CgiPath.begin(), _CgiPath.end(),locationsBlock[i]->getCgiPath()) == _CgiPath.end())
+					_CgiPath.push_back(locationsBlock[i]->getCgiPath());
+			}
 			std::string uri = locationsBlock[i]->getUri();
 			if (!uri.empty() && std::find(paths.begin(), paths.end(), uri) == paths.end())
 					paths.push_back(locationsBlock[i]->getUri());

@@ -154,6 +154,7 @@ void HttpRequestHandler::setIsComplete(const bool& is) { isRequestComplete = is;
 void HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { allowedMethods = methods; }
 void HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { allowedPaths = paths; }
 void HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
+void HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _CgiPath = cgiPath; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -170,3 +171,4 @@ bool    HttpRequestHandler::getIsComplete() const { return isRequestComplete; }
 std::string	HttpRequestHandler::getRootDirectory() const { return rootDirectory; }
 const std::vector<std::string>& HttpRequestHandler::getAllowedMethods() const { return allowedMethods; }
 const std::vector<std::string>& HttpRequestHandler::getAllowedPaths() const { return allowedPaths; }
+const std::vector<std::string>& HttpRequestHandler::getCgiPath() const { return _CgiPath;}
