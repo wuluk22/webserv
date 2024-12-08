@@ -7,15 +7,15 @@ ConfigParser* ConfigParser::instance = NULL;
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
-	std::string l_items[] = { "cgi_path", "cgi_extensions", "cgi_allowed", "alias", "allowed_method"};
+	std::string l_items[] = { "cgi_path", "alias", "allowed_method", "return"};
     initializeVector(l_params, l_items, ARRAY_SIZE(l_items));
-    std::string s_items[] = { "server_name", "listen" };
+    std::string s_items[] = { "server_name", "listen", "error_pages" };
     initializeVector(s_params, s_items, ARRAY_SIZE(s_items));
     std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size"};
     initializeVector(c_params, c_items, ARRAY_SIZE(c_items));
     std::string non_repeat_s[] = { "root" };
     initializeVector(non_repeat_s_token, non_repeat_s,ARRAY_SIZE(non_repeat_s));
-    std::string non_repeat_l[] = { "root", "cgi_extensions", "cgi_path" };
+    std::string non_repeat_l[] = { "root", "cgi_path" };
     initializeVector(non_repeat_l_token, non_repeat_l, ARRAY_SIZE(non_repeat_l));
 
 	if (init_path.empty() || !endsWith(init_path, FILE_EXT))
@@ -79,8 +79,10 @@ bool ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 	} else if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
-	if (directive->getContentPath().empty())
-		directive->setContentPath(removeExcessiveSlashes(root + uri));
+	if (!directive->setContentPath(removeExcessiveSlashes(root + uri))) {
+		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
+		return (false);
+	}
 	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root))) {
 		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
 		return (false);
@@ -111,6 +113,10 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	flag.root_defined = false;
 	flag.went_in_directive = false;
 	uri = returnSecondArgs(working_line);
+	if (!distinctUri(uri, server_config)) {
+		std::cerr << ERROR_HEADER << DOUBLE_LOCATION_URI << AL << current_line << RESET << std::endl;
+		throw ConfigException();
+	}
 	token_counter.enterBlock();
 	server_config->setDirective(location_directive);
 	while (std::getline(config_file, working_line)) {
@@ -234,6 +240,17 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
+bool ConfigParser::distinctUri(std::string current_uri, ServerConfig *current_server) {
+	std::vector <LocationBlock *> all_directives = current_server->getDirectives();
+	if (current_uri.empty())
+		return (false);
+	for (std::vector<LocationBlock *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
+		if ((*it)->getUri() == current_uri)
+			return (false);
+	}
+	return (true);
+}
+
 bool ConfigParser::checkPathLocationDirective(LocationBlock *location_block) {
 	return (true);
 }
@@ -259,5 +276,4 @@ bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
 // 		std::cout << e.what() <<std::endl;
 // 	}
 // 	ServerConfig* c = config->getServerConfig(0);
-// 	std::vector <ADirective *> all_directives = c->getAllDirectives();
 // }
