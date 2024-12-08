@@ -4,12 +4,12 @@
 #include <vector>
 #include <iostream>
 #include <set>
+#include <map>
 
 #include "ConfigException.hpp"
 #include "PathValidator.hpp"
 
 struct s_common_params {
-	bool server_level;
 	std::string _root;
 	std::set <std::string> _index;
 	bool _auto_index;
@@ -19,10 +19,16 @@ struct s_common_params {
 struct s_server_params {
 	std::set<std::string> _server_name;
 	std::set<unsigned int> _listen;
+	std::map<unsigned int, std::string> _error_pages_record;
+};
+
+struct s_return {
+	std::size_t status_code;
+	std::string redirection_url;
 };
 
 struct s_loc_params {
-	bool _is_cgi;
+	s_return _return_args;
 	std::string _cgi_path;
 	std::string _uri;
 	std::string _content_path;
@@ -45,6 +51,8 @@ enum e_allowed_methods {
     #undef IS_LINUX
     #define IS_LINUX 1
 #endif
+
+#define NO_RETURN 999
 
 class LocationBlock;
 class ServerBlock;
@@ -88,7 +96,6 @@ class ADirective {
 		std::set <std::string> getIndex(void) const;
 		bool getAutoIndex(void) const;
 		unsigned int getClientMaxBodySize(void) const;
-		bool isDirectiveServerLevel(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const s_common_params *params);
@@ -108,10 +115,12 @@ class ServerBlock : public ADirective {
 		//Individual setters
 		bool setServerName(std::set<std::string> server_names);
 		bool setListeningPort(std::set<unsigned int> listening_ports);
+		bool setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record);
 
 		//Individual getter
 		std::set<std::string> getServerName(void) const;
 		std::set<unsigned int> getListeningPort(void) const;
+		std::map<unsigned int, std::string> getErrorPagesRecord(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock *server_params);
@@ -139,12 +148,13 @@ class LocationBlock : public ADirective {
 		bool setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
 		bool setContentPath(std::string content_path);
-		void setIsCgi(bool value);
+		bool setReturnArgs(std::size_t status_code, std::string redirection_url);
 		// Individual getter
 		std::string getCgiPath(void) const;
 		std::string getAlias(void) const;
 		std::string getUri(void) const;
 		std::string getContentPath(void) const;
+		s_return getReturnArgs(void) const;
 		bool isCgiAllowed(void) const;
 		bool isDirectiveCgi(void) const;
 		bool isGetAllowed(void) const;
