@@ -217,7 +217,7 @@ LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_auto_index = false;
 	this->_location_params._modified_client_max_body_size = false;
 	this->_location_params._allowed_methods = 0;
-	this->_location_params._return_args.status_code = NO_RETURN;
+	this->_location_params._return_args._status_code = NO_RETURN;
 }
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
@@ -305,9 +305,21 @@ bool LocationBlock::setContentPath(std::string content_path) {
 	return (false);
 }
 
+std::string LocationBlock::getFirstAccessibleIndex(void) {
+	std::string index_file_path;
+	
+	for (std::set<std::string>::iterator it = this->_common_params._index.begin(); it != this->_common_params._index.end(); it++) {
+		index_file_path = this->_location_params._content_path + "/" + (*it);
+		_validator.setPath(index_file_path);
+		if (_validator.exists() && _validator.isFile() && _validator.isReadable())
+			return (index_file_path);
+	}
+	return ("");
+}
+
 bool LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
-	this->_location_params._return_args.status_code = status_code;
-	this->_location_params._return_args.redirection_url = redirection_url;
+	this->_location_params._return_args._status_code = status_code;
+	this->_location_params._return_args._redirection_url = redirection_url;
 	return (true);
 }
 
@@ -369,10 +381,10 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	os	<< "URI: " << params->getUri() << "\n"
 		<< "Content Path: " << params->getContentPath() << "\n"
 		<< "Allowed Methods: " << "\n";
-	if (params->getReturnArgs().status_code != NO_RETURN)
-		os << "Return status code : " << params->getReturnArgs().status_code << "\n";
-	if (!params->getReturnArgs().redirection_url.empty())
-		os << "Redirection URL : " << params->getReturnArgs().redirection_url << "\n";
+	if (params->getReturnArgs()._status_code != NO_RETURN)
+		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
+	if (!params->getReturnArgs()._redirection_url.empty())
+		os << "Redirection URL : " << params->getReturnArgs()._redirection_url << "\n";
 	if (params->isGetAllowed()) 
 		os << "GET ";
 	if (params->isPostAllowed()) 
