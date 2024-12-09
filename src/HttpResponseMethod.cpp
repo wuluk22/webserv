@@ -108,7 +108,7 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
 	}	*/
     if (isCgiRequest(request.getPath()))
     {
-		// handleCGI(request, response);
+		handleCGI(request, response);
         //setErrorResponse(request, response, 200, "CGI Braowsss");
 		filePath = staticDir + "/cgi.html";
 		std::cout << "CGIIIIII" << std::endl;

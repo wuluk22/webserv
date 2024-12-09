@@ -289,16 +289,16 @@ bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
 	return (true);
 }
 
-int main(void) {
-	ConfigParser *config;
-	try {
-		 config = ConfigParser::getInstance("test.conf");
-	} catch (ConfigException &e)
-	{
-		std::cout << e.what() <<std::endl;
-	}
-	while (true) {
-		std::cout << config->areAllPathAccessible(config->getServerConfig(0)) << std::endl;
-		sleep(5);
-	}
-}
+// int main(void) {
+// 	ConfigParser *config;
+// 	try {
+// 		 config = ConfigParser::getInstance("test.conf");
+// 	} catch (ConfigException &e)
+// 	{
+// 		std::cout << e.what() <<std::endl;
+// 	}
+// 	while (true) {
+// 		std::cout << config->areAllPathAccessible(config->getServerConfig(0)) << std::endl;
+// 		sleep(5);
+// 	}
+// }
