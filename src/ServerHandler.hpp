@@ -15,7 +15,6 @@
 class ServerHandler
 {
 	private:
-		// struct addrinfo 	hints; // for getaddrinfo();
 		struct sockaddr_in				_address;
 		socklen_t						_addrlen;
 		int								_sock;

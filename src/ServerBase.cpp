@@ -86,17 +86,9 @@ void	ServerBase::processClientConnections()
 		cpyWriteFds = writefds;
 		std::vector<int> clientToRemove;
 
-		// std::cout << "BEGIN PROGRAM" << std::endl;
-		// print_fd_set(readfds, "readfds");
-		// print_fd_set(writefds, "writefds");
-		// print_fd_set(cpyReadFds, "cpyReadFds");
-		// print_fd_set(cpyWriteFds, "cpyWriteFds");
-		std::cout << std::endl;
         // Wait for an activity on one of the sockets
         if (select(maxSock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
 		{
-			// print_fd_set(cpyReadFds, "IN SELECT cpyReadFds");
-			// print_fd_set(cpyWriteFds, "cpyWriteFds");
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 		}
         // If activity on server socket, it's an incoming connection
@@ -164,12 +156,5 @@ void	ServerBase::processClientConnections()
 				}
 			}
 		}
-		// std::cout << "END OF PROGRAM" << std::endl;
-		// print_fd_set(cpyReadFds, "cpyReadFds");
-		// print_fd_set(cpyWriteFds, "cpyWriteFds");
-		// to verify the content of clientSockets
-		// for (unsigned long i = 0; i < ClientSockets.size(); i++) {
-		// 	std::cout << i << " : " << ClientSockets[i] << std::endl;
-		// }
     }
 }
