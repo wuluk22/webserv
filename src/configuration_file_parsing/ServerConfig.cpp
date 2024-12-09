@@ -118,15 +118,11 @@ std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 
 ServerBlock::ServerBlock(void) {
 	this->_common_params.server_level = true;
-<<<<<<< HEAD
 	if (IS_LINUX)
 		this->_server_params._listen.insert(1024);
 	else
 		this->_server_params._listen.insert(80);
 	listening_ports_set = false;
-=======
-	this->_server_params._listen.insert(80);
->>>>>>> test-socket-request-responses
 }
 
 ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {
@@ -145,12 +141,7 @@ s_server_params ServerBlock::getServerParams(void) const {
 }
 
 ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
-<<<<<<< HEAD
 	if (this != &rhs) {
-=======
-	if (this != &rhs)
-	{
->>>>>>> test-socket-request-responses
 		this->_common_params = rhs._common_params;
 		this->_server_params = rhs._server_params;
 	}
@@ -167,7 +158,6 @@ bool ServerBlock::setServerName(std::set<std::string> server_names) {
 bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	if (listening_ports.empty())
 		return (false);
-<<<<<<< HEAD
 	if (!listening_ports_set) {
 		this->_server_params._listen = listening_ports;
 		listening_ports_set = true;
@@ -176,9 +166,6 @@ bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 			this->_server_params._listen.insert(*it);
 		}
 	}
-=======
-	this->_server_params._listen = listening_ports;
->>>>>>> test-socket-request-responses
 	return (true);
 }
 
@@ -209,13 +196,8 @@ LocationBlock::LocationBlock(void) {
 	this->_common_params.server_level = false;
 	this->_location_params._is_cgi = false;
 	this->_common_params._client_max_body_size = 1;
-<<<<<<< HEAD
 	this->_location_params._modified_auto_index = false;
 	this->_location_params._modified_client_max_body_size = false;
-=======
-	this->_location_params.modified_auto_index = false;
-	this->_location_params.modified_client_max_body_size = false;
->>>>>>> test-socket-request-responses
 	this->_location_params._allowed_methods = 0;
 }
 
