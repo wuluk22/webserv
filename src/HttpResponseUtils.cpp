@@ -99,6 +99,10 @@ void	HttpResponseHandler::setStatusCode(int code) { this->code = code; }
 void	HttpResponseHandler::setStatusMsg(std::string message) { this->status = message; }
 void	HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { headers[headerName] = headerValue; }
 void	HttpResponseHandler::setBody(std::string body) { this->body = body; }
+void	HttpResponseHandler::setResponse(std::string output)
+{
+    
+}
 
 std::string HttpResponseHandler::getHttpVersion() const { return httpVersion; }
 int         HttpResponseHandler::getStatusCode() const { return code; }
