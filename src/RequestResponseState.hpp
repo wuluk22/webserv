@@ -1,7 +1,7 @@
 #ifndef REQUESTRESPONSESTATE_HPP
 # define REQUESTRESPONSESTATE_HPP
 
-#include <cstddef>
+# include <cstddef>
 # include <iostream>
 # include "HttpRequestHandler.hpp"
 # include "HttpResponseHandler.hpp"
@@ -12,9 +12,8 @@ class	HttpResponseHandler;
 class	RRState
 {
 	private:
-		HttpRequestHandler				_request;
-		HttpResponseHandler				_response;
-		std::vector<LocationBlock *>	_locations;
+		HttpRequestHandler	_request;
+		HttpResponseHandler	_response;
 	
 	public:
 	//METHODS
@@ -22,15 +21,12 @@ class	RRState
 	~RRState();
 
 	//GETTER
-	HttpRequestHandler&				getRequest();
-	HttpResponseHandler&			getResponse();
-	std::vector<LocationBlock *>&	getLocations();
-
+	HttpRequestHandler&		getRequest();
+	HttpResponseHandler&	getResponse();
+;	
 	//SETTER
 	void				setRequest(HttpRequestHandler& req);
 	void				setResponse(HttpResponseHandler& res);
-	void				setLocations(std::vector<LocationBlock *>& locations);
-	HttpRequestHandler	initRequest(const HttpRequestHandler& request);
 };
 
 #endif

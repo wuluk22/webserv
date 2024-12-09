@@ -25,9 +25,6 @@
 #define NO_ROOT_DEFINITION "No root definition, vacant URI prefix, aborting"
 #define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
 #define UNDEFINED_PARAMS "Undefined parameter"
-#define NUMERICAL_VALUE_EXPECTED "Numerical value expected, aborting"
-#define RESERVED_PORTS_LINUX "Ports under 1024 are reserved, aborting"
-#define AMBIGUOUS_URI_DEFINITION "Root and alias cannot be declared inside the same location, aborting"
 #define AL " at line : "
 #define RESET "\e[0m"
 

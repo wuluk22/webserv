@@ -10,8 +10,6 @@ FILES	=	src/main \
 			src/ServerBase \
 			src/HttpRequestHandler \
 			src/HttpResponseHandler \
-			src/HttpResponseMethod \
-			src/HttpResponseUtils \
 			src/HttpRequestUtils \
 			src/HttpRequestParsing \
 			src/HttpRequestDir \
@@ -25,7 +23,7 @@ FILES	=	src/main \
 			src/configuration_file_parsing/ServerConfig \
 			src/configuration_file_parsing/ConfigParserUtils \
 			src/configuration_file_parsing/TokenCounter \
-			src/configuration_file_parsing/DirectiveParser
+			src/configuration_file_parsing/DirectiveParser 
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)

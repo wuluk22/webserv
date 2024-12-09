@@ -1,39 +1,34 @@
 #ifndef SOCKETHANDLER_HPP
 # define SOCKETHANDLER_HPP
 
-#include "ErrorHandler.hpp"
-#include "configuration_file_parsing/ServerConfig.hpp"
+# include "ErrorHandler.hpp"
 
-#include <netinet/in.h>
-// #include <sys/_types/_socklen_t.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <vector>
+# include <netinet/in.h>
+# include <sys/select.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <fcntl.h>
+# include <unistd.h>
 
 class ServerHandler
 {
 	private:
 		// struct addrinfo 	hints; // for getaddrinfo();
-		struct sockaddr_in				_address;
-		socklen_t						_addrlen;
-		int								_sock;
-		int								_port;
-		std::vector<LocationBlock *>	_locations;
+		struct sockaddr_in	_address;
+		socklen_t			_addrlen;
+		int					_sock;
+		int					_port;
+		std::string			_serverName;
 
 	public:
 		// METHODS
 		ServerHandler();
 		~ServerHandler();
-		int&							getSock();
-		int&							getPort();
-		struct sockaddr*				getAddress();
-		socklen_t&						getAddrlen();
-		std::vector<LocationBlock *>&	getLocations();
+		int&				getSock();
+		int&				getPort();
+		struct sockaddr*	getAddress();
+		socklen_t&			getAddrlen();
 
-		void				setLocations(std::vector<LocationBlock *>& locations);
 		void				InitializeServerSocket(int port, const int backlog);
 		int					createSocket();
 		void				setSocketOptions(int sock);
@@ -42,6 +37,6 @@ class ServerHandler
 		void				setNonblocking(int sock);
 };
 
-void						printFdSet(const fd_set& fdset, std::string functionName);
+void print_fd_set(const fd_set& fdset, std::string functionName);
 
 #endif

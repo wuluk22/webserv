@@ -79,9 +79,7 @@ bool ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 	} else if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
-	if (directive->getContentPath().empty())
-		directive->setContentPath(removeExcessiveSlashes(root + uri));
-	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root))) {
+	if (!directive->setUri(root + uri)) {
 		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
 		return (false);
 	}
@@ -102,14 +100,9 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	std::vector<std::string> working_line_splitted;
 	std::streampos last_position;
 	LocationBlock *location_directive = new LocationBlock();
-	s_parser_flags flag;
+	bool went_in_directive = false;
 	std::string uri;
 
-	flag.alias_defined = false;
-	flag.cgi_allowed_defined = false;
-	flag.cgi_path_defined = false;
-	flag.root_defined = false;
-	flag.went_in_directive = false;
 	uri = returnSecondArgs(working_line);
 	token_counter.enterBlock();
 	server_config->setDirective(location_directive);
@@ -120,14 +113,6 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 			continue;
 		working_line = trim(working_line);
 		working_line_splitted = split(working_line, ' ');
-		if (working_line_splitted[0] == "alias")
-			flag.alias_defined = true;
-		else if (working_line_splitted[0] == "root")
-			flag.root_defined = true;
-		if (flag.root_defined && flag.alias_defined) {
-			std::cerr << ERROR_HEADER << AMBIGUOUS_URI_DEFINITION << AL << current_line << RESET << std::endl;
-			throw ConfigException();
-		}
 		if (is_token_valid(working_line_splitted[0], B_LOC)) {
 			if (working_line_splitted.size() != 2) {
 				std::cerr << ERROR_HEADER << NO_URI_LOCATION << AL << current_line << RESET << std::endl;  
@@ -141,7 +126,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				location_directive->setRoot(current_server->getRoot());
 			}
 			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, server_config);
-			flag.went_in_directive = true;
+			went_in_directive = true;
 		} else if (is_token_valid(working_line_splitted[0], LOC_TERMINATOR) && working_line_splitted.size()) {
 			break;
 		} else if (is_token_valid_multiple(working_line_splitted[0], l_params) || is_token_valid_multiple(working_line_splitted[0], c_params)) {
@@ -150,7 +135,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 				std::cerr << ERROR_HEADER << TOKEN_REPEATED << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
-			if (flag.went_in_directive && working_line_splitted[0] == "root") {
+			if (went_in_directive && working_line_splitted[0] == "root") {
 				std::cerr << ERROR_HEADER << ROOT_PRIORITY << AL << current_line << RESET << std::endl;
 				throw ConfigException();
 			}
@@ -234,21 +219,27 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
-bool ConfigParser::checkPathLocationDirective(LocationBlock *location_block) {
-	return (true);
-}
+// bool ConfigParser::checkPathLocationDirective(LocationBlock *location_block) {
+// 	if (!location_block->getRoot().empty())
+		
+// }
 
-bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
-	std::vector<LocationBlock *> all_directives;
-	if (!current_server_config)
-		return (false);
-	all_directives = current_server_config->getDirectives();
-	for (int i = 0; i < all_directives.size(); i++) {
-		if (!checkPathLocationDirective(all_directives[i]))
-			return (false);
-	}
-	return (true);
-}
+// bool ConfigParser::areAllPathAccessible(void) {
+// 	ServerConfig *current_server;
+// 	std::vector <LocationBlock *> all_server_directives;
+// 	ServerBlock *server_header;
+	
+// 	bool status;
+	
+// 	for (int i = 0; i < this->_servers_config.size(); i++) {
+// 		current_server = _servers_config[i];
+// 		all_server_directives = current_server->getDirectives();
+// 		server_header = current_server->getServerHeader();
+// 		for (int y = 0; y < all_server_directives.size(); y++) {
+// 			checkPathLocationDirective(all_server_directives[y]);
+// 		}
+// 	}
+// }
 
 // int main(void) {
 // 	ConfigParser *config;
