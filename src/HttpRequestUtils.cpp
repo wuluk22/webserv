@@ -1,5 +1,24 @@
 #include "HttpRequestHandler.hpp"
 
+std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoByUri(HttpRequestHandler request)
+{
+    const std::string& requestUri = request.getPath();
+
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
+    {
+        const std::string& locationUri = it->first;
+        if (requestUri == locationUri)
+        {
+			std::cout << "MATCH between: " << locationUri << " and " << requestUri << std::endl;
+			request.setIsValid(true);
+            return it->second;
+        }
+    }
+	request.setIsValid(false);
+    return std::map<std::string, std::vector<std::string> >();
+}
+
+
 std::string HttpRequestHandler::trim(const std::string& str)
 {
 	size_t	first;
@@ -102,6 +121,8 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 	{
 		out << *it << "\n";
 	}
+	out << "\nallowedPath : \n";
+	out << handler.getAllowedPath() << "\n";
 	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
@@ -151,6 +172,12 @@ void HttpRequestHandler::setHeader(const std::string& name, const std::string& v
 void HttpRequestHandler::setBody(const std::string& b) { body = b; }
 void HttpRequestHandler::setFd(const int& nb) { fd = nb; }
 void HttpRequestHandler::setIsComplete(const bool& is) { isRequestComplete = is; }
+void HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { allowedMethods = methods; }
+void HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { allowedPaths = paths; }
+void HttpRequestHandler::setAllowedPath(const std::string& path) { allowedPath = path; }
+void HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
+void HttpRequestHandler::setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo) { _locInfo = locInfo; }
+void HttpRequestHandler::setIsValid(const bool& val) { valid = val; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -164,3 +191,9 @@ std::string HttpRequestHandler::getHeader(const std::string& name) const
 const   std::map<std::string, std::string>& HttpRequestHandler::getHeaders() const { return headers; }
 int     HttpRequestHandler::getFd() const { return fd; }
 bool    HttpRequestHandler::getIsComplete() const { return isRequestComplete; }
+std::string	HttpRequestHandler::getRootDirectory() const { return rootDirectory; }
+const std::vector<std::string>& HttpRequestHandler::getAllowedMethods() const { return allowedMethods; }
+const std::vector<std::string>& HttpRequestHandler::getAllowedPaths() const { return allowedPaths; }
+const std::string&				HttpRequestHandler::getAllowedPath() const { return allowedPath; }
+const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	HttpRequestHandler::getLocInfo() const { return _locInfo; }
+bool	HttpRequestHandler::getIsValid() const { return valid; }

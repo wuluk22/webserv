@@ -69,7 +69,7 @@ void	ServerBase::processClientConnections()
 	struct timeval timeout;
 
 	timeout.tv_sec = 30;
-	
+	timeout.tv_usec = 0;
 	while (true)
     {
 		cpyReadFds = readfds;
@@ -83,17 +83,21 @@ void	ServerBase::processClientConnections()
 		// print_fd_set(cpyWriteFds, "cpyWriteFds");
 		std::cout << std::endl;
         // Wait for an activity on one of the sockets
-        if (select(max_sock + 1, &cpyReadFds, &cpyWriteFds, NULL, &timeout) < 0) {
-			print_fd_set(cpyReadFds, "IN SELECT cpyReadFds");
-			print_fd_set(cpyWriteFds, "cpyWriteFds");
+        if (select(maxSock + 1, &cpyReadFds, &cpyWriteFds, NULL, &timeout) < 0)
+		{
+			// print_fd_set(cpyReadFds, "IN SELECT cpyReadFds");
+			// print_fd_set(cpyWriteFds, "cpyWriteFds");
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 		}
 
         // If activity on server socket, it's an incoming connection
 		for (unsigned long i = 0; i < this->Servers.size(); i++) {
 			int serverSocket = this->Servers[i].getSock();
-			if (FD_ISSET(serverSocket, &cpyReadFds)) {
-				accept_connection(this->Servers[(int)i]);
+			if (FD_ISSET(serverSocket, &cpyReadFds))
+			{
+				std::cout << "-----------------------------------------Server ID : ------------------------------- " << i << std::endl;
+				acceptConnection(this->Servers[(int)i]);
+				break;
 			}
 		}
 
@@ -102,7 +106,9 @@ void	ServerBase::processClientConnections()
 			int client_sock = it->first;
 			if (FD_ISSET(client_sock, &cpyReadFds)) {
 				HttpRequestHandler request = it->second.getRequest();
-				request = request.handleRequest(client_sock);
+				request.reset();
+				request = request.handleRequest(client_sock, &loc);
+				//request = it->second.initRequest(request);
 				it->second.setRequest(request);
 				// std::cout << "Request reponse : " << request.getFd() << std::endl;
 				if (request.getFd() <= 0 ) { // Client Disconnected
