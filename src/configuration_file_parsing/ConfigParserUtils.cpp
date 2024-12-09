@@ -129,8 +129,5 @@ std::string ConfigParser::removeExcessiveSlashes(const std::string& path) {
 			was_last_slash = false;
 		}
 	}
-	if (!result.empty() && result[result.size() - 1] != '/') {
-		//result = result + "/";
-	}
     return (result);
 }

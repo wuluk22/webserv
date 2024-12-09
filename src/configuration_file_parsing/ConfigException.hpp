@@ -4,7 +4,7 @@
 #include <iostream>
 
 // ERROR MACRO
-#define ERROR_HEADER "\e[91m[CONFIG_PARSER] : "
+#define ERROR_HEADER "\e[91m[CONFIG_PARSER | ERROR] : "
 
 // ERROR MESSAGES
 #define BAD_ACCESS "No such file present, aborting"
@@ -23,12 +23,20 @@
 #define PATH_NOT_RECOGNIZED "Path isn't recognized, aborting"
 #define ROOT_PRIORITY "Root redefinition should be declared before inbricked location, aborting"
 #define NO_ROOT_DEFINITION "No root definition, vacant URI prefix, aborting"
-#define TWO_SERVER_BLOCK_DEFINITIONS "Two server block definitions, aborting"
 #define UNDEFINED_PARAMS "Undefined parameter"
 #define NUMERICAL_VALUE_EXPECTED "Numerical value expected, aborting"
 #define RESERVED_PORTS_LINUX "Ports under 1024 are reserved, aborting"
 #define AMBIGUOUS_URI_DEFINITION "Root and alias cannot be declared inside the same location, aborting"
+#define WRONG_ERROR_PAGES_SCOPE "Wrong error pages scope, aborting"
+#define DOUBLE_LOCATION_URI "Repeated URI, aborting"
 #define AL " at line : "
+
+// WARNING HEADER
+#define WARNING_HEADER "\e[33m[CONFIG_PARSER | WARNING] : "
+
+// WARNING MESSAGES
+#define NO_ROOT_DEFINED_ERROR_PAGES "No root defined for error pages, switching to absolute path"
+
 #define RESET "\e[0m"
 
 // EXCEPTIONS MESSAGES

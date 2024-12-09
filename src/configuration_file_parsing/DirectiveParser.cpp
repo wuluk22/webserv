@@ -160,6 +160,64 @@ bool ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	}
 	return (directive->setListeningPort(ports));
 }
+bool ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *directive) {
+	std::map <unsigned int, std::string> error_pages_record;
+	std::string path;
+	unsigned error_code;
+
+	if (args.empty() || args.size() < 3) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		return (false);
+	}
+	if (directive->getRoot().empty()) {
+		std::cout << WARNING_HEADER << NO_ROOT_DEFINED_ERROR_PAGES << RESET << std::endl;
+		path = args.back();
+	} else
+		path = removeExcessiveSlashes(directive->getRoot() + args.back());  
+	_validator.setPath(path);
+	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable())) {
+		std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
+		return (false);
+	}
+	for (int i = 1; i < args.size() - 1; i++) {
+		std::pair<unsigned int, std::string> single_error_page_record;
+		error_code = std::strtoul(args[i].c_str(), NULL, 10);
+		if (error_code < 400 || error_code > 527) {
+			std::cerr << ERROR_HEADER << WRONG_ERROR_PAGES_SCOPE << RESET << std::endl;
+			return (false);
+		}
+		single_error_page_record.first = error_code;
+		single_error_page_record.second = path;
+		error_pages_record.erase(error_code);
+		error_pages_record.insert(single_error_page_record);
+	}
+	return (directive->setErrorPagesRecord(error_pages_record));
+}
+
+bool ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *directive) {
+	std::size_t arg_size = args.size();
+	std::size_t status_code;
+	std::string redirection_url;
+
+	if (args.empty() || arg_size < 2|| arg_size > 3) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		return (false);
+	}
+	args.erase(args.begin());
+	if (!isStringDigit(args[0])) {
+		std::cerr << ERROR_HEADER << NUMERICAL_VALUE_EXPECTED << RESET << std::endl;
+		return (false);
+	}
+	status_code = strtoul(args[0].c_str(), NULL, 10);
+	if (status_code < 100 || status_code > 599) {
+		std::cerr << ERROR_HEADER << WRONG_ERROR_PAGES_SCOPE << RESET << std::endl;
+		return (false);
+	}
+	if (arg_size == 2)
+		return (directive->setReturnArgs(status_code, redirection_url));
+	redirection_url = args[1];
+	return (directive->setReturnArgs(status_code, redirection_url));
+}
 
 void ConfigParser::processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, bool &command_status) {
 	if (args[0] == "root")
@@ -183,6 +241,8 @@ void ConfigParser::processDirectiveLoc(LocationBlock *directive, std::string wor
 		command_status = parseAlias(working_line, directive);
 	else if (args[0] == "allowed_method")
 		command_status = parseAllowedMethhod(args, directive);
+	else if (args[0] == "return")
+		command_status = parseReturn(args, directive);
 	if (!command_status) {
 		std::cout << ERROR_HEADER << AL << current_line << RESET << std::endl;
 		throw ConfigException();
@@ -198,6 +258,8 @@ void ConfigParser::processDirectiveServ(ServerBlock *directive, std::string work
 		command_status = parseServerName(args, directive);
 	else if (args[0] == "listen")
 		command_status = parseListeningPorts(args, directive);
+	else if (args[0] == "error_pages")
+		command_status = parseErrorPages(args, directive);
 	if (!command_status) {
 		std::cout << ERROR_HEADER << AL << current_line << RESET << std::endl;
 		throw ConfigException();
