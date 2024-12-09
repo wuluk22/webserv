@@ -13,14 +13,13 @@ int main()
 	{
 		config = ConfigParser::getInstance("test.conf");
 		ServerConfig* c = config->getServerConfig(0);
-		// std::vector <LocationBlock *> all_directives = c->getDirectives();
 		ServerBlock	*server_header = c->getServerHeader();
 		ServerBase.addPortAndServers(config->getAllServerConfig());
-		for (unsigned long i = 0; i < ServerBase.getServers().size(); i++)
-		{
-			std::cout << "nbr of servers : " << ServerBase.getServers().size() << std::endl;
+		// for (unsigned long i = 0; i < ServerBase.getServers().size(); i++)
+		// {
+			// std::cout << "nbr of servers : " << ServerBase.getServers().size() << std::endl;
 			ServerBase.processClientConnections();
-		}
+		// }
 	}
 	catch (const ServerHandlerError& e)
 	{

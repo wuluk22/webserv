@@ -22,12 +22,12 @@ server
     server_name example.com 
     index index.html
 
-    location /
+    location hiih
         auto_index on
         allowed_method GET
     end-location
     
-    location /public/upload
+    location hiih
         index content.html
         allowed_method GET
     end-location

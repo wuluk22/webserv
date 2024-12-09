@@ -5,9 +5,11 @@
 # include <iostream>
 # include "HttpRequestHandler.hpp"
 # include "HttpResponseHandler.hpp"
+# include "ServerHandler.hpp"
 
 class	HttpRequestHandler;
 class	HttpResponseHandler;
+class	ServerHandler;
 
 class	RRState
 {
@@ -15,6 +17,7 @@ class	RRState
 		HttpRequestHandler				_request;
 		HttpResponseHandler				_response;
 		std::vector<LocationBlock *>	_locations;
+		// ServerHandler					_server;
 	
 	public:
 	//METHODS

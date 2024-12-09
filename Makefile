@@ -1,7 +1,7 @@
 NAME	= webserv
 
 CC	= c++
-FLAGS	= -g -std=c++98
+FLAGS	= -g3 -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
