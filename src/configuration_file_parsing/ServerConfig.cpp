@@ -98,10 +98,6 @@ unsigned int ADirective::getClientMaxBodySize(void) const {
 	return (this->_common_params._client_max_body_size);
 }
 
-bool ADirective::isDirectiveServerLevel(void) const {
-	return (this->_common_params.server_level);
-}
-
 std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 	const std::set<std::string> indexSet = params->getIndex();
 
@@ -117,7 +113,6 @@ std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 // ServerBlock
 
 ServerBlock::ServerBlock(void) {
-	this->_common_params.server_level = true;
 	if (IS_LINUX)
 		this->_server_params._listen.insert(1024);
 	else
@@ -169,6 +164,21 @@ bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	return (true);
 }
 
+bool ServerBlock::setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record) {
+	unsigned int error_value;
+	std::pair<unsigned int, std::string> current_pair;
+	
+	if (error_pages_record.empty())
+		return (false);
+	for (std::map<unsigned int, std::string>::iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
+		current_pair = (*it);
+		error_value = current_pair.first;
+		this->_server_params._error_pages_record.erase(error_value);
+		this->_server_params._error_pages_record.insert(*it);
+	}
+	return (true);
+}
+
 std::set <std::string> ServerBlock::getServerName(void) const {
 	return (this->_server_params._server_name);
 }
@@ -177,9 +187,14 @@ std::set <unsigned int> ServerBlock::getListeningPort(void) const {
 	return (this->_server_params._listen);
 }
 
+std::map<unsigned int, std::string> ServerBlock::getErrorPagesRecord(void) const {
+	return (this->_server_params._error_pages_record);
+}
+
 std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 	const std::set<unsigned int> listening_ports = params->getListeningPort();
 	const std::set<std::string> server_names = params->getServerName();
+	const std::map<unsigned int, std::string> error_pages_record = params->getErrorPagesRecord();
 
 	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
 	os << static_cast<const ADirective *>(params);
@@ -187,18 +202,22 @@ std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 		os << "Listening ports : " << (*it) << "\n"; 
 	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
 		os << "Server name : " << (*it) << "\n";
+	for (std::map<unsigned int, std::string>::const_iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
+		if (it == error_pages_record.begin())
+			os << "Error pages redefinition" << "\n";
+		os << "Port : " << (*it).first << " | Path : " << (*it).second << std::endl;
+	}
 	return (os);
 }
 
 // LocationBlock
 
 LocationBlock::LocationBlock(void) {
-	this->_common_params.server_level = false;
-	this->_location_params._is_cgi = false;
 	this->_common_params._client_max_body_size = 1;
 	this->_location_params._modified_auto_index = false;
 	this->_location_params._modified_client_max_body_size = false;
 	this->_location_params._allowed_methods = 0;
+	this->_location_params._return_args._status_code = NO_RETURN;
 }
 
 LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
@@ -226,50 +245,43 @@ s_loc_params LocationBlock::getLocationParams(void) const {
 }
 
 void LocationBlock::clientMaxBodySizeModified(void) {
-	this->_location_params.modified_client_max_body_size = true;
+	this->_location_params._modified_client_max_body_size = true;
 }
 
 void LocationBlock::autoIndexModified(void) {
-	this->_location_params.modified_auto_index = true;
-}
-
-void LocationBlock::setIsCgi(bool value) {
-	this->_location_params._is_cgi = value;
+	this->_location_params._modified_auto_index = true;
 }
 
 bool LocationBlock::setCgiPath(std::string path_args) {
-	if (path_args.empty())
+	if (path_args.empty()) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
+	}
 	_validator.setPath(path_args);
-	if (_validator.exists() && _validator.isFile() && _validator.isExecutable()) {
+	if (_validator.exists() && _validator.isFile() && _validator.isExecutable() && _validator.isReadable()) {
 		_location_params._cgi_path = path_args;
 		return (true);
 	}
+	std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
 	return (false);
 }
 
-bool LocationBlock::setUri(std::string uri_args) {
-	if (uri_args.empty())
+bool LocationBlock::setUri(std::string uri_args, std::string root_args) {
+	if (uri_args.empty() || root_args.empty()) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
 		return (false);
-	_validator.setPath(uri_args);
-	if (_validator.exists() && _validator.isDirectory())
-	{
+	}
+	_validator.setPath(root_args + uri_args);
+	if (_validator.exists() && _validator.isDirectory()) {
 		_location_params._uri = uri_args;
 		return (true);
 	}
+	std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
 	return (false);
 }
 
 bool LocationBlock::setAlias(std::string alias_path) {
-		if (alias_path.empty())
-		return (false);
-	_validator.setPath(alias_path);
-	if (_validator.exists() && _validator.isDirectory())
-	{
-		_location_params._alias = alias_path;
-		return (true);
-	}
-	return (false);
+	return (setContentPath(alias_path));
 }
 
 bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
@@ -279,8 +291,40 @@ bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
 	return (true);
 }
 
+bool LocationBlock::setContentPath(std::string content_path) {
+	if (content_path.empty()) {
+		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+		return (false);
+	}
+	_validator.setPath(content_path);
+	if (_validator.exists() && _validator.isDirectory() && _validator.isReadable()) {
+		_location_params._content_path = content_path;
+		return (true);
+	}
+	std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
+	return (false);
+}
+
+std::string LocationBlock::getFirstAccessibleIndex(void) {
+	std::string index_file_path;
+	
+	for (std::set<std::string>::iterator it = this->_common_params._index.begin(); it != this->_common_params._index.end(); it++) {
+		index_file_path = this->_location_params._content_path + "/" + (*it);
+		_validator.setPath(index_file_path);
+		if (_validator.exists() && _validator.isFile() && _validator.isReadable())
+			return (index_file_path);
+	}
+	return ("");
+}
+
+bool LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
+	this->_location_params._return_args._status_code = status_code;
+	this->_location_params._return_args._redirection_url = redirection_url;
+	return (true);
+}
+
 bool LocationBlock::isCgiAllowed(void) const {
-	return (this->_location_params._is_cgi);
+	return (!this->_location_params._cgi_path.empty());
 }
 
 std::string LocationBlock::getCgiPath(void) const {
@@ -288,15 +332,23 @@ std::string LocationBlock::getCgiPath(void) const {
 }
 
 std::string LocationBlock::getAlias(void) const {
-	return (this->_location_params._alias);
+	return (this->_location_params._content_path);
 }
 
 std::string LocationBlock::getUri(void) const {
 	return (this->_location_params._uri);
 }
 
+std::string LocationBlock::getContentPath(void) const {
+	return (this->_location_params._content_path);
+}
+
+s_return LocationBlock::getReturnArgs(void) const {
+	return (this->_location_params._return_args);
+}
+
 bool LocationBlock::isDirectiveCgi(void) const {
-	return (this->_location_params._is_cgi);
+	return (!this->_location_params._cgi_path.empty());
 }
 
 bool LocationBlock::isGetAllowed(void) const {
@@ -311,6 +363,14 @@ bool LocationBlock::isDeleteAllowed(void) const {
 	return ((_location_params._allowed_methods & DELETE) != 0);
 }
 
+bool LocationBlock::hasClientMaxBodySizeModified(void) const {
+	return (this->_location_params._modified_client_max_body_size);
+}
+
+bool LocationBlock::hasAutoIndexModified(void) const {
+	return (this->_location_params._modified_auto_index);
+}
+
 std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
@@ -319,8 +379,12 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 		os	<< "CGI Path: " << params->getCgiPath() << "\n";
 	}
 	os	<< "URI: " << params->getUri() << "\n"
-		<< "Alias: " << params->getAlias() << "\n"
-		<< "Allowed Methods: ";
+		<< "Content Path: " << params->getContentPath() << "\n"
+		<< "Allowed Methods: " << "\n";
+	if (params->getReturnArgs()._status_code != NO_RETURN)
+		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
+	if (!params->getReturnArgs()._redirection_url.empty())
+		os << "Redirection URL : " << params->getReturnArgs()._redirection_url << "\n";
 	if (params->isGetAllowed()) 
 		os << "GET ";
 	if (params->isPostAllowed()) 
@@ -328,12 +392,4 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	if (params->isDeleteAllowed()) 
 		os << "DELETE ";
 	return (os);
-}
-
-bool LocationBlock::hasClientMaxBodySizeModified(void) const {
-	return (this->_location_params.modified_client_max_body_size);
-}
-
-bool LocationBlock::hasAutoIndexModified(void) const {
-	return (this->_location_params.modified_auto_index);
 }

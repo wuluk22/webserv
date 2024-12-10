@@ -1,15 +1,18 @@
 NAME	= webserv
 
 CC	= c++
-FLAGS	= -g -std=c++98
+FLAGS	= -g3 -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
 FILES	=	src/main \
+			src/CGI/Cgi \
 			src/ServerHandler \
 			src/ServerBase \
 			src/HttpRequestHandler \
 			src/HttpResponseHandler \
+			src/HttpResponseMethod \
+			src/HttpResponseUtils \
 			src/HttpRequestUtils \
 			src/HttpRequestParsing \
 			src/HttpRequestDir \
@@ -23,11 +26,12 @@ FILES	=	src/main \
 			src/configuration_file_parsing/ServerConfig \
 			src/configuration_file_parsing/ConfigParserUtils \
 			src/configuration_file_parsing/TokenCounter \
-			src/configuration_file_parsing/DirectiveParser 
+			src/configuration_file_parsing/DirectiveParser
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
-HEADER	=	src/ServerHandler.hpp \
+HEADER	=	src/CGI/Cgi.hpp \
+			src/ServerHandler.hpp \
 			src/ServerHandler.hpp \
 			src/HttpRequestHandler.hpp \
 			src/HttpResponseHandler.hpp \

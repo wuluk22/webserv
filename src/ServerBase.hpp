@@ -1,21 +1,19 @@
 #ifndef SERVERBASE_HPP
-# define SERVERBASE_HPP
+#define SERVERBASE_HPP
 
-# include "ServerHandler.hpp"
-# include "ErrorHandler.hpp"
-# include "RequestResponseState.hpp"
+#include "ServerHandler.hpp"
+#include "ErrorHandler.hpp"
+#include "RequestResponseState.hpp"
 
-# include <iostream>
-# include <sys/select.h>
-# include <vector>
-# include <map>
-
-class ConfigParser;
+#include <iostream>
+#include <sys/select.h>
+#include <vector>
+#include <map>
 
 class	ServerBase
 {
 	private:
-		int							max_sock;
+		int							maxSock;
 		std::map<int, RRState>		ClientSockets;
 		std::vector<ServerHandler>	Servers;
 		fd_set 						readfds, writefds;
@@ -24,14 +22,14 @@ class	ServerBase
 		//METHODS
 		ServerBase();
 		~ServerBase();
-		fd_set&						get_readfds();
-		fd_set&						get_writefds();
-		std::vector<ServerHandler>	get_servers();
+		fd_set&						getReadfds();
+		fd_set&						getWritefds();
+		std::vector<ServerHandler>	getServers();
 
 
 		void						processClientConnections();
-		void						accept_connection(ServerHandler	Server);
-		void						addPortAndServers();
+		void						acceptConnection(ServerHandler	Server);
+		void						addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
 };
 
 #endif

@@ -178,6 +178,7 @@ void HttpRequestHandler::setAllowedPath(const std::string& path) { allowedPath =
 void HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
 void HttpRequestHandler::setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo) { _locInfo = locInfo; }
 void HttpRequestHandler::setIsValid(const bool& val) { valid = val; }
+void HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _CgiPath = cgiPath; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -197,3 +198,4 @@ const std::vector<std::string>& HttpRequestHandler::getAllowedPaths() const { re
 const std::string&				HttpRequestHandler::getAllowedPath() const { return allowedPath; }
 const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	HttpRequestHandler::getLocInfo() const { return _locInfo; }
 bool	HttpRequestHandler::getIsValid() const { return valid; }
+const std::vector<std::string>& HttpRequestHandler::getCgiPath() const { return _CgiPath;}

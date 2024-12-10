@@ -96,14 +96,14 @@ HttpRequestHandler HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         }
     }
 
-    tmpRequest.setLocInfo(locInfo); // Assuming a setLocInfo function exists
+    // tmpRequest.setLocInfo(locInfo); // Assuming a setLocInfo function exists
     return tmpRequest;
 }
 
 
 
 
-HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> *locationsBlock)
+HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock)
 {
     const size_t bufferSize = 1024;
     char buffer[bufferSize];

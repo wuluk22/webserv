@@ -3,20 +3,10 @@
 #include "Logger.hpp"
 
 // DEBUG // DON'T FORGET TO DELETE
-<<<<<<< HEAD
-void printFdSet(const fd_set& fdset, std::string functionName)
-{
-    std::cout << "Current fds in " << functionName << " : ";
-    for (int i = 0; i < FD_SETSIZE; i++)
-	{
-        if (FD_ISSET(i, &fdset))
-		{
-=======
 void print_fd_set(const fd_set& fdset, std::string functionName) {
     std::cout << "Current fds in " << functionName << " : ";
     for (int i = 0; i < FD_SETSIZE; i++) {
         if (FD_ISSET(i, &fdset)) {
->>>>>>> test-socket-request-responses
             std::cout << i << " ";
         }
     }
@@ -24,15 +14,11 @@ void print_fd_set(const fd_set& fdset, std::string functionName) {
 }
 
 // METHODS //
-<<<<<<< HEAD
-ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){}
-=======
 ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){
   // memset(&this->hints, 0, sizeof this->hints); // Initialise la structure
   // this->hints.ai_family = AF_UNSPEC; // IPv4 ou IPv6
   // this->hints.ai_socktype = SOCK_STREAM; // TCP
 }
->>>>>>> test-socket-request-responses
 ServerHandler::~ServerHandler() {}
 
 // GETTER //

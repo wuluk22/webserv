@@ -1,5 +1,5 @@
 #include "HttpResponseHandler.hpp"
-//#include "CGI/Cgi.hpp"
+#include "CGI/Cgi.hpp"
 #include <fstream>
 #include <cstdlib>
 #include <cstdio>
