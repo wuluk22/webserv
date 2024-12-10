@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Documentation</title>
+    <title>Choose an Image</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,49 +13,70 @@
             text-align: center;
             color: #333;
         }
-        .endpoint {
-            margin-top: 20px;
+        .image-preview {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
         }
-        .endpoint h2 {
-            color: #007bff;
+        .image-preview img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.3s, border 0.3s;
         }
-        .code {
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-left: 4px solid #007bff;
-            font-family: monospace;
+        .image-preview img:hover {
+            transform: scale(1.1);
+            border: 2px solid #007bff;
+        }
+        #submit-button {
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #submit-button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <div><a href='/'>Home</a></div>
-	    <!-- Form for GET request -->
-    <h2>GET Request</h2>
-    <form action="/cgi-bin/script.c" method="GET">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" placeholder="Enter your name">
-        <br>
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" placeholder="Enter your age">
-        <br>
-        <button type="submit">Submit GET Request</button>
+
+    <h1>Choose an Image</h1>
+
+    <form id="image-form" action="/cgi-bin/random_quote.py" method="GET">
+        <input type="hidden" id="selected-image" name="image" value="">
+
+        <!-- Aperçu des images -->
+        <div class="image-preview">
+            <img src="/Images/image1.jpg" alt="Image 1" onclick="selectImage('image1.jpg')" title="Image 1">
+            <!-- <img src="/Images/image2.jpg" alt="Image 2" onclick="selectImage('image2.jpg')" title="Image 2">
+            <img src="/Images/image3.jpg" alt="Image 3" onclick="selectImage('image3.jpg')" title="Image 3">
+            <img src="/Images/image4.jpg" alt="Image 4" onclick="selectImage('image4.jpg')" title="Image 4">
+            <img src="/Images/image5.jpg" alt="Image 5" onclick="selectImage('image5.jpg')" title="Image 5"> -->
+        </div>
+
+        <button type="submit" id="submit-button">Submit</button>
     </form>
 
-    <hr>
+    <script>
+        function selectImage(imageName) {
+            // Remplit l'input caché avec le nom de l'image
+            document.getElementById('selected-image').value = imageName;
 
-    <!-- Form for POST request -->
-    <h2>POST Request</h2>
-    <form action="/cgi-bin/your_script.cgi" method="POST">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" placeholder="Enter your name">
-        <br>
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" placeholder="Enter your age">
-        <br>
-        <textarea name="comments" id="comments" placeholder="Enter your comments"></textarea>
-        <br>
-        <button type="submit">Submit POST Request</button>
-    </form>
-
+            // Indique visuellement l'image sélectionnée
+            const images = document.querySelectorAll('.image-preview img');
+            images.forEach(img => img.style.border = "2px solid transparent");
+            document.querySelector(`img[alt="Image ${imageName.split('.')[0].slice(-1)}"]`).style.border = "2px solid green";
+        }
+    </script>
 </body>
 </html>

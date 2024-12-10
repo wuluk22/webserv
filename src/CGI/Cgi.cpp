@@ -42,6 +42,8 @@ std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scrip
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
 
+    std::clog << "REQUEST GET METHOD : " << request.getMethod() << std::endl;
+
     stringEnv.push_back("REQUEST_METHOD=" + request.getMethod());
     stringEnv.push_back("SCRIPT_PATH=" + scriptPath);
     if (request.getMethod() == "GET")
@@ -54,10 +56,8 @@ std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scrip
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
     stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
     // stringEnv.push_back("SERVER_NAME=" + request.getServerName());
-
     for (size_t i = 0; i < stringEnv.size(); i++) {
-        envp.push_back(const_cast<char *>(stringEnv[i].c_str()));
-        std::cout << "ENV : " << envp[i] << std::endl;
+        envp.push_back(strdup(stringEnv[i].c_str()));
     }
     envp.push_back(NULL);
     return envp;
@@ -85,12 +85,14 @@ void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseH
         if (headerEnd != std::string::npos) 
         {
             std::string headers = output.substr(0, headerEnd);
+            std::cout << "HEADERS : " << headers << std::endl;
             std::string body = output.substr(headerEnd + 4);
 
             // Analyser et ajouter les en-têtes
             std::istringstream headerStream(headers);
             std::string headerLine;
-            while (std::getline(headerStream, headerLine)) {
+            while (std::getline(headerStream, headerLine))
+            {
                 std::string::size_type colonPos = headerLine.find(": ");
                 if (colonPos != std::string::npos) {
                     std::string headerName = headerLine.substr(0, colonPos);
@@ -130,7 +132,6 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
     std::string cgiPath = "/usr/bin/python3";
     std::vector<std::string> scriptPaths = request.getCgiPath();
     std::string selectedScriptPath;
-
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
         std::cout << "path : " << it->c_str() << "\n";
@@ -157,10 +158,17 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
         std::vector<char*> argv;
         std::vector<char *> envp = homeMadeSetEnv(request, selectedScriptPath);
 
-        argv.push_back(const_cast<char*>(cgiPath.c_str()));
-        argv.push_back(const_cast<char*>(selectedScriptPath.c_str()));
+        argv.push_back(strdup(cgiPath.c_str()));
+        argv.push_back(strdup(selectedScriptPath.c_str()));
         argv.push_back(NULL);
-        if (access(cgiPath.c_str(), X_OK) == 0) {
+        // for (std::vector<char *>::iterator it = argv.begin(); it != argv.end(); it++) {
+        //     std::clog << "ARGV : " << *it << std::endl;
+        // }
+        // for (std::vector<char *>::iterator it = envp.begin(); it != envp.end(); it++) {
+        //     std::clog << "ENVP : " << *it << std::endl;
+        // }
+        if (access(cgiPath.c_str(), X_OK) == 0)
+        {
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
             exit(1);
@@ -170,7 +178,6 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
     { // Processus parent
         std::string output;
         int status;
-
         close(pipefd[1]);
         output = readDatasFromScript(pipefd[0]);
 

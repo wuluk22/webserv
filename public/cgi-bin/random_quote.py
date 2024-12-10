@@ -1,28 +1,51 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import random
+import cgi
+import cgitb
 
-def main():
-    file_path = "phrases.txt"
+# Activer le mode debug pour les erreurs CGI
+cgitb.enable()
 
+PHRASES_FILE = "/home/salowie/Documents/webserv/public/phrases.txt"
+IMAGES_DIR = "/home/salowie/Documents/webserv/public/Images/"
+
+def get_random_phrase(file_path):
+    """Retourne une phrase aléatoire à partir d'un fichier."""
     try:
         with open(file_path, "r") as file:
             phrases = file.readlines()
         if phrases:
-            random_phrase = random.choice(phrases).strip()
+            return random.choice(phrases).strip()
         else:
-            random_phrase = "Aucune phrase disponible dans le fichier."
+            return "Aucune phrase disponible dans le fichier."
     except FileNotFoundError:
-        random_phrase = "Le fichier 'phrases.txt' est introuvable."
+        return "Le fichier 'phrases.txt' est introuvable."
     except Exception as e:
-        random_phrase = "Erreur : " + str(e)
+        return f"Erreur : {e}"
 
-    print("Content-Type: text/html\n")
+def main():
+    # Récupérer les données de la query string
+    form = cgi.FieldStorage()
+    selected_image = form.getvalue("image", "Aucune image sélectionnée")
+
+    # Obtenir une phrase aléatoire
+    random_phrase = get_random_phrase(PHRASES_FILE)
+
+    # Vérifier si l'image existe
+    image_path = os.path.join(IMAGES_DIR, selected_image)
+    if not os.path.isfile(image_path):
+        selected_image = "Image non trouvée"
+
+    # Générer la page HTML
+    print("Content-Type: text/html\r\n\r\n") 
     print("<html>")
-    print("<head><title>Phrase aleatoire</title></head>")
+    print("<head><title>Phrase et Image</title></head>")
     print("<body>")
-    print("<h1>Voici une phrase aleatoire :</h1>")
-    print("<p>{}</p>".format(random_phrase))
+    print(f"<p>{random_phrase}</p>")
+    print(f"<p>{selected_image}</p>")
+    if selected_image != "Aucune image sélectionnée" and selected_image != "Image non trouvée":
+        print(f'<img src="/Images/{selected_image}" alt="Image sélectionnée" style="max-width:300px;">')
     print("</body>")
     print("</html>")
 

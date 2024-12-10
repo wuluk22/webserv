@@ -30,8 +30,9 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 				if (std::find(methods.begin(), methods.end(), "DELETE") == methods.end())
 					methods.push_back("DELETE");
 			if (locationsBlock[i]->isCgiAllowed()) {
-				if (std::find(_CgiPath.begin(), _CgiPath.end(),locationsBlock[i]->getCgiPath()) == _CgiPath.end())
-					_CgiPath.push_back(locationsBlock[i]->getCgiPath());
+				if (std::find(_CgiPath.begin(), _CgiPath.end(),locationsBlock[i]->getCgiPath()) == _CgiPath.end()) {
+					cgiPath.push_back(locationsBlock[i]->getCgiPath());
+				}
 			}
 			std::string uri = locationsBlock[i]->getUri();
 			if (!uri.empty() && std::find(paths.begin(), paths.end(), uri) == paths.end())
@@ -55,6 +56,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 	tmpRequest.setAllowedMethods(methods);
 	tmpRequest.setAllowedPaths(paths);
 	tmpRequest.setRootDirectory(root);
+	tmpRequest.setCgiPath(cgiPath);
 	//std::cerr << "\ntest 4: \n" << tmpRequest << "end!" << std::endl;
 	return tmpRequest;
 }

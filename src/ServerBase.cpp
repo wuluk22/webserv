@@ -95,7 +95,6 @@ void	ServerBase::processClientConnections()
 		for (unsigned long i = 0; i < this->Servers.size(); i++)
 		{
 			int serverSocket = this->Servers[i].getSock();
-			std::cout << "serverSocket : " << serverSocket << std::endl;
 			if (FD_ISSET(serverSocket, &cpyReadFds))
 			{
 				acceptConnection(this->Servers[(int)i]);
@@ -105,7 +104,6 @@ void	ServerBase::processClientConnections()
 		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++)
 		{
 			int client_sock = it->first;
-			std::cout << "client sock : " << client_sock << std::endl;
 			std::vector<LocationBlock *> loc = it->second.getLocations();
 			if (FD_ISSET(client_sock, &cpyReadFds))
 			{
