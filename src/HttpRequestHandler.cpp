@@ -44,24 +44,39 @@ HttpRequestHandler HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     {
         const std::string& locationUri = (*it)->getUri();
 
-        // Check if the location matches the request path
         // Initialize the inner map for this URI if not already present
         if (locInfo.find(locationUri) == locInfo.end())
         {
             locInfo[locationUri] = std::map<std::string, std::vector<std::string> >();
         }
+
         // Add allowed methods
         if ((*it)->isGetAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "GET") == locInfo[locationUri]["allowed_methods"].end())
+        {
             locInfo[locationUri]["allowed_methods"].push_back("GET");
+        }
         if ((*it)->isPostAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "POST") == locInfo[locationUri]["allowed_methods"].end())
+        {
             locInfo[locationUri]["allowed_methods"].push_back("POST");
+        }
         if ((*it)->isDeleteAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "DELETE") == locInfo[locationUri]["allowed_methods"].end())
+        {
             locInfo[locationUri]["allowed_methods"].push_back("DELETE");
+        }
+
         // Add content path
         if (!(*it)->getContentPath().empty())
         {
             locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
         }
+
+        // Add index files
+        std::vector<std::string> ind;
+        
+        std::string indices = (*it)->getFirstAccessibleIndex();
+        ind.push_back(indices);
+        if (!ind.empty())
+            locInfo[locationUri]["index"].push_back(indices);
     }
 
     if (locInfo.empty())
@@ -81,7 +96,7 @@ HttpRequestHandler HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     }
 
     // Debugging print to verify contents of locInfo
-    std::cerr << "LocInfo Map Contents (Multiple Matches):" << std::endl;
+    std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
     {
         std::cerr << "URI: " << it->first << std::endl;
@@ -96,14 +111,15 @@ HttpRequestHandler HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         }
     }
 
-    // tmpRequest.setLocInfo(locInfo); // Assuming a setLocInfo function exists
+    tmpRequest.setLocInfo(locInfo); // Assuming a setLocInfo function exists
     return tmpRequest;
 }
 
 
 
 
-HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock)
+
+HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> *locationsBlock)
 {
     const size_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -116,11 +132,12 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector
     unsigned int bodyLength = 0;
 	request.reset();
 	request.setIsValid(false);
+    int i = 0;
 	//request = request.handleConfig(request, locationsBlock);
     while (true)
 	{
 		request.setIsComplete(false);
-        int bytesRead = recv(client_sock, buffer, bufferSize - 1, 0);
+        int bytesRead = recv(clientSock, buffer, bufferSize - 1, 0);
         i++;
 		std::cout << " MEOW " << i << " MEOW " << std::endl;
         if (bytesRead <= 0) {

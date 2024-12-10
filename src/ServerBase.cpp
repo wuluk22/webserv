@@ -106,7 +106,7 @@ void	ServerBase::processClientConnections()
 		{
 			int client_sock = it->first;
 			std::cout << "client sock : " << client_sock << std::endl;
-			std::vector<LocationBlock *> loc = it->second.getLocations();
+			std::vector<LocationBlock *> *loc = &it->second.getLocations();
 			if (FD_ISSET(client_sock, &cpyReadFds))
 			{
 				HttpRequestHandler request = it->second.getRequest();

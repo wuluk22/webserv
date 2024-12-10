@@ -23,6 +23,8 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
     if (config.empty())
     {
         std::cerr << "No matching configuration found for URI: " << request.getPath() << std::endl;
+        setErrorResponse(request, response, 404, "Not Fouoond");
+        return response;
     }
 
     // Access configuration data
@@ -36,36 +38,62 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
         }
         std::cerr << std::endl;
     }
-    if (request.getIsValid())
-    {
-        std::cout << "\n--- YESSSSS ---" << std::endl;
-    }
 
-    const std::string	staticDir = request.getRootDirectory();
     std::string			filePath;
 	struct stat			pathStat;
 	std::string			errorPage;
 	std::string			content;
 
+    std::string staticDir = (config.find("root_directory") != config.end() && !config["root_directory"].empty())
+                                ? config["root_directory"][0]
+                                : "/public";
+    std::string allowedPaths = request.getPath();
+    std::vector<std::string> allowedMethods = config["allowed_methods"];
+
 	filePath = staticDir + request.getPath();
+
+
     response.setHeader("Connection", "close");
-	if (!request.isMethodAllowed(request, request.getMethod()))
-	{
-			setErrorResponse(request, response, 405, "Method_not_allowed");
-			return response;
-	}
+    // Validate the HTTP method
+    if (std::find(allowedMethods.begin(), allowedMethods.end(), request.getMethod()) == allowedMethods.end())
+    {
+        std::cerr << "HTTP method not allowed: " << request.getMethod() << std::endl;
+        setErrorResponse(request, response, 405, "Method Not Allowed");
+        return response;
+    }
+
+    // Validate the request path
+    /*bool pathAllowed = false;
+    std::vector<std::string>::iterator pathIt;
+    for (pathIt = allowedPaths.begin(); pathIt != allowedPaths.end(); ++pathIt)
+    {
+        if (request.getPath() == *pathIt || request.getPath().find(*pathIt) == 0)
+        {
+            pathAllowed = true;
+            break;
+        }
+    }*/
+
+    if (!request.getIsValid())
+    {
+        std::cerr << "Access denied for path: " << request.getPath() << std::endl;
+        std::cerr << "----------------" << request.getIsValid() << std::endl;
+        setErrorResponse(request, response, 403, "Forbidden");
+        return response;
+    }
+
     if (request.getMethod() == "GET")
     {
         response = handleGet(request, response);
         return response;
     }
-	if (request.getMethod() == "POST")
+	else if (request.getMethod() == "POST")
 	{
 		std::cout << request << std::endl;
 		request.handleFileUpload(request.getBody(), request.getPath(), response);
 		return response;
 	}
-	if (request.getMethod() == "DELETE")
+	else if (request.getMethod() == "DELETE")
 	{
 		std::string path;
 		path = staticDir + request.getPath();
@@ -77,7 +105,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
         	response.setBody("Resource deleted successfully.");
     	} else {
         	response.setStatusCode(404);
-        	response.setStatusMsg("Not Found");
+        	response.setStatusMsg("Not ---Found");
         	response.setBody("Resource not found.");
 		}
         return response;
@@ -88,7 +116,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
 
 HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& response)
 {
-    std::string staticDir = request.getRootDirectory();
+    std::string staticDir = "public";
     std::string filePath;
     std::string valid;
     struct stat pathStat;
@@ -110,14 +138,45 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
     {
         filePath = staticDir + "/index.html";
     }
+    if (request.getPath() == "/docs.html")
+    {
+        filePath = staticDir + "/docs.html";
+    }
+    if (request.getPath() == "/upload.html")
+    {
+        filePath = staticDir + "/upload.html";
+        std::cout << "--------filUUUUU : " << filePath << std::endl;
+    }
+
+    if (request.getPath() == "/favicon.ico")
+    {
+        std::string faviconPath = staticDir + "/favicon.ico";
+        if (request.fileExists(faviconPath))
+        {
+            std::string content = request.readFile(faviconPath);
+            response.setStatusCode(200);
+            response.setStatusMsg("OK");
+            response.setBody(content);
+            response.setHeader("Content-Type", "image/x-icon");
+            response.setHeader("Content-Length", request.toString(content.length()));
+            return response;
+        }
+        else
+        {
+            setErrorResponse(request, response, 404, "Favicon Not Found");
+            return response;
+        }
+    }
+
     // Basic security check to prevent directory traversal
     if (filePath.find("..") != std::string::npos)
     {
-        setErrorResponse(request, response, 403, "Forbidden");
+        setErrorResponse(request, response, 403, "For bidden");
         return response;
     }
-    if (!request.fileExists(filePath) && !isCgiRequest(request.getPath()))
+    if (!request.fileExists(filePath))
     {
+        std::cout << filePath << "-----------------------------------here" << std::endl;
         setErrorResponse(request, response, 404, "Not Found meow");
         return response;
     }
@@ -155,7 +214,9 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("X-Frame-Options", "SAMEORIGIN");
     response.setHeader("X-XSS-Protection", "1; mode=block");
-    //std::cout << response << std::endl;
+    std::cout << "-------------------RESPONSE-----------------" << std::endl;
+    std::cout << response << std::endl;
+    std::cout << "-------------------RESPONSE-----------------" << std::endl;
     return response;
 }
 

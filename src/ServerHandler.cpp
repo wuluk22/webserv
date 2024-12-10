@@ -3,10 +3,13 @@
 #include "Logger.hpp"
 
 // DEBUG // DON'T FORGET TO DELETE
-void print_fd_set(const fd_set& fdset, std::string functionName) {
+void printFdSet(const fd_set& fdset, std::string functionName)
+{
     std::cout << "Current fds in " << functionName << " : ";
-    for (int i = 0; i < FD_SETSIZE; i++) {
-        if (FD_ISSET(i, &fdset)) {
+    for (int i = 0; i < FD_SETSIZE; i++)
+	{
+        if (FD_ISSET(i, &fdset))
+		{
             std::cout << i << " ";
         }
     }
@@ -14,11 +17,7 @@ void print_fd_set(const fd_set& fdset, std::string functionName) {
 }
 
 // METHODS //
-ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){
-  // memset(&this->hints, 0, sizeof this->hints); // Initialise la structure
-  // this->hints.ai_family = AF_UNSPEC; // IPv4 ou IPv6
-  // this->hints.ai_socktype = SOCK_STREAM; // TCP
-}
+ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){}
 ServerHandler::~ServerHandler() {}
 
 // GETTER //
@@ -26,6 +25,9 @@ int&  ServerHandler::getSock() { return this->_sock; }
 int&  ServerHandler::getPort() { return this->_port; }
 struct sockaddr* ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
 socklen_t&	ServerHandler::getAddrlen() { return _addrlen; }
+std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
+
+void	ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
 
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
@@ -49,17 +51,17 @@ void ServerHandler::InitializeServerSocket(int port, const int backlog)
 
 int ServerHandler::createSocket()
 {
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
-  if (sock < 0)
-  throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
-  return sock;
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0)
+		throw ServerHandlerError("Creation of socket failed", __FUNCTION__, __LINE__);
+    return sock;
 }
 
 void ServerHandler::setSocketOptions(int sock)
 {
-  int opt = 1;
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
-    throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
+    int opt = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt)) < 0)
+		throw ServerHandlerError("setsockopt failed with SO_REUSEADDR", __FUNCTION__, __LINE__);
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (char*)&opt, sizeof(opt)) < 0)
 		throw ServerHandlerError("setsockopt failed with SO_REUSEPORT", __FUNCTION__, __LINE__);
 }
@@ -72,7 +74,8 @@ void ServerHandler::bindSocket(int port)
 
 	// std::cout << "address.sin_addr.s_addr : " << address.sin_addr.s_addr << std::endl;
 	// std::cout << "address.sin_port :" << address.sin_port << std::endl;
-	if (bind(this->_sock, (struct sockaddr*)&this->_address, sizeof(this->_address)) < 0) {
+	if (bind(this->_sock, (struct sockaddr*)&this->_address, sizeof(this->_address)) < 0)
+	{
 		throw ServerHandlerError("bind failed", __FUNCTION__, __LINE__);
   }
 }

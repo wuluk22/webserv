@@ -4,17 +4,20 @@ std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoB
 {
     const std::string& requestUri = request.getPath();
 
+    
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
     {
         const std::string& locationUri = it->first;
+        std::cout << "-----------locationUri: " << locationUri << "   ------------requestUri: " << requestUri << std::endl;
         if (requestUri == locationUri)
         {
 			std::cout << "MATCH between: " << locationUri << " and " << requestUri << std::endl;
-			request.setIsValid(true);
+			this->setIsValid(true);
+            std::cout << "--------------------isvalid : " << request.getIsValid() << std::endl;
             return it->second;
         }
     }
-	request.setIsValid(false);
+	this->setIsValid(false);
     return std::map<std::string, std::vector<std::string> >();
 }
 
@@ -38,18 +41,28 @@ bool HttpRequestHandler::endsWith(const std::string& str, const std::string& suf
     return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
 
-bool HttpRequestHandler::isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const
+bool HttpRequestHandler::isMethodAllowed(HttpRequestHandler request, const std::string& method) const
 {
-		std::vector<std::string> alwdMet = request.getAllowedMethods();
-		for (size_t i = 0; i < alwdMet.size(); i++)
-		{
-				if (alwdMet[i] == method)
-				{
-						return true;
-				}
-		}
-		return false;
+    // Retrieve allowed methods from locInfo
+    std::map<std::string, std::vector<std::string> > locInfo = request.getLocInfoByUri(request);
+
+    // Check if the "allowed_methods" key exists and contains the requested method
+    if (locInfo.find("allowed_methods") != locInfo.end())
+    {
+        const std::vector<std::string>& allowedMethods = locInfo.at("allowed_methods");
+        for (size_t i = 0; i < allowedMethods.size(); i++)
+        {
+            if (allowedMethods[i] == method)
+            {
+                return true;
+            }
+        }
+    }
+
+    // If no match is found, return false
+    return false;
 }
+
 
 bool HttpRequestHandler::isPathAllowed(const HttpRequestHandler& request, const std::string& path) const
 {
@@ -178,7 +191,7 @@ void HttpRequestHandler::setAllowedPath(const std::string& path) { allowedPath =
 void HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
 void HttpRequestHandler::setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo) { _locInfo = locInfo; }
 void HttpRequestHandler::setIsValid(const bool& val) { valid = val; }
-void HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _CgiPath = cgiPath; }
+//void HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _CgiPath = cgiPath; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -198,4 +211,4 @@ const std::vector<std::string>& HttpRequestHandler::getAllowedPaths() const { re
 const std::string&				HttpRequestHandler::getAllowedPath() const { return allowedPath; }
 const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	HttpRequestHandler::getLocInfo() const { return _locInfo; }
 bool	HttpRequestHandler::getIsValid() const { return valid; }
-const std::vector<std::string>& HttpRequestHandler::getCgiPath() const { return _CgiPath;}
+//const std::vector<std::string>& HttpRequestHandler::getCgiPath() const { return _CgiPath;}
