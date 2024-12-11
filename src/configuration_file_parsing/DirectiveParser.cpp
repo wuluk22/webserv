@@ -110,8 +110,10 @@ void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 		if (!isStringDigit(args[i]))
 			throw ConfigParserError(NUMERICAL_VALUE_EXPECTED, __FUNCTION__, __LINE__, current_line);
 		value = std::strtoul(args[i].c_str(), NULL, 10);
-		if (IS_LINUX && value < 1024)
-			throw ConfigParserError(RESERVED_PORTS_LINUX, __FUNCTION__, __LINE__, current_line);
+		if (IS_LINUX && !(value >= 1024 && value <= 65535))
+			throw ConfigParserError(PORT_SCOPE_LINUX, __FUNCTION__, __LINE__, current_line);
+		else if (!(value <= 65535))
+			throw ConfigParserError(PORT_SCOPE_GENERAL, __FUNCTION__, __LINE__, current_line);
 		if (!ports.insert(value).second)
 			throw ConfigParserError(DUPE_ELEMS, __FUNCTION__, __LINE__, current_line);
 	}

@@ -35,7 +35,8 @@
 
 // SERVER HEADER ERROR MESSAGES
 #define EXCEEDING_LIMIT ERROR_HEADER "Size limit exceeded," AB RESET
-#define RESERVED_PORTS_LINUX ERROR_HEADER "Ports under 1024 are reserved," AB RESET
+#define PORT_SCOPE_LINUX ERROR_HEADER "Port scope is limited to 1024 - 65.535 for linux," AB RESET
+#define PORT_SCOPE_GENERAL ERROR_HEADER "Port scope is limited to 0 - 65.535 for your system," AB RESET 
 #define WRONG_ERROR_PAGES_SCOPE ERROR_HEADER "Wrong error pages scope," AB RESET
 
 // LOCATION RELATED ERROR MESSAGES
