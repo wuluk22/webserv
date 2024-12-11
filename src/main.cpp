@@ -29,9 +29,9 @@ int main()
 	{
 		std::cerr << "ERROR -> " << e.what() << std::endl;
 	}
-	catch (ConfigException &e)
+	catch (ConfigParserError &e)
 	{
-		std::cout << "ERROR -> " << e.what() << std::endl;
+		std::cout << e.what() << std::endl;
 	}
     return 0;
 }
