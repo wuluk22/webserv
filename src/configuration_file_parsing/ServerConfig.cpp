@@ -1,21 +1,7 @@
 #include "ServerConfig.hpp"
 
-// Server Configuration class
-
 ServerConfig::ServerConfig(void) {
 	this->server_header = NULL;
-}
-
-ServerConfig::ServerConfig(const ServerConfig &copy) {
-	(*this) = copy;
-}
-
-ServerConfig& ServerConfig::operator=(const ServerConfig& other) {
-	if (this != &other) {
-		this->directives = other.directives;
-		this->server_header = other.server_header;
-	}
-	return (*this);
 }
 
 ServerConfig::~ServerConfig() {
@@ -42,7 +28,7 @@ ServerBlock* ServerConfig::getServerHeader(void) const {
 	return (this->server_header);
 }
 
-// ADirective class
+// ******************************************************************************
 
 ADirective::ADirective(void) {
 	this->_common_params._auto_index = false;
@@ -66,12 +52,9 @@ bool ADirective::setRoot(std::string root_args) {
 	return (false);
 }
 
-bool ADirective::setIndex(std::set <std::string>index_args) {
-	if (index_args.empty())
-		return (false);
+void ADirective::setIndex(std::set <std::string>index_args) {
 	for (std::set<std::string>::iterator it = index_args.begin(); it != index_args.end(); ++it)
 		_common_params._index.insert(*it);
-	return (true);
 }
 
 void ADirective::setAutoIndex(bool value) {
@@ -110,23 +93,14 @@ std::ostream& operator<<(std::ostream& os, const ADirective *params) {
 	return (os);
 }
 
-// ServerBlock
+// ******************************************************************************
 
 ServerBlock::ServerBlock(void) {
 	if (IS_LINUX)
 		this->_server_params._listen.insert(1024);
 	else
 		this->_server_params._listen.insert(80);
-	listening_ports_set = false;
-}
-
-ServerBlock::ServerBlock(s_common_params common_params, s_server_params server_params) {
-	this->_common_params = common_params;
-	this->_server_params = server_params;
-}
-
-ServerBlock::ServerBlock(const ServerBlock &copy) {
-	(*this) = copy;
+	_listening_ports_set = false;
 }
 
 ServerBlock::~ServerBlock() {}
@@ -135,27 +109,14 @@ s_server_params ServerBlock::getServerParams(void) const {
 	return (this->_server_params);
 }
 
-ServerBlock& ServerBlock::operator=(const ServerBlock &rhs) {
-	if (this != &rhs) {
-		this->_common_params = rhs._common_params;
-		this->_server_params = rhs._server_params;
-	}
-	return (*this);
-}
-
-bool ServerBlock::setServerName(std::set<std::string> server_names) {
-	if (server_names.empty())
-		return (false);
+void ServerBlock::setServerName(std::set<std::string> server_names) {
 	this->_server_params._server_name = server_names;
-	return (true);
 }
 
 bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
-	if (listening_ports.empty())
-		return (false);
-	if (!listening_ports_set) {
+	if (!_listening_ports_set) {
 		this->_server_params._listen = listening_ports;
-		listening_ports_set = true;
+		_listening_ports_set = true;
 	} else {
 		for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++) {
 			this->_server_params._listen.insert(*it);
@@ -164,18 +125,39 @@ bool ServerBlock::setListeningPort(std::set<unsigned int> listening_ports) {
 	return (true);
 }
 
-bool ServerBlock::setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record) {
+void ServerBlock::setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record) {
 	unsigned int error_value;
 	std::pair<unsigned int, std::string> current_pair;
 	
-	if (error_pages_record.empty())
-		return (false);
 	for (std::map<unsigned int, std::string>::iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
 		current_pair = (*it);
 		error_value = current_pair.first;
 		this->_server_params._error_pages_record.erase(error_value);
 		this->_server_params._error_pages_record.insert(*it);
+	};
+}
+
+bool ServerBlock::checkDeclaredPathOccurence(std::string path) {
+	for (std::vector<std::string>::iterator it = _server_params._declared_path.begin(); it != _server_params._declared_path.end(); it++) {
+		if ((*it) == path)
+			return (false);
 	}
+	return (true);
+}
+
+bool ServerBlock::setAcessLogPath(std::string path) {
+	if (!checkDeclaredPathOccurence(path))
+		return (false);
+	this->_server_params._access_log_file_path = path;
+	this->_server_params._declared_path.push_back(path);
+	return (true);
+}
+
+bool ServerBlock::setErrorLogPath(std::string path) {
+	if (!checkDeclaredPathOccurence(path))
+		return (false);
+	this->_server_params._error_log_file_path = path;
+	this->_server_params._declared_path.push_back(path);
 	return (true);
 }
 
@@ -190,6 +172,14 @@ std::set <unsigned int> ServerBlock::getListeningPort(void) const {
 std::map<unsigned int, std::string> ServerBlock::getErrorPagesRecord(void) const {
 	return (this->_server_params._error_pages_record);
 }
+
+std::string ServerBlock::getAccessLogPath(void) const {
+	return (this->_server_params._access_log_file_path);
+}
+
+std::string ServerBlock::getErrorLogPath(void) const {
+	return (this->_server_params._error_log_file_path);
+} 
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 	const std::set<unsigned int> listening_ports = params->getListeningPort();
@@ -210,7 +200,7 @@ std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 	return (os);
 }
 
-// LocationBlock
+// ******************************************************************************
 
 LocationBlock::LocationBlock(void) {
 	this->_common_params._client_max_body_size = 1;
@@ -220,25 +210,7 @@ LocationBlock::LocationBlock(void) {
 	this->_location_params._return_args._status_code = NO_RETURN;
 }
 
-LocationBlock::LocationBlock(s_common_params common_params, s_loc_params location_params) {
-	this->_common_params = common_params;
-	this->_location_params = location_params;
-}
-
-LocationBlock::LocationBlock(const LocationBlock &copy) {
-	(*this) = copy;
-}
-
 LocationBlock::~LocationBlock() {}
-
-LocationBlock& LocationBlock::operator=(const LocationBlock &rhs) {
-	if (this != &rhs)
-	{
-		this->_common_params = rhs._common_params;
-		this->_location_params = rhs._location_params;
-	}
-	return (*this);
-}
 
 s_loc_params LocationBlock::getLocationParams(void) const {
 	return (this->_location_params);
@@ -253,16 +225,11 @@ void LocationBlock::autoIndexModified(void) {
 }
 
 bool LocationBlock::setCgiPath(std::string path_args) {
-	if (path_args.empty()) {
-		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
-		return (false);
-	}
 	_validator.setPath(path_args);
 	if (_validator.exists() && _validator.isFile() && _validator.isExecutable() && _validator.isReadable()) {
 		_location_params._cgi_path = path_args;
 		return (true);
 	}
-	std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
 	return (false);
 }
 
@@ -292,16 +259,11 @@ bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
 }
 
 bool LocationBlock::setContentPath(std::string content_path) {
-	if (content_path.empty()) {
-		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
-		return (false);
-	}
 	_validator.setPath(content_path);
 	if (_validator.exists() && _validator.isDirectory() && _validator.isReadable()) {
 		_location_params._content_path = content_path;
 		return (true);
 	}
-	std::cerr << ERROR_HEADER << BAD_ACCESS << RESET << std::endl;
 	return (false);
 }
 
@@ -317,10 +279,9 @@ std::string LocationBlock::getFirstAccessibleIndex(void) {
 	return ("");
 }
 
-bool LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
+void LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
 	this->_location_params._return_args._status_code = status_code;
 	this->_location_params._return_args._redirection_url = redirection_url;
-	return (true);
 }
 
 bool LocationBlock::isCgiAllowed(void) const {
