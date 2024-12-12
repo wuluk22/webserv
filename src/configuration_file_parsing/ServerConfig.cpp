@@ -181,7 +181,7 @@ std::string ServerBlock::getErrorLogPath(void) const {
 	return (this->_server_params._error_log_file_path);
 } 
 
-std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
+std::ostream& operator<<(std::ostream& os, ServerBlock *params) {
 	const std::set<unsigned int> listening_ports = params->getListeningPort();
 	const std::set<std::string> server_names = params->getServerName();
 	const std::map<unsigned int, std::string> error_pages_record = params->getErrorPagesRecord();
@@ -275,7 +275,6 @@ std::vector <std::string> LocationBlock::accessibleIndex(void) {
 		index_file_path = this->_location_params._content_path + "/" + (*it);
 		_validator.setPath(index_file_path);
 		if (_validator.exists() && _validator.isFile() && _validator.isReadable()) {
-			std::cout << "is valid" << std::endl;
 			list_of_indices.push_back(this->_location_params._uri + '/' + (*it));
 		}
 	}
@@ -339,12 +338,6 @@ std::ostream& operator<<(std::ostream& os, LocationBlock *params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
 	os << static_cast<const ADirective *>(params);
-	std::cout << "=======================" << std::endl;
-	std::vector <std::string> test = params->accessibleIndex();
-	for (int i = 0; i < test.size(); i++) {
-		std::cout << "accessible path : " << test[i] << std::endl;
-	}
-	std::cout << "=======================" << std::endl;
 	if (params->isCgiAllowed()) {
 		os	<< "CGI Path: " << params->getCgiPath() << "\n";
 	}

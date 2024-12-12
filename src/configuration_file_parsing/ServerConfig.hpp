@@ -123,7 +123,7 @@ class ServerBlock : public ADirective {
 		std::string							getErrorLogPath(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const ServerBlock *server_params);
+std::ostream& operator<<(std::ostream& os, ServerBlock *server_params);
 
 class LocationBlock : public ADirective {
 	private:
