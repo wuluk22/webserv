@@ -267,16 +267,19 @@ bool LocationBlock::setContentPath(std::string content_path) {
 	return (false);
 }
 
-std::string LocationBlock::getFirstAccessibleIndex(void) {
+std::vector <std::string> LocationBlock::accessibleIndex(void) {
 	std::string index_file_path;
+	std::vector <std::string> list_of_indices;
 	
 	for (std::set<std::string>::iterator it = this->_common_params._index.begin(); it != this->_common_params._index.end(); it++) {
 		index_file_path = this->_location_params._content_path + "/" + (*it);
 		_validator.setPath(index_file_path);
-		if (_validator.exists() && _validator.isFile() && _validator.isReadable())
-			return (index_file_path);
+		if (_validator.exists() && _validator.isFile() && _validator.isReadable()) {
+			std::cout << "is valid" << std::endl;
+			list_of_indices.push_back(this->_location_params._uri + '/' + (*it));
+		}
 	}
-	return ("");
+	return (list_of_indices);
 }
 
 void LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
@@ -332,10 +335,16 @@ bool LocationBlock::hasAutoIndexModified(void) const {
 	return (this->_location_params._modified_auto_index);
 }
 
-std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
+std::ostream& operator<<(std::ostream& os, LocationBlock *params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
 	os << static_cast<const ADirective *>(params);
+	std::cout << "=======================" << std::endl;
+	std::vector <std::string> test = params->accessibleIndex();
+	for (int i = 0; i < test.size(); i++) {
+		std::cout << "accessible path : " << test[i] << std::endl;
+	}
+	std::cout << "=======================" << std::endl;
 	if (params->isCgiAllowed()) {
 		os	<< "CGI Path: " << params->getCgiPath() << "\n";
 	}

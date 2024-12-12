@@ -147,21 +147,21 @@ class LocationBlock : public ADirective {
 		bool setContentPath(std::string content_path);
 		void setReturnArgs(std::size_t status_code, std::string redirection_url);
 		// Individual getter
-		std::string	getCgiPath(void) const;
-		std::string	getAlias(void) const;
-		std::string	getUri(void) const;
-		std::string	getContentPath(void) const;
-		s_return	getReturnArgs(void) const;
-		std::string	getFirstAccessibleIndex(void);
-		bool		isCgiAllowed(void) const;
-		bool		isDirectiveCgi(void) const;
-		bool		isGetAllowed(void) const;
-		bool		isPostAllowed(void) const;
-		bool		isDeleteAllowed(void) const;
-		bool		hasClientMaxBodySizeModified(void) const;
-		bool		hasAutoIndexModified(void) const;
+		std::string					getCgiPath(void) const;
+		std::string					getAlias(void) const;
+		std::string					getUri(void) const;
+		std::string					getContentPath(void) const;
+		s_return					getReturnArgs(void) const;
+		std::vector<std::string>	accessibleIndex(void);
+		bool						isCgiAllowed(void) const;
+		bool						isDirectiveCgi(void) const;
+		bool						isGetAllowed(void) const;
+		bool						isPostAllowed(void) const;
+		bool						isDeleteAllowed(void) const;
+		bool						hasClientMaxBodySizeModified(void) const;
+		bool						hasAutoIndexModified(void) const;
 };
 
-std::ostream& operator<<(std::ostream& os, const LocationBlock *location_params);
+std::ostream& operator<<(std::ostream& os, LocationBlock *location_params);
 
 #endif
