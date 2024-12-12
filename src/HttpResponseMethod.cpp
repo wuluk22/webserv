@@ -10,24 +10,19 @@
 #include <unistd.h>
 
 
-
-
-
 HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
 {
-
-    // Get the configuration for the request URI
+    //request.setAllowedMethods(request.getAllowedMethodsFromLoc(request.getPath()));
+    //request.setAllowedPaths(request.getContentPathsFromLoc(request.getPath()));
     std::map<std::string, std::vector<std::string> > config = request.getLocInfoByUri(request);
 
-    // Check if config is empty (no match found)
     if (config.empty())
     {
         std::cerr << "No matching configuration found for URI: " << request.getPath() << std::endl;
-        setErrorResponse(request, response, 404, "Not Fouoond");
+        setErrorResponse(request, response, 404, "Not FFFound");
         return response;
     }
 
-    // Access configuration data
     std::cerr << "\nConfiguration for URI: " << request.getPath() << std::endl;
     for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
     {
@@ -39,45 +34,20 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
         std::cerr << std::endl;
     }
 
-    std::string			filePath;
-	struct stat			pathStat;
-	std::string			errorPage;
-	std::string			content;
-
-    std::string staticDir = (config.find("root_directory") != config.end() && !config["root_directory"].empty())
-                                ? config["root_directory"][0]
-                                : "/public";
-    std::string allowedPaths = request.getPath();
-    std::vector<std::string> allowedMethods = config["allowed_methods"];
-
-	filePath = staticDir + request.getPath();
-
-
-    response.setHeader("Connection", "close");
-    // Validate the HTTP method
-    if (std::find(allowedMethods.begin(), allowedMethods.end(), request.getMethod()) == allowedMethods.end())
+    std::string staticDir = request.getRootDirectoryFromLoc(request.getPath());
+    std::cout << "METHOD : " << request.getMethod() << std::endl;
+    if (!request.isMethodAllowedInLoc(request.getPath(), request.getMethod()))
     {
         std::cerr << "HTTP method not allowed: " << request.getMethod() << std::endl;
         setErrorResponse(request, response, 405, "Method Not Allowed");
         return response;
     }
 
-    // Validate the request path
-    /*bool pathAllowed = false;
-    std::vector<std::string>::iterator pathIt;
-    for (pathIt = allowedPaths.begin(); pathIt != allowedPaths.end(); ++pathIt)
-    {
-        if (request.getPath() == *pathIt || request.getPath().find(*pathIt) == 0)
-        {
-            pathAllowed = true;
-            break;
-        }
-    }*/
+    std::string filePath = request.getFullPathFromLoc(request.getPath(), request.getPath());
 
     if (!request.getIsValid())
     {
         std::cerr << "Access denied for path: " << request.getPath() << std::endl;
-        std::cerr << "----------------" << request.getIsValid() << std::endl;
         setErrorResponse(request, response, 403, "Forbidden");
         return response;
     }
@@ -87,32 +57,31 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
         response = handleGet(request, response);
         return response;
     }
-	else if (request.getMethod() == "POST")
-	{
-		std::cout << request << std::endl;
-		request.handleFileUpload(request.getBody(), request.getPath(), response);
-		return response;
-	}
-	else if (request.getMethod() == "DELETE")
-	{
-		std::string path;
-		path = staticDir + request.getPath();
-		path = urlDecode(path);
-		//std::cout << request << std::endl;
-    	if (remove(path.c_str()) == 0) {
-        	response.setStatusCode(200);
-        	response.setStatusMsg("OK");
-        	response.setBody("Resource deleted successfully.");
-    	} else {
-        	response.setStatusCode(404);
-        	response.setStatusMsg("Not ---Found");
-        	response.setBody("Resource not found.");
-		}
+    else if (request.getMethod() == "POST")
+    {
+        request.handleFileUpload(request.getBody(), filePath, response);
         return response;
     }
+    else if (request.getMethod() == "DELETE")
+    {
+        std::string decodedPath = urlDecode(filePath);
+        if (remove(decodedPath.c_str()) == 0)
+        {
+            response.setStatusCode(200);
+            response.setStatusMsg("OK");
+            response.setBody("Resource deleted successfully.");
+        }
+        else
+        {
+            setErrorResponse(request, response, 404, "Not Fwaound");
+        }
+        return response;
+    }
+
     setErrorResponse(request, response, 405, "Method not supported");
     return response;
 }
+
 
 HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& response)
 {

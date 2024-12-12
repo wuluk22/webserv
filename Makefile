@@ -14,13 +14,13 @@ FILES	=	src/main \
 			src/HttpResponseMethod \
 			src/HttpResponseUtils \
 			src/HttpRequestUtils \
+			src/HttpRequestLocUtils \
 			src/HttpRequestParsing \
 			src/HttpRequestDir \
 			src/DirectoryHandler \
 			src/RequestResponseState \
 			src/Logger \
 			src/ErrorHandler \
-			src/configuration_file_parsing/ConfigException \
 			src/configuration_file_parsing/PathValidator \
 			src/configuration_file_parsing/ConfigParser \
 			src/configuration_file_parsing/ServerConfig \

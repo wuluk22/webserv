@@ -73,10 +73,9 @@ HttpRequestHandler HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         // Add index files
         std::vector<std::string> ind;
         
-        std::string indices = (*it)->getFirstAccessibleIndex();
-        ind.push_back(indices);
+        ind = (*it)->accessibleIndex();
         if (!ind.empty())
-            locInfo[locationUri]["index"].push_back(indices);
+            locInfo[locationUri]["index"] = ind;
     }
 
     if (locInfo.empty())

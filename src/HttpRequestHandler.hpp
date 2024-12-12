@@ -48,6 +48,7 @@ class HttpRequestHandler
 		//std::map<std::string, std::vector<std::string> >	_locInfo;
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
 		bool										isRequestComplete;
+		
 		static std::string							extractBoundary(const std::string& content_type);
     	static std::string							generateErrorResponse(const std::string& message);
 	public:
@@ -93,6 +94,19 @@ class HttpRequestHandler
 		const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	getLocInfo()const;
 		std::map<std::string, std::vector<std::string> > getLocInfoByUri(HttpRequestHandler request);
 		bool										getIsValid() const;
+
+		std::vector<std::string>					getAllowedMethodsFromLoc(const std::string& uri) const;
+		std::vector<std::string>					getContentPathsFromLoc(const std::string& uri) const;
+		std::string									getRootDirectoryFromLoc(const std::string& uri) const;
+		bool										isAutoIndexEnabled(const std::string& uri) const;
+		std::vector<std::string>					getIndexFilesFromLoc(const std::string& uri) const;
+		std::vector<std::string>					getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
+		std::string									getFullPathFromLoc(const std::string& uri, const std::string& relativePath) const;
+
+		bool										isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
+		bool										isIndexFile(const std::string& uri, const std::string& fileName) const;
+		bool										isAutoIndexEnabledForUri(const std::string& uri) const;
+		bool										isPathAllowedInLoc(const std::string& uri, const std::string& path) const;
 
 		HttpRequestHandler							handleRequest(int clientSock, std::vector<LocationBlock *> *locationsBlock);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);

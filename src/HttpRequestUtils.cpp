@@ -1,25 +1,6 @@
 #include "HttpRequestHandler.hpp"
 
-std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoByUri(HttpRequestHandler request)
-{
-    const std::string& requestUri = request.getPath();
 
-    
-    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
-    {
-        const std::string& locationUri = it->first;
-        std::cout << "-----------locationUri: " << locationUri << "   ------------requestUri: " << requestUri << std::endl;
-        if (requestUri == locationUri)
-        {
-			std::cout << "MATCH between: " << locationUri << " and " << requestUri << std::endl;
-			this->setIsValid(true);
-            std::cout << "--------------------isvalid : " << request.getIsValid() << std::endl;
-            return it->second;
-        }
-    }
-	this->setIsValid(false);
-    return std::map<std::string, std::vector<std::string> >();
-}
 
 
 std::string HttpRequestHandler::trim(const std::string& str)
