@@ -263,6 +263,7 @@ bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
 	if (!checkPathServerDirective(current_server_block))
 		return (false);
 	if (!current_server_block->getErrorLogPath().empty())
+		return (false);
 	for (int i = 0; i < all_directives.size(); i++) {
 		if (!checkPathLocationDirective(all_directives[i]))
 			return (false);
