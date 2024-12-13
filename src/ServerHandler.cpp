@@ -33,6 +33,7 @@ void	ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
 {
+  Logger log;
 	this->_port = port;
   this->_sock = createSocket();
 
@@ -47,7 +48,7 @@ void ServerHandler::InitializeServerSocket(int port, const int backlog)
 
   // Start listening for connections
   listenSocket(this->_sock, backlog);
-  Logger::log("Server listening for connections");
+  log.info("Server listening for connections");
 }
 
 int ServerHandler::createSocket()

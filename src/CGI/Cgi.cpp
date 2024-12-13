@@ -199,6 +199,7 @@ void    Cgi::handleCGI(RRState& rrstate)
     } 
     else 
     { // Processus parent
+        Logger log;
         std::string output;
         int status;
         close(pipefd[1]);
@@ -210,7 +211,7 @@ void    Cgi::handleCGI(RRState& rrstate)
             rrstate.getResponse().handleCgiResponse(output, rrstate.getResponse());
         }
         else
-            Logger::log("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));
+            log.info("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));
     }
 }
 
