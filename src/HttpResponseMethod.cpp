@@ -79,7 +79,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 403, "Forbidden");
         return rrstate.getResponse();
     }
-    if (rrstate.getRequest().fileExists(filePath) && !isCgiRequest(rrstate.getRequest().getPath()))
+    if (!rrstate.getRequest().fileExists(filePath) && isCgiRequest(rrstate.getRequest().getPath()))
     {
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
@@ -103,7 +103,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (isCgiRequest(rrstate.getRequest().getPath()))
     {
         Cgi cgi;
-        std::cout << "CLIENTSOCK IN RESPONSEMETHOD : " << rrstate.getRequest().getClientSocket() << std::endl;
 		cgi.handleCGI(rrstate);
         //setErrorResponse(request, response, 200, "CGI Braowsss");
 		filePath = staticDir + "/cgi.html";

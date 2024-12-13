@@ -209,8 +209,8 @@ void    Cgi::handleCGI(RRState& rrstate)
         {
             rrstate.getResponse().handleCgiResponse(output, rrstate.getResponse());
         }
-        else
-            Logger::log("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));
+        // else
+        //     Logger::log("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));
     }
 }
 

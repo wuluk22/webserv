@@ -47,7 +47,7 @@ void ServerHandler::InitializeServerSocket(int port, const int backlog)
 
   // Start listening for connections
   listenSocket(this->_sock, backlog);
-  Logger::log("Server listening for connections");
+ // Logger::log("Server listening for connections");
 }
 
 int ServerHandler::createSocket()
