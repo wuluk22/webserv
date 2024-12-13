@@ -1,22 +1,11 @@
 #include "HttpRequestHandler.hpp"
 
-std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoByUri(HttpRequestHandler request)
-{
-    const std::string& requestUri = request.getPath();
-
-    
-    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
-    {
-        const std::string& locationUri = it->first;
-        const std::map<std::string, std::vector<std::string> >& locConfig = it->second;
-        
-        //const std::string& locationUri = it->first; // remplacer it->first par std::vector<std::string> paths;
         /*
             pour /docs.html je dois pouvoir savoir qu'il se trouve dans le it->first : "/public"
             pour se faire je dois ajouter public a /docs.html pour pouvoir le comparer a it->first
             ou directement aux elements de it->second["index"]
 
-            structure de locInfo:
+            exemple de structure de _locInfo:
             
             it->first       it->second              elements of it->second
             "/"             ["allowed_methods"      ["GET", "POST"]]
@@ -24,16 +13,40 @@ std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoB
                             ["root_directory"       ["public"]]
                             ["index"                ["/public/index.html, /public/docs.html"]]
         */
-        std::cout << "-----------locationUri: " << locationUri << "   ------------requestUri: " << requestUri << std::endl;
-        if (requestUri == locationUri)
+
+std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoByUri(HttpRequestHandler request)
+{
+    std::string requestUri = request.getPath();
+    bool isRoot = (requestUri == "/");
+    if (!isRoot && requestUri.find("/public") != 0)
+    {
+        requestUri = "/" + request.getRootDirectory() + requestUri;
+    }
+
+    std::cout << "Adjusted REQUEST PATH: " << requestUri << std::endl;
+    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
+
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
+    {
+        const std::string& locationUri = it->first;
+
+        if (requestUri.find(locationUri) == 0 && 
+            (matchedLocation == _locInfo.end() || locationUri.size() > matchedLocation->first.size()))
         {
-			std::cout << "MATCH between: " << locationUri << " and " << requestUri << std::endl;
-			this->setIsValid(true);
-            std::cout << "--------------------isvalid : " << request.getIsValid() << std::endl;
-            return it->second;
+            matchedLocation = it;
         }
     }
-	this->setIsValid(false);
+
+    if (matchedLocation != _locInfo.end())
+    {
+        const std::map<std::string, std::vector<std::string> >& locConfig = matchedLocation->second;
+        std::cout << "MATCH FOUND: Location URI: " << matchedLocation->first << " for Request URI: " << requestUri << std::endl;
+        this->setIsValid(true);
+        return locConfig;
+    }
+
+    std::cout << "No matching location found for Request URI: " << requestUri << std::endl;
+    this->setIsValid(false);
     return std::map<std::string, std::vector<std::string> >();
 }
 

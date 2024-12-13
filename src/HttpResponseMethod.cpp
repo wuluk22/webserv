@@ -22,6 +22,12 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
         setErrorResponse(request, response, 404, "Not FFFound");
         return response;
     }
+    std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
+    if (it != config.end())
+    {
+    // Set the allowed methods in the request
+        request.setAllowedMethods(it->second);
+    }
 
     std::cerr << "\nConfiguration for URI: " << request.getPath() << std::endl;
     for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
@@ -36,10 +42,10 @@ HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request,
 
     std::string staticDir = request.getRootDirectoryFromLoc(request.getPath());
     std::cout << "METHOD : " << request.getMethod() << std::endl;
-    if (!request.isMethodAllowedInLoc(request.getPath(), request.getMethod()))
+    if (!request.isMethodAllowed(request, request.getMethod()))
     {
         std::cerr << "HTTP method not allowed: " << request.getMethod() << std::endl;
-        setErrorResponse(request, response, 405, "Method Not Allowed");
+        setErrorResponse(request, response, 405, "Method Not AAAllowed");
         return response;
     }
 
@@ -107,14 +113,9 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
     {
         filePath = staticDir + "/index.html";
     }
-    if (request.getPath() == "/docs.html")
+    else if (request.getPath() != "/")
     {
-        filePath = staticDir + "/docs.html";
-    }
-    if (request.getPath() == "/upload.html")
-    {
-        filePath = staticDir + "/upload.html";
-        std::cout << "--------filUUUUU : " << filePath << std::endl;
+        filePath = staticDir + request.getPath();
     }
 
     if (request.getPath() == "/favicon.ico")
