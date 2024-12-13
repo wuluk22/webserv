@@ -58,8 +58,6 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
 
-    std::clog << "REQUEST GET METHOD : " << rrstate.getRequest().getMethod() << std::endl;
-
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
     if (rrstate.getRequest().getMethod() == "GET")
@@ -72,7 +70,6 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
     stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
     stringEnv.push_back("REMOTE_ADDR=" + getClientIP(rrstate));
-    std::cout << "FD : " << rrstate.getRequest().getClientSocket() << std::endl;
     stringEnv.push_back("REMOTE_PORT=" + toStrInt(getClientPort(rrstate)));
     // stringEnv.push_back("SERVER_NAME=" + request.getServerName());
     for (size_t i = 0; i < stringEnv.size(); i++) {
@@ -106,8 +103,8 @@ void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseH
             std::string headers = output.substr(0, headerEnd);
             std::string body = output.substr(headerEnd + 4);
             
-            std::cout << "HEADERS : " << headers << std::endl;
-            std::cout << "BODY : " << body << std::endl;
+            std::clog << "HEADERS : " << headers << std::endl;
+            std::clog << "BODY : " << body << std::endl;
 
             // Analyser et ajouter les en-têtes
             std::istringstream headerStream(headers);
@@ -155,10 +152,10 @@ void    Cgi::handleCGI(RRState& rrstate)
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        // std::cout << "path : " << it->c_str() << "\n";
+        std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            // std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
+            std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }

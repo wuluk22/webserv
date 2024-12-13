@@ -79,7 +79,7 @@ void	ServerBase::processClientConnections()
 	fd_set	cpyReadFds, cpyWriteFds;
 	// struct timeval timeout;
 
-	// timeout.tv_sec = 3;
+	// timeout.tv_sec = 15;
 	while (true)
     {
 		cpyReadFds = readfds;
