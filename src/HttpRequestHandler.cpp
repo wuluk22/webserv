@@ -1,4 +1,5 @@
-#include "HttpRequestHandler.hpp"
+# include "HttpRequestHandler.hpp"
+# include "RequestResponseState.hpp"
 
 HttpRequestHandler::HttpRequestHandler()
 {}
@@ -63,7 +64,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
 
 
-HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock)
+HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rrstate)
 {
     const size_t bufferSize = 1024;
     char buffer[bufferSize];
@@ -73,7 +74,8 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector
     unsigned int contentLength = 0;
     unsigned int bodyLength = 0;
 	
-	request = request.handleConfig(request, locationsBlock);
+	request = request.handleConfig(request, rrstate.getServer().getLocations());
+	request.setClientSocket(clientSock);
     while (true)
 	{
 		request.setIsComplete(false);
@@ -112,7 +114,7 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector
                     request = httpParsing(requestData);
                     request.setFd(1);
 					request.setIsComplete(true);
-					request = request.handleConfig(request, locationsBlock);
+					request = request.handleConfig(request, rrstate.getServer().getLocations());
 					//std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
 					//std::cout << " \na! " << request << " a! " << std::endl;
                     return request;
@@ -143,7 +145,7 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector
             request = httpParsing(requestData);
             request.setFd(1);
 			request.setIsComplete(isRequestComplete);
-			request = request.handleConfig(request, locationsBlock);
+			request = request.handleConfig(request, rrstate.getServer().getLocations());
 			//std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
 			//std::cout << " \nb! " << request << " b! " << std::endl;
             return request;
@@ -157,7 +159,7 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, std::vector
     request = httpParsing(requestData);
     request.setFd(1);
 	request.setIsComplete(isRequestComplete);
-	request = request.handleConfig(request, locationsBlock);
+	request = request.handleConfig(request, rrstate.getServer().getLocations());
 	//std::cout << " \nc! " << request.getIsComplete() << " c! " << std::endl;
     return request;
 }

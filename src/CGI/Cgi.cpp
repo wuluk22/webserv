@@ -1,19 +1,36 @@
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <vector>
-#include <map>
-#include <fstream>
-
+# include "Cgi.hpp"
 # include "../Logger.hpp"
 # include "../HttpRequestHandler.hpp"
 # include "../HttpResponseHandler.hpp"
+# include "../RequestResponseState.hpp"
 # include "../ErrorHandler.hpp"
+# include "../ServerHandler.hpp"
 
-std::string         getQuery(std::string path)
+Cgi::Cgi() {}
+Cgi::~Cgi() {}
+
+std::string Cgi::getClientIP(RRState& rrstate) {
+    if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
+        perror("getsockname");
+        return "0.0.0.0";
+    }
+    // Convertir l'adresse IP en format lisible
+    return inet_ntoa(rrstate.getServer().getAdd().sin_addr);
+}
+
+int Cgi::getClientPort(RRState& rrstate) {
+    struct sockaddr_in client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
+        perror("getsockname");
+        return 0;
+    }
+
+    return ntohs(rrstate.getServer().getAdd().sin_port);
+}
+
+std::string         Cgi::getQuery(std::string path)
 {
     std::string query;
     size_t pos = 0;
@@ -22,11 +39,10 @@ std::string         getQuery(std::string path)
         query = path.substr(pos + 1);
     else
         query = "";
-    std::cout << "QUERY : " << query << std::endl;
     return query;
 }
 
-std::string         findAccept(std::map<std::string, std::string> headers)
+std::string         Cgi::findAccept(std::map<std::string, std::string> headers)
 {
     std::string result;
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
@@ -37,24 +53,27 @@ std::string         findAccept(std::map<std::string, std::string> headers)
     return result;
 }
 
-std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scriptPath)
+std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath)
 {
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
 
-    std::clog << "REQUEST GET METHOD : " << request.getMethod() << std::endl;
+    std::clog << "REQUEST GET METHOD : " << rrstate.getRequest().getMethod() << std::endl;
 
-    stringEnv.push_back("REQUEST_METHOD=" + request.getMethod());
-    stringEnv.push_back("SCRIPT_PATH=" + scriptPath);
-    if (request.getMethod() == "GET")
-        stringEnv.push_back("QUERY_STRING=" + getQuery(request.getPath()));
-    if (request.getMethod() == "POST") {
-        stringEnv.push_back("CONTENT_TYPE=" + findAccept(request.getHeaders()));
-        stringEnv.push_back("CONTENT_LENGTH=" + request.getHeader("CONTENT_LENGTH"));
+    stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
+    stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
+    if (rrstate.getRequest().getMethod() == "GET")
+        stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
+    if (rrstate.getRequest().getMethod() == "POST") {
+        stringEnv.push_back("CONTENT_TYPE=" + findAccept(rrstate.getRequest().getHeaders()));
+        stringEnv.push_back("CONTENT_LENGTH=" + rrstate.getRequest().getHeader("CONTENT_LENGTH"));
     }
-    stringEnv.push_back("SERVER_PROTOCOL=" + request.getHttpVersion());
+    stringEnv.push_back("SERVER_PROTOCOL=" + rrstate.getRequest().getHttpVersion());
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
     stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
+    stringEnv.push_back("REMOTE_ADDR=" + getClientIP(rrstate));
+    std::cout << "FD : " << rrstate.getRequest().getClientSocket() << std::endl;
+    stringEnv.push_back("REMOTE_PORT=" + toStrInt(getClientPort(rrstate)));
     // stringEnv.push_back("SERVER_NAME=" + request.getServerName());
     for (size_t i = 0; i < stringEnv.size(); i++) {
         envp.push_back(strdup(stringEnv[i].c_str()));
@@ -63,7 +82,7 @@ std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scrip
     return envp;
 }
 
-std::string readDatasFromScript(int pipefd)
+std::string Cgi::readDatasFromScript(int pipefd)
 {
     std::ostringstream output;
     std::string outputStr;
@@ -85,8 +104,10 @@ void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseH
         if (headerEnd != std::string::npos) 
         {
             std::string headers = output.substr(0, headerEnd);
-            std::cout << "HEADERS : " << headers << std::endl;
             std::string body = output.substr(headerEnd + 4);
+            
+            std::cout << "HEADERS : " << headers << std::endl;
+            std::cout << "BODY : " << body << std::endl;
 
             // Analyser et ajouter les en-têtes
             std::istringstream headerStream(headers);
@@ -119,25 +140,25 @@ void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseH
         }
 }
 
-void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
+void    Cgi::handleCGI(RRState& rrstate)
 {
     int pid;
     int pipefd[2];
     if (pipe(pipefd) == -1)
     {
-        setErrorResponse(request, response, 500, "Internal Server Error - Pipe creation failed");
+        setErrorResponse(rrstate, 500, "Internal Server Error - Pipe creation failed");
         return ;
     }
 
     std::string cgiPath = "/usr/bin/python3";
-    std::vector<std::string> scriptPaths = request.getCgiPath();
+    std::vector<std::string> scriptPaths = rrstate.getRequest().getCgiPath();
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        std::cout << "path : " << it->c_str() << "\n";
+        // std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            std::cout << "selectedScriptPath : " << selectedScriptPath << std::endl;
+            // std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
@@ -146,7 +167,7 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
     {
         close(pipefd[0]);
         close(pipefd[1]);
-        setErrorResponse(request, response, 500, "Internal Server Error - Fork creation failed");
+        setErrorResponse(rrstate, 500, "Internal Server Error - Fork creation failed");
         return;
     }
     else if (pid == 0)
@@ -156,7 +177,7 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
         close(pipefd[1]);
 
         std::vector<char*> argv;
-        std::vector<char *> envp = homeMadeSetEnv(request, selectedScriptPath);
+        std::vector<char *> envp = homeMadeSetEnv(rrstate, selectedScriptPath);
 
         argv.push_back(strdup(cgiPath.c_str()));
         argv.push_back(strdup(selectedScriptPath.c_str()));
@@ -167,8 +188,10 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
         // for (std::vector<char *>::iterator it = envp.begin(); it != envp.end(); it++) {
         //     std::clog << "ENVP : " << *it << std::endl;
         // }
-        if (access(cgiPath.c_str(), X_OK) == 0)
+        std::clog << "QUERY : " << getQuery(rrstate.getRequest().getPath()) << std::endl;
+        if (access(cgiPath.c_str(), X_OK) == 0) //  && getQuery(request.getPath()) != ""
         {
+            std::clog << "ICI" << std::endl;
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
             exit(1);
@@ -184,7 +207,7 @@ void    handleCGI(HttpRequestHandler& request, HttpResponseHandler& response)
         waitpid(pid, &status, 0);
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
         {
-            response.handleCgiResponse(output, response);
+            rrstate.getResponse().handleCgiResponse(output, rrstate.getResponse());
         }
         else
             Logger::log("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));

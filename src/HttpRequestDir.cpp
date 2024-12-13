@@ -1,4 +1,5 @@
 #include "HttpRequestHandler.hpp"
+#include "HttpResponseHandler.hpp"
 
 void	HttpRequestHandler::handleDirectoryRequest(const std::string& path, HttpResponseHandler& response)
 {

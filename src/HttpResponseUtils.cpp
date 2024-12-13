@@ -1,6 +1,6 @@
 #include "HttpResponseHandler.hpp"
 
-std::string urlDecode(const std::string& url)
+std::string HttpResponseHandler::urlDecode(const std::string& url)
 {
     std::string decoded;
     size_t length = url.length();
@@ -30,13 +30,13 @@ std::string urlDecode(const std::string& url)
     return decoded;
 }
 
-bool isCgiRequest(const std::string& path)
+bool HttpResponseHandler::isCgiRequest(const std::string& path)
 {
     const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
 
     const std::string cgiDirectory = "/cgi-bin";
-	std::cout << "\nPATH: " << path << std::endl;
+	// std::cout << "\nPATH: " << path << std::endl;
 
     if (path.find(cgiDirectory) == 0)
 	{

@@ -2,10 +2,34 @@
 #ifndef CGI_HPP
 # define CGI_HPP
 
-#include "../HttpRequestHandler.hpp"
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
-std::string         getQuery(std::string path);
-std::vector<char *> homeMadeSetEnv(HttpRequestHandler request, std::string scriptPath);
-void                handleCGI(HttpRequestHandler& request, HttpResponseHandler& response);
+class RRState;
+
+class Cgi
+{
+    private:
+    public:
+        Cgi();
+        ~Cgi();
+        std::string         getQuery(std::string path);
+        void                handleCGI(RRState& rrstate);
+        std::string         getClientIP(RRState& rrstate);
+        int                 getClientPort(RRState& rrstate);
+        void				handleCgi(RRState& rrstate);
+        std::string         findAccept(std::map<std::string, std::string> headers);
+        std::string         readDatasFromScript(int pipefd);
+        std::vector<char *> homeMadeSetEnv(RRState& rrstate, std::string scriptPath);
+};
 
 #endif

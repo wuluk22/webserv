@@ -24,6 +24,7 @@ ServerHandler::~ServerHandler() {}
 int&  ServerHandler::getSock() { return this->_sock; }
 int&  ServerHandler::getPort() { return this->_port; }
 struct sockaddr* ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
+struct sockaddr_in ServerHandler::getAdd() { return this->_address; } 
 socklen_t&	ServerHandler::getAddrlen() { return _addrlen; }
 std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
 

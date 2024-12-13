@@ -12,9 +12,9 @@
 
 #ifndef HTTPREQUESTHANDLER_HPP
 # define HTTPREQUESTHANDLER_HPP
-# include "HttpResponseHandler.hpp"
 # include "DirectoryHandler.hpp"
 # include "configuration_file_parsing/ServerConfig.hpp"
+
 # include <sys/socket.h> // recv | send
 # include <iostream>
 # include <unistd.h> // close
@@ -27,12 +27,14 @@
 # include <cstring>
 # include <algorithm>
 
+class RRState;
 class HttpResponseHandler;
 
 class HttpRequestHandler
 {
 	private:
 		int											fd;
+		int											_clientSocket;
 		std::string									method;
 		std::string									path;
 		std::string									httpVersion;
@@ -72,6 +74,7 @@ class HttpRequestHandler
 		void										setAllowedPaths(const std::vector<std::string>& paths);
 		void										setRootDirectory(const std::string& path);
 		void										setCgiPath(const std::vector<std::string>& cgiPath);
+		void										setClientSocket(const int& clientSock);
 
 		std::string									getMethod(void) const;
 		std::string									getPath(void) const;
@@ -85,8 +88,9 @@ class HttpRequestHandler
 		const std::vector<std::string>&				getAllowedMethods() const;
 		const std::vector<std::string>&				getAllowedPaths() const;
 		const std::vector<std::string>&				getCgiPath() const;
+		const int&									getClientSocket() const;
 
-		HttpRequestHandler							handleRequest(int clientSock, std::vector<LocationBlock *> locationsBlock);
+		HttpRequestHandler							handleRequest(int clientSock, RRState& rrstate);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
 		//HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
 		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);

@@ -1,19 +1,18 @@
 #include "HttpResponseHandler.hpp"
 #include "HttpRequestHandler.hpp"
+#include "RequestResponseState.hpp"
 
-void HttpResponseHandler::handleResponse(HttpRequestHandler& request, int clientSock)
+void HttpResponseHandler::handleResponse(RRState& rrstate)
 {
     try
     {
-        *this = handlePath(request, *this);
-
         std::string responseStr = getAll();
         size_t totalSent = 0;
         ssize_t sent;
 
         while (totalSent < responseStr.length())
         {
-            sent = send(clientSock, 
+            sent = send(rrstate.getClientSock(), 
                         responseStr.c_str() + totalSent, 
                         responseStr.length() - totalSent, 
                         0);

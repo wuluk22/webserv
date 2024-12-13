@@ -27,6 +27,7 @@ def get_random_phrase(file_path):
 def main():
     # Récupérer les données de la query string
     form = cgi.FieldStorage()
+    print(form)
     selected_image = form.getvalue("image", "Aucune image sélectionnée")
 
     # Obtenir une phrase aléatoire

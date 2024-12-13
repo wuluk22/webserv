@@ -1,7 +1,6 @@
 #ifndef SOCKETHANDLER_HPP
 # define SOCKETHANDLER_HPP
 
-#include "ErrorHandler.hpp"
 #include "configuration_file_parsing/ServerConfig.hpp"
 
 #include <netinet/in.h>
@@ -11,6 +10,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <vector>
+
+class ErrorHandler;
 
 class ServerHandler
 {
@@ -28,6 +29,7 @@ class ServerHandler
 		int&							getSock();
 		int&							getPort();
 		struct sockaddr*				getAddress();
+		struct sockaddr_in				getAdd();
 		socklen_t&						getAddrlen();
 		std::vector<LocationBlock *>&	getLocations();
 

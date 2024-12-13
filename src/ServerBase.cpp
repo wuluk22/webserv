@@ -2,11 +2,10 @@
 #include "ServerBase.hpp"
 #include "ServerHandler.hpp"
 #include "RequestResponseState.hpp"
+#include "HttpResponseHandler.hpp"
+#include "HttpRequestHandler.hpp"
+#include "ErrorHandler.hpp"
 #include "configuration_file_parsing/ServerConfig.hpp"
-
-#include <algorithm>
-#include <cstring>
-#include <vector>
 
 //METHODS
 ServerBase::ServerBase() : maxSock(0)
@@ -62,8 +61,9 @@ void	ServerBase::acceptConnection(ServerHandler	Server)
 	FD_SET(newSocket, &readfds);
 	// if (ClientSockets.find(newSocket) == ClientSockets.end()) {
 		RRState NewConnectionState;
-		NewConnectionState.setLocations(Server.getLocations());
-		// for (std::vector<LocationBlock *>::iterator it = NewConnectionState.getLocations().begin(); it != NewConnectionState.getLocations().end(); it++) {
+		NewConnectionState.setServer(Server);
+		// std::cout << "TEST SERVER PORT : " << NewConnectionState.getServer().getPort() << std::endl; 
+		// for (std::vector<LocationBlock *>::iterator it = NewConnectionState.getServer().getLocations().begin(); it != NewConnectionState.getServer().getLocations().end(); it++) {
 		// 	std::cout << "SOCKETPART : ";
 		// 	std::cout << *it << std::endl;
 		// }
@@ -104,11 +104,12 @@ void	ServerBase::processClientConnections()
 		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++)
 		{
 			int client_sock = it->first;
-			std::vector<LocationBlock *> loc = it->second.getLocations();
+			std::vector<LocationBlock *> loc = it->second.getServer().getLocations();
 			if (FD_ISSET(client_sock, &cpyReadFds))
 			{
-				HttpRequestHandler request = it->second.getRequest();
-				request = request.handleRequest(client_sock, loc);
+				it->second.setClientSock(client_sock);
+				// HttpRequestHandler request = it->second.getRequest();
+				HttpRequestHandler request = request.handleRequest(client_sock, it->second);
 				//request = it->second.initRequest(request);
 				it->second.setRequest(request);
 				// std::cout << "Request reponse : " << request.getFd() << std::endl;
@@ -131,7 +132,7 @@ void	ServerBase::processClientConnections()
 			if (FD_ISSET(client_sock, &cpyWriteFds))
             {
 				HttpResponseHandler response = it->second.getResponse();
-                response.handleResponse(it->second.getRequest(), client_sock);
+                response.handleResponse(it->second);
 				//std::cerr << "process 3-\n" << it->second.getRequest() << "end!" << std::endl;
 				it->second.setResponse(response);
 				close(client_sock);

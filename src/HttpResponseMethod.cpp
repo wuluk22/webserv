@@ -1,104 +1,98 @@
 #include "HttpResponseHandler.hpp"
+#include "HttpRequestHandler.hpp"
+#include "RequestResponseState.hpp"
 #include "CGI/Cgi.hpp"
-#include <fstream>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <stdexcept>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
-HttpResponseHandler HttpResponseHandler::handlePath(HttpRequestHandler& request, HttpResponseHandler& response)
+HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 {
-    const std::string	staticDir = request.getRootDirectory();
+    const std::string	staticDir = rrstate.getRequest().getRootDirectory();
     std::string			filePath;
 	struct stat			pathStat;
 	std::string			errorPage;
 	std::string			content;
 
-	filePath = staticDir + request.getPath();
+	filePath = staticDir + rrstate.getRequest().getPath();
 
-	if (!request.isMethodAllowed(request, request.getMethod()))
+	if (!rrstate.getRequest().isMethodAllowed(rrstate.getRequest(), rrstate.getRequest().getMethod()))
 	{
-			setErrorResponse(request, response, 405, "Method_not_allowed");
-			return response;
+			setErrorResponse(rrstate, 405, "Method_not_allowed");
+			return rrstate.getResponse();
 	}
-    if (request.getMethod() == "GET")
+    if (rrstate.getRequest().getMethod() == "GET")
     {
-        response = handleGet(request, response);
-        return response;
+        rrstate.getResponse() = handleGet(rrstate);
+        return rrstate.getResponse();
     }
-	if (request.getMethod() == "POST")
+	if (rrstate.getRequest().getMethod() == "POST")
 	{
-		request.handleFileUpload(request.getBody(), request.getPath(), response);
-		return response;
+		rrstate.getRequest().handleFileUpload(rrstate.getRequest().getBody(), rrstate.getRequest().getPath(), rrstate.getResponse());
+		return rrstate.getResponse();
 	}
-	if (request.getMethod() == "DELETE")
+	if (rrstate.getRequest().getMethod() == "DELETE")
 	{
 		std::string path;
-		path = staticDir + request.getPath();
+		path = staticDir + rrstate.getRequest().getPath();
 		path = urlDecode(path);
 		//std::cout << request << std::endl;
     	if (remove(path.c_str()) == 0) {
-        	response.setStatusCode(200);
-        	response.setStatusMsg("OK");
-        	response.setBody("Resource deleted successfully.");
+        	rrstate.getResponse().setStatusCode(200);
+        	rrstate.getResponse().setStatusMsg("OK");
+        	rrstate.getResponse().setBody("Resource deleted successfully.");
     	} else {
-        	response.setStatusCode(404);
-        	response.setStatusMsg("Not Found");
-        	response.setBody("Resource not found.");
+        	rrstate.getResponse().setStatusCode(404);
+        	rrstate.getResponse().setStatusMsg("Not Found");
+        	rrstate.getResponse().setBody("Resource not found.");
 		}
-        return response;
+        return rrstate.getResponse();
     }
-    setErrorResponse(request, response, 405, "Method not supported");
-    return response;
+    setErrorResponse(rrstate, 405, "Method not supported");
+    return rrstate.getResponse();
 }
 
-HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& response)
+HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {
-    std::string staticDir = request.getRootDirectory();
+    std::string staticDir = rrstate.getRequest().getRootDirectory();
     std::string filePath;
     std::string valid;
     struct stat pathStat;
     std::string errorPage;
     std::string content;
 
-    filePath = staticDir + request.getPath();
-	valid = "/" + staticDir + request.getPath();
+    filePath = staticDir + rrstate.getRequest().getPath();
+	valid = "/" + staticDir + rrstate.getRequest().getPath();
     // request.isPathAllowed(request, request.getPath())
-    std::cout << request << std::endl;
-    std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << request.getPath() << std::endl;
+    std::cout << rrstate.getRequest() << std::endl;
+    std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << rrstate.getRequest().getPath() << std::endl;
     /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
     {
         setErrorResponse(request, response, 404, "Path not allowed");
         std::cout << "\n--- ::" << valid << std::endl;
         return response;
     }*/
-    if (request.getPath() == "/")
+    if (rrstate.getRequest().getPath() == "/")
     {
         filePath = staticDir + "/index.html";
     }
     // Basic security check to prevent directory traversal
     if (filePath.find("..") != std::string::npos)
     {
-        setErrorResponse(request, response, 403, "Forbidden");
-        return response;
+        setErrorResponse(rrstate, 403, "Forbidden");
+        return rrstate.getResponse();
     }
-    if (!request.fileExists(filePath) && !isCgiRequest(request.getPath()))
+    if (rrstate.getRequest().fileExists(filePath) && !isCgiRequest(rrstate.getRequest().getPath()))
     {
-        setErrorResponse(request, response, 404, "Not Found meow");
-        return response;
+        setErrorResponse(rrstate, 404, "Not Found meow");
+        return rrstate.getResponse();
     }
-    if (request.getPath() == "/static")
+    if (rrstate.getRequest().getPath() == "/static")
 	{
         std::cout << "------HERE------" << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
 	    {
 	    	if (S_ISDIR(pathStat.st_mode))
 	    	{
-				request.handleDirectoryRequest(request.getPath(), response);
-	    		return response;
+				rrstate.getRequest().handleDirectoryRequest(rrstate.getRequest().getPath(), rrstate.getResponse());
+	    		return rrstate.getResponse();
 	    	}
 	    }
     }
@@ -106,33 +100,35 @@ HttpResponseHandler handleGet(HttpRequestHandler& request, HttpResponseHandler& 
 	{
 		return response;
 	}	*/
-    if (isCgiRequest(request.getPath()))
+    if (isCgiRequest(rrstate.getRequest().getPath()))
     {
-		handleCGI(request, response);
+        Cgi cgi;
+        std::cout << "CLIENTSOCK IN RESPONSEMETHOD : " << rrstate.getRequest().getClientSocket() << std::endl;
+		cgi.handleCGI(rrstate);
         //setErrorResponse(request, response, 200, "CGI Braowsss");
 		filePath = staticDir + "/cgi.html";
     }
-    content = request.readFile(filePath);
-    response.setStatusCode(200);
-    response.setStatusMsg("OK");
-    response.setBody(content);
-    response.setHeader("Content-Type", request.getMimeType(filePath));
-    response.setHeader("Content-Length", request.toString(content.length()));
-    response.setHttpVersion("HTTP/1.1");
+    content = rrstate.getRequest().readFile(filePath);
+    rrstate.getResponse().setStatusCode(200);
+    rrstate.getResponse().setStatusMsg("OK");
+    rrstate.getResponse().setBody(content);
+    rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
+    rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
+    rrstate.getResponse().setHttpVersion("HTTP/1.1");
     // Add security headers
-    response.setHeader("X-Content-Type-Options", "nosniff");
-    response.setHeader("X-Frame-Options", "SAMEORIGIN");
-    response.setHeader("X-XSS-Protection", "1; mode=block");
+    rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
+    rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
+    rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
     //std::cout << response << std::endl;
-    return response;
+    return rrstate.getResponse();
 }
 
-void    setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg)
+void    setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg)
 {
-    response.setStatusCode(statusCode);
-    response.setStatusMsg(statusMsg);
-    std::string errorPage = request.createErrorPage(statusCode, statusMsg);
-    response.setBody(errorPage);
-    response.setHeader("Content-Type", "text/html");
-    response.setHeader("Content-Length", request.toString((errorPage.length())));
+    rrstate.getResponse().setStatusCode(statusCode);
+    rrstate.getResponse().setStatusMsg(statusMsg);
+    std::string errorPage = rrstate.getRequest().createErrorPage(statusCode, statusMsg);
+    rrstate.getResponse().setBody(errorPage);
+    rrstate.getResponse().setHeader("Content-Type", "text/html");
+    rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString((errorPage.length())));
 }

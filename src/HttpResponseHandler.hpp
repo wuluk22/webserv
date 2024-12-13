@@ -16,14 +16,19 @@
 # include <sstream>
 # include <fstream>
 # include <map>
-# include "HttpRequestHandler.hpp"
+# include <vector>
 # include <sys/stat.h> // For stat()
-# include <string>
-# include <iostream>
+# include <sys/socket.h> // for send
 # include <string>
 # include <cstdlib>
+# include <cstdio>
+# include <cstring>
+# include <stdexcept>
+# include <sys/stat.h>
+# include <sys/wait.h>
+# include <unistd.h>
 
-class HttpRequestHandler;
+class RRState;
 
 class HttpResponseHandler
 {
@@ -42,10 +47,14 @@ class HttpResponseHandler
 		std::map<std::string, std::string>	getHeaders() const;
 		std::string							getBody() const;
 		std::string							getAll() const;
-		HttpResponseHandler					handlePath(HttpRequestHandler &request, HttpResponseHandler &response);
-		void								handleResponse(HttpRequestHandler& request, int clientSock);
+		
+		HttpResponseHandler					handlePath(RRState& rrstate);
+		void								handleResponse(RRState& rrstate);
 		void								sendError(int clientSock, int statusCode, const std::string& statusMsg, const std::string& body);
-		void    							handleCgiResponse(std::string output, HttpResponseHandler& response);
+		std::string							urlDecode(const std::string& url);
+		HttpResponseHandler					handleGet(RRState& rrstate);
+		bool								isCgiRequest(const std::string& path);
+		void                				handleCgiResponse(std::string output, HttpResponseHandler& response);
 	private:
 		std::string							httpVersion;
 		int									code;
@@ -53,11 +62,7 @@ class HttpResponseHandler
 		std::map<std::string, std::string>	headers;
 		std::string							body;
 };
+void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);
 std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);
-std::string			urlDecode(const std::string& url);
-HttpResponseHandler	handleGet(HttpRequestHandler& request, HttpResponseHandler& response);
-void				setErrorResponse(HttpRequestHandler& request, HttpResponseHandler& response, int statusCode, const std::string& statusMsg);
-bool				isCgiRequest(const std::string& path);
-void				handleCgi(HttpRequestHandler& request, HttpResponseHandler& response);
 
 #endif

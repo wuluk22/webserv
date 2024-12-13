@@ -1,23 +1,26 @@
 #ifndef REQUESTRESPONSESTATE_HPP
 # define REQUESTRESPONSESTATE_HPP
 
+#pragma once
+
 #include <cstddef>
 # include <iostream>
-# include "HttpRequestHandler.hpp"
-# include "HttpResponseHandler.hpp"
-# include "ServerHandler.hpp"
 
-class	HttpRequestHandler;
-class	HttpResponseHandler;
-class	ServerHandler;
+#include "HttpRequestHandler.hpp"
+#include "HttpResponseHandler.hpp"
+#include "ServerHandler.hpp"
+
+class HttpRequestHandler;
+class HttpResponseHandler;
+class ServerHandler;
 
 class	RRState
 {
 	private:
 		HttpRequestHandler				_request;
 		HttpResponseHandler				_response;
-		std::vector<LocationBlock *>	_locations;
-		// ServerHandler					_server;
+		ServerHandler					_server;
+		int								_clientSock;
 	
 	public:
 	//METHODS
@@ -27,13 +30,17 @@ class	RRState
 	//GETTER
 	HttpRequestHandler&				getRequest();
 	HttpResponseHandler&			getResponse();
-	std::vector<LocationBlock *>&	getLocations();
+	ServerHandler&					getServer();
+	int&							getClientSock();
 
 	//SETTER
 	void				setRequest(HttpRequestHandler& req);
 	void				setResponse(HttpResponseHandler& res);
-	void				setLocations(std::vector<LocationBlock *>& locations);
+	void				setServer(const ServerHandler& server);
+	void				setClientSock(const int& clientSock);
+
 	HttpRequestHandler	initRequest(const HttpRequestHandler& request);
+
 };
 
 #endif

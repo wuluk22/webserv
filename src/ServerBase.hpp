@@ -1,14 +1,16 @@
 #ifndef SERVERBASE_HPP
 #define SERVERBASE_HPP
 
-#include "ServerHandler.hpp"
-#include "ErrorHandler.hpp"
 #include "RequestResponseState.hpp"
+#include "ServerHandler.hpp"
+#include "configuration_file_parsing/ServerConfig.hpp"
 
 #include <iostream>
 #include <sys/select.h>
 #include <vector>
 #include <map>
+#include <algorithm>
+#include <cstring>
 
 class	ServerBase
 {
