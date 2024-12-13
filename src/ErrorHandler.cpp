@@ -29,4 +29,13 @@ ServerHandlerError::ServerHandlerError(const std::string& msg, const char* funct
 ServerHandlerError::~ServerHandlerError() throw() {}
 
 ServerBaseError::ServerBaseError(const std::string& msg, const char* function, int line) : Error("Error in ServerBase class in function : " + toStr(function) + " in line : " + toStrInt(line) + " : " + msg) {};
-ServerBaseError::~ServerBaseError() throw() {} // need to redefine, if not, it's COEXEPT from c++11 because i modified std::exception
+ServerBaseError::~ServerBaseError() throw() {}
+
+ConfigParserError::ConfigParserError(const std::string& msg, const char* function, int line, int config_line)
+    : Error(msg + '\n'
+            + "---" + '\n' +
+            "Config file line error : " + toStrInt(config_line) + '\n' +
+            "Exception from ConfigParser method : " + toStr(function) + '\n' +
+            "at line : " + toStrInt(line)) {}
+
+ConfigParserError::~ConfigParserError() throw() {}

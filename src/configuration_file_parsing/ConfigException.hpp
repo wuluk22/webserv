@@ -2,49 +2,50 @@
 #define CONFIGEXCEPTION_HPP
 
 #include <iostream>
+#include "../ErrorHandler.hpp"
 
-// ERROR MACRO
+// COMMON MACROS
 #define ERROR_HEADER "\e[91m[CONFIG_PARSER | ERROR] : "
+#define AB " aborting."
+#define RESET "\e[0m"
 
-// ERROR MESSAGES
-#define BAD_ACCESS "No such file present, aborting"
-#define NO_SERVER_CONFIG "No such server configuration, aborting"
-#define TOKEN_REPEATED "Non-repeatable token repeated within block, aborting"
-#define INVALID_TOKEN "Invalid token in the configuration file, aborting"
-#define NO_INSTRUCTION "No instruction given in the configuration file, aborting"
-#define TOKEN_POSITION_MISMATCH "Token is not within any block, aborting"
-#define BAD_INSTRUCTION "Bad instruction within a directive, aborting"
-#define NO_URI_LOCATION "Location token contain no URI, aborting"
-#define BAD_URI "Bad URI, aborting"
-#define DUPE_ELEMS "Duplicate elements discovered, aborting"
-#define NO_ELEMENTS "Lack of proper arguments, aborting"
-#define DOUBLE_DIRECTIVE "Double server directive, aborting"
-#define EXCEEDING_LIMIT "Size limit exceeded, aborting"
-#define PATH_NOT_RECOGNIZED "Path isn't recognized, aborting"
-#define ROOT_PRIORITY "Root redefinition should be declared before inbricked location, aborting"
-#define NO_ROOT_DEFINITION "No root definition, vacant URI prefix, aborting"
-#define UNDEFINED_PARAMS "Undefined parameter"
-#define NUMERICAL_VALUE_EXPECTED "Numerical value expected, aborting"
-#define RESERVED_PORTS_LINUX "Ports under 1024 are reserved, aborting"
-#define AMBIGUOUS_URI_DEFINITION "Root and alias cannot be declared inside the same location, aborting"
-#define WRONG_ERROR_PAGES_SCOPE "Wrong error pages scope, aborting"
-#define DOUBLE_LOCATION_URI "Repeated URI, aborting"
-#define AL " at line : "
+// PATH RELATED ERROR MESSAGES
+#define BAD_ACCESS ERROR_HEADER "No such file present," AB RESET
+#define BAD_CONFIG_FILE ERROR_HEADER "Config file isn't readable," AB RESET
+#define NO_SERVER_CONFIG ERROR_HEADER "No such server configuration," AB RESET
+#define PATH_NOT_RECOGNIZED ERROR_HEADER "Path isn't recognized," AB RESET
+#define PATH_ALREADY_DEFINED ERROR_HEADER "Path is already defined," AB RESET
+
+// CONFIG PARSER RULES ERROR MESSAGES
+#define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET
+#define INVALID_TOKEN ERROR_HEADER  "Invalid token in the configuration file," AB RESET
+#define TOKEN_REPEATED ERROR_HEADER "Non-repeatable token repeated within block," AB RESET
+#define BAD_INSTRUCTION ERROR_HEADER "Bad instruction within a directive," AB RESET
+#define TOKEN_POSITION_MISMATCH ERROR_HEADER "Token is not within any block," AB RESET
+#define NO_INSTRUCTION ERROR_HEADER "No instruction given in the configuration file," AB RESET
+#define DUPE_ELEMS ERROR_HEADER "Duplicate elements discovered," AB RESET
+#define NO_ELEMENTS ERROR_HEADER "Lack of proper arguments," AB RESET
+#define DOUBLE_DIRECTIVE ERROR_HEADER "Double server directive," AB RESET
+#define ROOT_PRIORITY ERROR_HEADER "Root redefinition should be declared before inbricked location," AB RESET
+#define NO_ROOT_DEFINITION ERROR_HEADER "No root definition, vacant URI prefix," AB RESET
+#define UNDEFINED_PARAMS ERROR_HEADER "Undefined parameter," AB RESET
+#define NUMERICAL_VALUE_EXPECTED ERROR_HEADER "Numerical value expected," AB RESET
+#define AMBIGUOUS_URI_DEFINITION ERROR_HEADER "Root and alias cannot be declared inside the same location block," AB RESET
+#define DOUBLE_LOCATION_URI ERROR_HEADER "Repeated URI," AB RESET
+
+// SERVER HEADER ERROR MESSAGES
+#define EXCEEDING_LIMIT ERROR_HEADER "Size limit exceeded," AB RESET
+#define PORT_SCOPE_LINUX ERROR_HEADER "Port scope is limited to 1024 - 65.535 for linux," AB RESET
+#define PORT_SCOPE_GENERAL ERROR_HEADER "Port scope is limited to 0 - 65.535 for your system," AB RESET 
+#define WRONG_ERROR_PAGES_SCOPE ERROR_HEADER "Wrong error pages scope," AB RESET
+
+// LOCATION RELATED ERROR MESSAGES
+#define NO_URI_LOCATION ERROR_HEADER "Location token contain no URI," AB RESET
+#define BAD_URI ERROR_HEADER "Bad URI," AB RESET
 
 // WARNING HEADER
 #define WARNING_HEADER "\e[33m[CONFIG_PARSER | WARNING] : "
-
 // WARNING MESSAGES
-#define NO_ROOT_DEFINED_ERROR_PAGES "No root defined for error pages, switching to absolute path"
-
-#define RESET "\e[0m"
-
-// EXCEPTIONS MESSAGES
-#define DEFAULT_CONFIG_EXCEPTION "Config exception, aborting"
-
-class ConfigException : std::exception {
-	public:
-		virtual const char * what ();
-};
+#define NO_ROOT_DEFINED_ERROR_PAGES WARNING_HEADER "No root defined for error pages, switching to absolute path" RESET
 
 #endif
