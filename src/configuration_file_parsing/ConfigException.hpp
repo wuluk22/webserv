@@ -7,7 +7,10 @@
 // COMMON MACROS
 #define ERROR_HEADER "\e[91m[CONFIG_PARSER | ERROR] : "
 #define AB " aborting."
-#define RESET "\e[0m"
+
+#ifndef RESET
+    #define RESET "\e[0m"
+#endif
 
 // PATH RELATED ERROR MESSAGES
 #define BAD_ACCESS ERROR_HEADER "No such file present," AB RESET
