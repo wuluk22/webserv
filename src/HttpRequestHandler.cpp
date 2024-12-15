@@ -7,59 +7,123 @@ HttpRequestHandler::HttpRequestHandler()
 HttpRequestHandler::~HttpRequestHandler()
 {}
 
+void HttpRequestHandler::reset()
+{
+	std::cerr << "\n--------cleaner------" << std::endl;
+
+    this->allowedPaths.clear();
+	for (std::vector<std::string>::iterator it = this->allowedMethods.begin(); it != this->allowedMethods.end(); ++it)
+	{
+		std::cerr << "method cleaner: " << *it << std::endl;
+	}
+    this->allowedMethods.clear();
+	this->allowedPath.clear();
+    
+
+    /*this->rootDirectory.clear();
+    this->path.clear();
+    this->method.clear();
+    this->httpVersion.clear();
+    this->body.clear();
+    
+
+    this->headers.clear();
+    this->statusCode = 0;
+    this->cgiEnabled = false;*/
+	std::cerr << "\n--------cleaner------" << std::endl;
+}
+
 HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock)
 {
+	//request.reset();
 	HttpRequestHandler tmpRequest(request);
-	std::vector<std::string>	paths;
-	std::vector<std::string>	methods;
+    //tmpRequest.reset();
+	std::map<std::string, std::map<std::string, std::vector<std::string> > > locInfo;
+
 	std::string					root;
 	std::vector<std::string>	cgiPath;
 
-	bool	completed("false");
-	int		i = 0;
 	root = "public";
 
-	while (i < locationsBlock.size() && locationsBlock[i])
-	{
-			if (locationsBlock[i]->isGetAllowed())
-				if (std::find(methods.begin(), methods.end(), "GET") == methods.end())
-					methods.push_back("GET");
-			if (locationsBlock[i]->isPostAllowed())
-				if (std::find(methods.begin(), methods.end(), "POST") == methods.end())
-					methods.push_back("POST");
-			if (locationsBlock[i]->isDeleteAllowed())
-				if (std::find(methods.begin(), methods.end(), "DELETE") == methods.end())
-					methods.push_back("DELETE");
-			if (locationsBlock[i]->isCgiAllowed()) {
-				if (std::find(_CgiPath.begin(), _CgiPath.end(),locationsBlock[i]->getCgiPath()) == _CgiPath.end()) {
-					cgiPath.push_back(locationsBlock[i]->getCgiPath());
-				}
-			}
-			std::string uri = locationsBlock[i]->getUri();
-			if (!uri.empty() && std::find(paths.begin(), paths.end(), uri) == paths.end())
-					paths.push_back(locationsBlock[i]->getUri());
-			/*if (block->hasRoot())
-            	root = block->getRoot();
+    for (std::vector<LocationBlock*>::const_iterator it = locationsBlock.begin(); it != locationsBlock.end(); ++it)
+    {
+        const std::string& locationUri = (*it)->getUri();
+
+        // Initialize the inner map for this URI if not already present
+        if (locInfo.find(locationUri) == locInfo.end())
+        {
+            locInfo[locationUri] = std::map<std::string, std::vector<std::string> >();
+        }
+
+        // Add allowed methods
+        if ((*it)->isGetAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "GET") == locInfo[locationUri]["allowed_methods"].end())
+        {
+            locInfo[locationUri]["allowed_methods"].push_back("GET");
+        }
+        if ((*it)->isPostAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "POST") == locInfo[locationUri]["allowed_methods"].end())
+        {
+            locInfo[locationUri]["allowed_methods"].push_back("POST");
+        }
+        if ((*it)->isDeleteAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "DELETE") == locInfo[locationUri]["allowed_methods"].end())
+        {
+            locInfo[locationUri]["allowed_methods"].push_back("DELETE");
+        }
+        if ((*it)->isCgiAllowed() && std::find(_CgiPath.begin(), _CgiPath.end(), (*it)->getCgiPath()) == _CgiPath.end())
+        {
+            cgiPath.push_back((*it)->getCgiPath());
+        }
+
+
+        // Add content path
+        if (!(*it)->getContentPath().empty())
+        {
+            locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
+        }
+
+        // Add index files
+        std::vector<std::string> ind;
         
-        	if (block->hasServerName())
-        	    serverName = block->getServerName();
-			
-        	if (block->hasClientMaxBodySize())
-        	    clientMaxBodySize = block->getClientMaxBodySize();
-			
-        	if (block->hasRedirect())
-			{
-        	    redirectEnabled = true;
-        	    redirectUrl = block->getRedirectUrl();
-        	}*/
-			i++;
-	}
-	tmpRequest.setAllowedMethods(methods);
-	tmpRequest.setAllowedPaths(paths);
-	tmpRequest.setRootDirectory(root);
-	tmpRequest.setCgiPath(cgiPath);
-	//std::cerr << "\ntest 4: \n" << tmpRequest << "end!" << std::endl;
-	return tmpRequest;
+        ind = (*it)->accessibleIndex();
+        if (!ind.empty())
+            locInfo[locationUri]["index"] = ind;
+    }
+
+
+    if (locInfo.empty())
+    {
+        // No matching locations
+        std::cout << "\n------meowwww-----" << std::endl;
+        std::vector<std::string> emptyMethods;
+        tmpRequest.setAllowedMethods(emptyMethods);
+        tmpRequest.setRootDirectory(root);
+        tmpRequest.setCgiPath(cgiPath);
+        return tmpRequest;
+    }
+
+    // Add root directory to all matching URIs
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
+    {
+        it->second["root_directory"].push_back(root);
+    }
+
+    // Debugging print to verify contents of locInfo
+    std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
+    {
+        std::cerr << "URI: " << it->first << std::endl;
+        for (std::map<std::string, std::vector<std::string> >::iterator innerIt = it->second.begin(); innerIt != it->second.end(); ++innerIt)
+        {
+            std::cerr << "  " << innerIt->first << ": ";
+            for (std::vector<std::string>::iterator vecIt = innerIt->second.begin(); vecIt != innerIt->second.end(); ++vecIt)
+            {
+                std::cerr << *vecIt << " ";
+            }
+            std::cerr << std::endl;
+        }
+    }
+    tmpRequest.setCgiPath(cgiPath);
+    tmpRequest.setLocInfo(locInfo); // Assuming a setLocInfo function exists
+    return tmpRequest;
 }
 
 
@@ -73,6 +137,9 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
     bool headersComplete = false;
     unsigned int contentLength = 0;
     unsigned int bodyLength = 0;
+
+	request.reset();
+	request.setIsValid(false);
 	
 	request = request.handleConfig(request, rrstate.getServer().getLocations());
 	request.setClientSocket(clientSock);
@@ -123,7 +190,7 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
         }
 		else
 		{
-            std::string::size_type headerEnd = requestData.find("\r\n\r\n");
+			std::string::size_type headerEnd = requestData.find("\r\n\r\n");
             bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
         }
         bool isRequestComplete = false;

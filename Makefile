@@ -16,6 +16,7 @@ FILES	=	src/main \
 			src/HttpRequestUtils \
 			src/HttpRequestParsing \
 			src/HttpRequestDir \
+			src/HttpRequestLocUtils \
 			src/DirectoryHandler \
 			src/RequestResponseState \
 			src/Logger \

@@ -77,6 +77,7 @@ void	ServerBase::acceptConnection(ServerHandler	Server)
 void	ServerBase::processClientConnections()
 {
 	fd_set	cpyReadFds, cpyWriteFds;
+	HttpRequestHandler	request;
 	// struct timeval timeout;
 
 	// timeout.tv_sec = 15;
@@ -109,7 +110,7 @@ void	ServerBase::processClientConnections()
 			{
 				it->second.setClientSock(client_sock);
 				// HttpRequestHandler request = it->second.getRequest();
-				HttpRequestHandler request = request.handleRequest(client_sock, it->second);
+				request = request.handleRequest(client_sock, it->second);
 				//request = it->second.initRequest(request);
 				it->second.setRequest(request);
 				// std::cout << "Request reponse : " << request.getFd() << std::endl;
@@ -133,7 +134,7 @@ void	ServerBase::processClientConnections()
             {
 				HttpResponseHandler response = it->second.getResponse();
                 response.handleResponse(it->second);
-				//std::cerr << "process 3-\n" << it->second.getRequest() << "end!" << std::endl;
+				std::cerr << "process 3-\n" << it->second.getResponse() << "end!" << std::endl;
 				it->second.setResponse(response);
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);

@@ -102,6 +102,8 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 	{
 		out << *it << "\n";
 	}
+	out << "\nallowedPath : \n";
+	out << handler.getAllowedPath() << "\n";
 	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
@@ -153,9 +155,13 @@ void HttpRequestHandler::setFd(const int& nb) { fd = nb; }
 void HttpRequestHandler::setIsComplete(const bool& is) { isRequestComplete = is; }
 void HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { allowedMethods = methods; }
 void HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { allowedPaths = paths; }
+void HttpRequestHandler::setAllowedPath(const std::string& path) { allowedPath = path; }
 void HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
 void HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _CgiPath = cgiPath; }
 void HttpRequestHandler::setClientSocket(const int& clientSock) {_clientSocket = clientSock;}
+
+void HttpRequestHandler::setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo) { _locInfo = locInfo; }
+void HttpRequestHandler::setIsValid(const bool& val) { valid = val; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -172,5 +178,8 @@ bool    HttpRequestHandler::getIsComplete() const { return isRequestComplete; }
 std::string	HttpRequestHandler::getRootDirectory() const { return rootDirectory; }
 const std::vector<std::string>& HttpRequestHandler::getAllowedMethods() const { return allowedMethods; }
 const std::vector<std::string>& HttpRequestHandler::getAllowedPaths() const { return allowedPaths; }
+const std::string&				HttpRequestHandler::getAllowedPath() const { return allowedPath; }
 const std::vector<std::string>& HttpRequestHandler::getCgiPath() const { return _CgiPath;}
 const int&						HttpRequestHandler::getClientSocket() const {return _clientSocket; };
+const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	HttpRequestHandler::getLocInfo() const { return _locInfo; }
+bool	HttpRequestHandler::getIsValid() const { return valid; }
