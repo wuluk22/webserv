@@ -1,26 +1,12 @@
 #include "HttpRequestHandler.hpp"
 
-        /*
-            pour /docs.html je dois pouvoir savoir qu'il se trouve dans le it->first : "/public"
-            pour se faire je dois ajouter public a /docs.html pour pouvoir le comparer a it->first
-            ou directement aux elements de it->second["index"]
-
-            exemple de structure de _locInfo:
-            
-            it->first       it->second              elements of it->second
-            "/"             ["allowed_methods"      ["GET", "POST"]]
-                            ["content_path"         ["/fullfilepath/"]]
-                            ["root_directory"       ["public"]]
-                            ["index"                ["/public/index.html, /public/docs.html"]]
-        */
-
 std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoByUri(HttpRequestHandler request)
 {
     std::string requestUri = request.getPath();
     bool isRoot = (requestUri == "/");
     if (!isRoot && requestUri.find("/public") != 0)
     {
-        requestUri = "/" + request.getRootDirectory() + requestUri;
+        requestUri = "/public" + requestUri;
     }
 
     std::cout << "Adjusted REQUEST PATH: " << requestUri << std::endl;
@@ -110,9 +96,9 @@ std::vector<std::string> HttpRequestHandler::getConfigFieldFromLoc(const std::st
     return std::vector<std::string>();
 }
 
-std::string HttpRequestHandler::getFullPathFromLoc(const std::string& uri, const std::string& relativePath) const
+std::string HttpRequestHandler::getFullPathFromLoc(const std::string& relativePath) const
 {
-    std::string rootDirectory = getRootDirectoryFromLoc(uri);
+    std::string rootDirectory = getRootDirectoryFromLoc(relativePath);
     if (!rootDirectory.empty())
     {
         return rootDirectory + relativePath;

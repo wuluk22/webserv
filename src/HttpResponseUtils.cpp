@@ -76,13 +76,13 @@ void HttpResponseHandler::sendError(int clientSock, int statusCode, const std::s
     }
     catch (const std::exception& e)
     {
-        // Log failure in sending error response
         std::cerr << "Error sending error response: " << e.what() << std::endl;
     }
 }
 
 std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
 {
+	out << "\n---------------------------RESPONSE---------------------------------\n";
 	out << i.getHttpVersion() << " " << i.getStatusCode() << " " << i.getStatusMsg() << std::endl;
 	std::map<std::string, std::string> headers = i.getHeaders();
 	std::map<std::string, std::string>::const_iterator it;
@@ -91,6 +91,7 @@ std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
 		out << it->first << ": " << it->second << std::endl;
 	}
 	out << i.getBody();
+	out << "\n---------------------------RESPONSE---------------------------------\n";
 	return out;
 }
 

@@ -110,7 +110,7 @@ class HttpRequestHandler
 		bool										isAutoIndexEnabled(const std::string& uri) const;
 		std::vector<std::string>					getIndexFilesFromLoc(const std::string& uri) const;
 		std::vector<std::string>					getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
-		std::string									getFullPathFromLoc(const std::string& uri, const std::string& relativePath) const;
+		std::string									getFullPathFromLoc(const std::string& relativePath) const;
 
 		bool										isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
 		bool										isIndexFile(const std::string& uri, const std::string& fileName) const;

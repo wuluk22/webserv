@@ -49,13 +49,11 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     {
         const std::string& locationUri = (*it)->getUri();
 
-        // Initialize the inner map for this URI if not already present
         if (locInfo.find(locationUri) == locInfo.end())
         {
             locInfo[locationUri] = std::map<std::string, std::vector<std::string> >();
         }
 
-        // Add allowed methods
         if ((*it)->isGetAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "GET") == locInfo[locationUri]["allowed_methods"].end())
         {
             locInfo[locationUri]["allowed_methods"].push_back("GET");
@@ -73,14 +71,11 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
             cgiPath.push_back((*it)->getCgiPath());
         }
 
-
-        // Add content path
         if (!(*it)->getContentPath().empty())
         {
             locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
         }
 
-        // Add index files
         std::vector<std::string> ind;
         
         ind = (*it)->accessibleIndex();
@@ -91,7 +86,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
     if (locInfo.empty())
     {
-        // No matching locations
         std::cout << "\n------meowwww-----" << std::endl;
         std::vector<std::string> emptyMethods;
         tmpRequest.setAllowedMethods(emptyMethods);
@@ -100,13 +94,11 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         return tmpRequest;
     }
 
-    // Add root directory to all matching URIs
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
     {
         it->second["root_directory"].push_back(root);
     }
 
-    // Debugging print to verify contents of locInfo
     std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
     {
@@ -122,7 +114,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         }
     }
     tmpRequest.setCgiPath(cgiPath);
-    tmpRequest.setLocInfo(locInfo); // Assuming a setLocInfo function exists
+    tmpRequest.setLocInfo(locInfo);
     return tmpRequest;
 }
 

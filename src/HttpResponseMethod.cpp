@@ -26,7 +26,6 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
     if (it != config.end())
     {
-    // Set the allowed methods in the request
         rrstate.getRequest().setAllowedMethods(it->second);
     }
 
@@ -50,7 +49,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
 
 	//filePath = staticDir + rrstate.getRequest().getPath();
-    filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath(), rrstate.getRequest().getPath());
+    filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath());
 	if (!rrstate.getRequest().isMethodAllowed(rrstate.getRequest(), rrstate.getRequest().getMethod()))
 	{
         std::cerr << "Http method not allowed: " << rrstate.getRequest().getMethod() << std::endl;
@@ -76,7 +75,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	if (rrstate.getRequest().getMethod() == "DELETE")
 	{
 		std::string path;
-		path = staticDir + rrstate.getRequest().getPath();
+		path = "public" + rrstate.getRequest().getPath();
 		path = urlDecode(path);
 		//std::cout << request << std::endl;
     	if (remove(path.c_str()) == 0) {
@@ -138,7 +137,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
             return rrstate.getResponse();
         }
     }
-    // Basic security check to prevent directory traversal
     if (filePath.find("..") != std::string::npos)
     {
         setErrorResponse(rrstate, 403, "Forbidden");
@@ -180,7 +178,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
     rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
     rrstate.getResponse().setHttpVersion("HTTP/1.1");
-    // Add security headers
+
     rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
     rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
     rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
