@@ -5,19 +5,63 @@
 
 HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 {
-    const std::string	staticDir = rrstate.getRequest().getRootDirectory();
+    //const std::string	staticDir = rrstate.getRequest().getRootDirectory();
     std::string			filePath;
 	struct stat			pathStat;
 	std::string			errorPage;
 	std::string			content;
 
-	filePath = staticDir + rrstate.getRequest().getPath();
+    std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
 
+    if (config.empty())
+    {
+        std::cerr << "No matching configuration found for URI: " << rrstate.getRequest().getPath() << std::endl;
+        setErrorResponse(rrstate, 404, "Not FFFound");
+        return rrstate.getResponse();
+    }
+
+
+
+
+    std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
+    if (it != config.end())
+    {
+        rrstate.getRequest().setAllowedMethods(it->second);
+    }
+
+    std::cerr << "\nConfiguration for URI: " << rrstate.getRequest().getPath() << std::endl;
+    for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
+    {
+        std::cerr << it->first << ": ";
+        for (std::vector<std::string>::iterator vecIt = it->second.begin(); vecIt != it->second.end(); ++vecIt)
+        {
+            std::cerr << *vecIt << " ";
+        }
+        std::cerr << std::endl;
+    }
+
+    std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate.getRequest().getPath());
+    std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
+
+
+
+
+
+
+	//filePath = staticDir + rrstate.getRequest().getPath();
+    filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath());
 	if (!rrstate.getRequest().isMethodAllowed(rrstate.getRequest(), rrstate.getRequest().getMethod()))
 	{
-			setErrorResponse(rrstate, 405, "Method_not_allowed");
-			return rrstate.getResponse();
+        std::cerr << "Http method not allowed: " << rrstate.getRequest().getMethod() << std::endl;
+	    setErrorResponse(rrstate, 405, "Method_not_allowed");
+		return rrstate.getResponse();
 	}
+    if (!rrstate.getRequest().getIsValid())
+    {
+        std::cerr << "Access denied for path: " << rrstate.getRequest().getPath() << std::endl;
+        setErrorResponse(rrstate, 403, "Forbidden");
+        return rrstate.getResponse();
+    }
     if (rrstate.getRequest().getMethod() == "GET")
     {
         rrstate.getResponse() = handleGet(rrstate);
@@ -31,7 +75,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	if (rrstate.getRequest().getMethod() == "DELETE")
 	{
 		std::string path;
-		path = staticDir + rrstate.getRequest().getPath();
+		path = "public" + rrstate.getRequest().getPath();
 		path = urlDecode(path);
 		//std::cout << request << std::endl;
     	if (remove(path.c_str()) == 0) {
@@ -51,7 +95,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {
-    std::string staticDir = rrstate.getRequest().getRootDirectory();
+    std::string staticDir = "public";
     std::string filePath;
     std::string valid;
     struct stat pathStat;
@@ -63,6 +107,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     // request.isPathAllowed(request, request.getPath())
     std::cout << rrstate.getRequest() << std::endl;
     std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << rrstate.getRequest().getPath() << std::endl;
+    std::cout << "staticDir-----------------------------: " << rrstate.getRequest().getRootDirectory() << std::endl;
     /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
     {
         setErrorResponse(request, response, 404, "Path not allowed");
@@ -73,7 +118,25 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     {
         filePath = staticDir + "/index.html";
     }
-    // Basic security check to prevent directory traversal
+    if (rrstate.getRequest().getPath() == "/favicon.ico")
+    {
+        std::string faviconPath = staticDir + "/favicon.ico";
+        if (rrstate.getRequest().fileExists(faviconPath))
+        {
+            std::string content = rrstate.getRequest().readFile(faviconPath);
+            rrstate.getResponse().setStatusCode(200);
+            rrstate.getResponse().setStatusMsg("OK");
+            rrstate.getResponse().setBody(content);
+            rrstate.getResponse().setHeader("Content-Type", "image/x-icon");
+            rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
+            return rrstate.getResponse();
+        }
+        else
+        {
+            setErrorResponse(rrstate, 404, "Favicon Not Found");
+            return rrstate.getResponse();
+        }
+    }
     if (filePath.find("..") != std::string::npos)
     {
         setErrorResponse(rrstate, 403, "Forbidden");
@@ -108,13 +171,14 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 		filePath = staticDir + "/cgi.html";
     }
     content = rrstate.getRequest().readFile(filePath);
+    std::cout << "MWOOOO: " << filePath << std::endl;
     rrstate.getResponse().setStatusCode(200);
     rrstate.getResponse().setStatusMsg("OK");
     rrstate.getResponse().setBody(content);
     rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
     rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
     rrstate.getResponse().setHttpVersion("HTTP/1.1");
-    // Add security headers
+
     rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
     rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
     rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");

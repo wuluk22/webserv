@@ -2,7 +2,7 @@
 
 Logger::Logger(void) {}
 
-Logger::Logger(std::string access_log_path = "", std::string error_log_path = "") {
+Logger::Logger(std::string access_log_path, std::string error_log_path) {
 	if (!access_log_path.empty()) {
 		_access_log_output_stream.open(access_log_path.c_str());
 		if (!_access_log_output_stream.is_open())

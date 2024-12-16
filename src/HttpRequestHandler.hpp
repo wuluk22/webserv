@@ -40,12 +40,15 @@ class HttpRequestHandler
 		std::string									httpVersion;
 		std::map<std::string, std::string>			headers;
 		std::string									body;
+		bool										valid;
 
 		std::vector<std::string>					allowedMethods; // GET POST DELETE
 		std::vector<std::string>					allowedPaths; // /static/ / /upload
+		std::string									allowedPath;
 		std::string									rootDirectory; // /public
 		std::vector<std::string>					_CgiPath;
 		
+		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
 		bool										isRequestComplete;
 		static std::string							extractBoundary(const std::string& contentType);
     	static std::string							generateErrorResponse(const std::string& message);
@@ -89,6 +92,33 @@ class HttpRequestHandler
 		const std::vector<std::string>&				getAllowedPaths() const;
 		const std::vector<std::string>&				getCgiPath() const;
 		const int&									getClientSocket() const;
+
+// --------------------------------
+
+		void										setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo);
+		void										setIsValid(const bool& is);
+		void										setAllowedPath(const std::string& paths);
+
+		const std::string&							getAllowedPath() const;
+		const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	getLocInfo()const;
+		std::map<std::string, std::vector<std::string> > getLocInfoByUri(HttpRequestHandler request);
+		bool										getIsValid() const;
+
+		std::vector<std::string>					getAllowedMethodsFromLoc(const std::string& uri) const;
+		std::vector<std::string>					getContentPathsFromLoc(const std::string& uri) const;
+		std::string									getRootDirectoryFromLoc(const std::string& uri) const;
+		bool										isAutoIndexEnabled(const std::string& uri) const;
+		std::vector<std::string>					getIndexFilesFromLoc(const std::string& uri) const;
+		std::vector<std::string>					getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
+		std::string									getFullPathFromLoc(const std::string& relativePath) const;
+
+		bool										isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
+		bool										isIndexFile(const std::string& uri, const std::string& fileName) const;
+		bool										isAutoIndexEnabledForUri(const std::string& uri) const;
+		bool										isPathAllowedInLoc(const std::string& uri, const std::string& path) const;
+		void										reset();
+
+// --------------------------------
 
 		HttpRequestHandler							handleRequest(int clientSock, RRState& rrstate);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
