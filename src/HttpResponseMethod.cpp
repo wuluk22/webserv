@@ -44,6 +44,10 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
 
 
+    const unsigned int& max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
+    std::cout << "MAXBODY : " << max << std::endl;
+
+    std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()) << std::endl;
 
 
 

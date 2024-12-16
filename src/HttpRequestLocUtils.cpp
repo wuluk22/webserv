@@ -87,6 +87,22 @@ std::vector<std::string> HttpRequestHandler::getIndexFilesFromLoc(const std::str
     return std::vector<std::string>();
 }
 
+unsigned int HttpRequestHandler::getMaxBodyFromLoc(const std::string& uri) const
+{
+    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator locIt = _locInfo.find(uri);
+
+    if (locIt != _locInfo.end())
+    {
+        std::map<std::string, std::vector<std::string> >::const_iterator maxBodyIt = locIt->second.find("max_body");
+        if (maxBodyIt != locIt->second.end() && !maxBodyIt->second.empty())
+        {
+            return static_cast<unsigned int>(std::atoi(maxBodyIt->second[0].c_str()));
+        }
+    }
+    return 1;
+}
+
+
 std::vector<std::string> HttpRequestHandler::getConfigFieldFromLoc(const std::string& uri, const std::string& field) const
 {
     if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find(field) != _locInfo.find(uri)->second.end())

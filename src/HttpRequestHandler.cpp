@@ -1,5 +1,6 @@
 # include "HttpRequestHandler.hpp"
 # include "RequestResponseState.hpp"
+# include <stdlib.h>
 
 HttpRequestHandler::HttpRequestHandler()
 {}
@@ -42,6 +43,8 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
 	std::string					root;
 	std::vector<std::string>	cgiPath;
+    unsigned int                maxBody;
+    bool                        autoIndex;
 
 	root = "public";
 
@@ -70,7 +73,17 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         {
             cgiPath.push_back((*it)->getCgiPath());
         }
-
+        if ((*it)->getAutoIndex())
+        {
+            locInfo[locationUri]["auto_index"].push_back("on");
+            autoIndex = (*it)->getAutoIndex();
+        }
+        if ((*it)->getClientMaxBodySize() && std::find(locInfo[locationUri]["max_body"].begin(), locInfo[locationUri]["max_body"].end(), request.toString((*it)->getClientMaxBodySize())) == locInfo[locationUri]["max_body"].end())
+        {
+            locInfo[locationUri]["max_body"].push_back(request.toString((*it)->getClientMaxBodySize()));
+            maxBody = (*it)->getClientMaxBodySize();
+            std::cout << "\n!!!!!!!!!!!!!!\n" << (*it)->getClientMaxBodySize() << std::endl;
+        }
         if (!(*it)->getContentPath().empty())
         {
             locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
@@ -115,6 +128,9 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     }
     tmpRequest.setCgiPath(cgiPath);
     tmpRequest.setLocInfo(locInfo);
+    tmpRequest.setAutoIndex(autoIndex);
+    tmpRequest.setMaxBody(maxBody);
+    std::cout << "\n????????????\n" << tmpRequest.getMaxBody() << " " << maxBody << std::endl;
     return tmpRequest;
 }
 

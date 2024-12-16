@@ -45,6 +45,8 @@ class HttpRequestHandler
 		std::vector<std::string>					allowedMethods; // GET POST DELETE
 		std::vector<std::string>					allowedPaths; // /static/ / /upload
 		std::string									allowedPath;
+		unsigned int								maxBodySize;
+		bool										autoIndex;
 		std::string									rootDirectory; // /public
 		std::vector<std::string>					_CgiPath;
 		
@@ -98,7 +100,11 @@ class HttpRequestHandler
 		void										setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo);
 		void										setIsValid(const bool& is);
 		void										setAllowedPath(const std::string& paths);
+		void										setAutoIndex(const bool& index);
+		void										setMaxBody(const unsigned int& max);
 
+		bool										getAutoIndex() const;
+		const unsigned int&							getMaxBody() const;
 		const std::string&							getAllowedPath() const;
 		const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	getLocInfo()const;
 		std::map<std::string, std::vector<std::string> > getLocInfoByUri(HttpRequestHandler request);
@@ -111,6 +117,7 @@ class HttpRequestHandler
 		std::vector<std::string>					getIndexFilesFromLoc(const std::string& uri) const;
 		std::vector<std::string>					getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
 		std::string									getFullPathFromLoc(const std::string& relativePath) const;
+		unsigned int								getMaxBodyFromLoc(const std::string& uri) const;
 
 		bool										isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
 		bool										isIndexFile(const std::string& uri, const std::string& fileName) const;
