@@ -104,10 +104,8 @@ std::string ConfigParser::returnSecondArgs(std::string args) {
 
 	trimmed_line = trim(args);
 	i = trimmed_line.find(' ');
-	if (i == std::string::npos) {
-		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+	if (i == std::string::npos)
 		return ("");
-	}
 	uri = trimmed_line.substr(i + 1, std::string::npos);
 	return (uri);
 }
@@ -130,4 +128,42 @@ std::string ConfigParser::removeExcessiveSlashes(const std::string& path) {
 		}
 	}
     return (result);
+}
+
+bool ConfigParser::isPathAbsoulte(std::string path) {
+	_validator.setPath(path);
+	if (path[0] == '/' && _validator.exists())
+		return (true);
+	return (false);
+}
+
+std::string ConfigParser::simplifyPath(const std::string& path) {
+	std::stack<std::string> stack;
+	std::vector<std::string> components = split(path, '/');
+	std::string simplifiedPath = "/";
+	std::stack<std::string> reversedStack;
+
+	for (std::vector<std::string>::size_type i = 0; i < components.size(); ++i) {
+		if (components[i] == "." || components[i].empty()) {
+			continue;
+		} else if (components[i] == "..") {
+			if (!stack.empty()) {
+				stack.pop();
+			}
+		} else {
+			stack.push(components[i]);
+		}
+	}
+	while (!stack.empty()) {
+		reversedStack.push(stack.top());
+		stack.pop();
+	}
+	while (!reversedStack.empty()) {
+		simplifiedPath += reversedStack.top();
+		reversedStack.pop();
+		if (!reversedStack.empty()) {
+			simplifiedPath += "/";
+		}
+	}
+	return (simplifiedPath);
 }

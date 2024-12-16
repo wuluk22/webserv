@@ -1,7 +1,6 @@
 #include "ConfigException.hpp"
 #include "ServerConfig.hpp"
 #include "ConfigParser.hpp"
-#include <time.h>
 
 ConfigParser* ConfigParser::_instance = NULL;
 
@@ -62,23 +61,21 @@ void ConfigParser::setServerConfig(size_t server_id, ServerConfig *current_serve
 	this->_servers_config.insert(std::make_pair(server_id, current_server));
 }
 
-void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri) {
+void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
 	std::string server_root = server_config->getRoot();
 	std::string location_root = directive->getRoot();
 	std::string root;
 	std::set<std::string> default_index;
 
-	if (location_root.empty() && server_root.empty()) {
-		std::cerr << ERROR_HEADER << NO_ROOT_DEFINITION << RESET << std::endl;
-	} else if (!server_root.empty() && location_root.empty())
+	if (location_root.empty() && server_root.empty())
+		throw ConfigParserError(NO_ROOT_DEFINITION, __FUNCTION__, __LINE__, line);
+	else if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
-	if (!directive->setContentPath(removeExcessiveSlashes(root + uri))) {
-		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
-	}
-	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root))) {
-		std::cerr << ERROR_HEADER << BAD_URI << RESET << std::endl;
-	}
+	if (!directive->setContentPath(removeExcessiveSlashes(root + uri)))
+		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
+	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root)))
+		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
 	if (directive->getIndex().empty() && server_config->getIndex().empty()) {
 		default_index.insert("index.html");
 		default_index.insert("index.htm");
@@ -97,12 +94,14 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	LocationBlock *location_directive = new LocationBlock();
 	s_parser_flags flag = (s_parser_flags) {false, false, false, false, false};
 	std::string uri;
+	size_t uri_line;
 
+	token_counter.enterBlock();
+	uri_line = current_line;
+	server_config->setDirective(location_directive);
 	uri = returnSecondArgs(working_line);
 	if (!distinctUri(uri, server_config))
 		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, current_line);	
-	token_counter.enterBlock();
-	server_config->setDirective(location_directive);
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
@@ -139,7 +138,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 		} else
 			throw ConfigParserError(INVALID_TOKEN, __FUNCTION__, __LINE__, current_line);
 	}
-	finalizeLocationBlock(location_directive, current_server, uri);
+	finalizeLocationBlock(location_directive, current_server, uri, uri_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
 	std::cout << location_directive << std::endl;

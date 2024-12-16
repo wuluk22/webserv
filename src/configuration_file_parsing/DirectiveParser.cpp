@@ -7,8 +7,10 @@ void ConfigParser::parseRoot(std::string working_line, ADirective *directive, si
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	if (!directive->setRoot(path))
+	else if (!directive->setRoot(simplifyPath(path)))
 		throw ConfigParserError(PATH_NOT_RECOGNIZED, __FUNCTION__, __LINE__, current_line);
+	else if (!isPathAbsoulte(path))
+		throw ConfigParserError(ABSOULTE_ROOT, __FUNCTION__, __LINE__, current_line);
 }
 
 void ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective *directive, size_t current_line) {
@@ -127,11 +129,15 @@ void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *
 
 	if (args.empty() || arg_size < 3)
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	if (directive->getRoot().empty()) {
-		std::cout << NO_ROOT_DEFINED_ERROR_PAGES << std::endl;
-		path = args.back();
-	} else
-		path = removeExcessiveSlashes(directive->getRoot() + args.back());  
+	path = args.back();
+	if (path[0] == '.')
+		throw ConfigParserError(URI_STYLE_FORMAT_ERROR, __FUNCTION__, __LINE__, current_line);
+	if (!isPathAbsoulte(path) && directive->getRoot().empty())
+		throw ConfigParserError(RELATIVE_ERROR_NO_ROOT, __FUNCTION__, __LINE__, current_line);
+	else if (path[0] == '/' && !directive->getRoot().empty())
+		path = directive->getRoot() + path;
+	else if (path[0] != '/' && !directive->getRoot().empty())
+		path = directive->getRoot() + '/' + path;
 	_validator.setPath(path);
 	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable()))
 		throw ConfigParserError(BAD_ACCESS, __FUNCTION__, __LINE__, current_line);

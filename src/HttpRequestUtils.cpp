@@ -102,8 +102,12 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 	{
 		out << *it << "\n";
 	}
-	// out << "\nallowedPath : \n";
-	// out << handler.getAllowedPath() << "\n";
+	out << "\nallowedPath : \n";
+	out << handler.getAllowedPath() << "\n";
+	out << "\nautoIndex: \n";
+	out << handler.getAutoIndex() << "\n";
+	out << "\nmaxBody: \n";
+	out << handler.getMaxBody() << "\n";
 	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
@@ -162,6 +166,8 @@ void HttpRequestHandler::setClientSocket(const int& clientSock) {_clientSocket =
 
 void HttpRequestHandler::setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo) { _locInfo = locInfo; }
 void HttpRequestHandler::setIsValid(const bool& val) { valid = val; }
+void HttpRequestHandler::setAutoIndex(const bool& index) { autoIndex = index; }
+void HttpRequestHandler::setMaxBody(const unsigned int& max) { maxBodySize = max; }
 
 std::string HttpRequestHandler::getMethod() const { return method; }
 std::string HttpRequestHandler::getPath() const { return path; }
@@ -183,3 +189,5 @@ const std::vector<std::string>& HttpRequestHandler::getCgiPath() const { return 
 const int&						HttpRequestHandler::getClientSocket() const {return _clientSocket; };
 const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	HttpRequestHandler::getLocInfo() const { return _locInfo; }
 bool	HttpRequestHandler::getIsValid() const { return valid; }
+bool	HttpRequestHandler::getAutoIndex() const { return autoIndex; }
+const unsigned int& HttpRequestHandler::getMaxBody() const { return maxBodySize; }

@@ -134,7 +134,7 @@ void	ServerBase::processClientConnections()
             {
 				HttpResponseHandler response = it->second.getResponse();
                 response.handleResponse(it->second);
-				// std::cerr << "process 3-\n" << it->second.getResponse() << "end!" << std::endl;
+				//std::cerr << "process 3-\n" << it->second.getResponse() << "end!" << std::endl;
 				it->second.setResponse(response);
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);
