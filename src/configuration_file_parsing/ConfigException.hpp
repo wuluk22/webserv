@@ -18,6 +18,9 @@
 #define NO_SERVER_CONFIG ERROR_HEADER "No such server configuration," AB RESET
 #define PATH_NOT_RECOGNIZED ERROR_HEADER "Path isn't recognized," AB RESET
 #define PATH_ALREADY_DEFINED ERROR_HEADER "Path is already defined," AB RESET
+#define ABSOULTE_ROOT ERROR_HEADER "Root path should be absolute," AB RESET
+#define RELATIVE_ERROR_NO_ROOT ERROR_HEADER "Error pages lacks root in the server level to base its URI," AB RESET
+#define URI_STYLE_FORMAT_ERROR ERROR_HEADER "Error pages uses either an absolute path, or an URI based on the existing root," AB RESET
 
 // CONFIG PARSER RULES ERROR MESSAGES
 #define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET

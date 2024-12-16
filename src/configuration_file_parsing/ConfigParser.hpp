@@ -77,6 +77,7 @@ class ConfigParser {
 		bool						checkPathServerDirective(ServerBlock *current_server_block);
 		std::string					removeExcessiveSlashes(const std::string& path);
 		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
+		bool						isPathAbsoulte(std::string path);
 
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock *current_server, ServerConfig *server_config);

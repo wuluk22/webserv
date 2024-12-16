@@ -104,10 +104,8 @@ std::string ConfigParser::returnSecondArgs(std::string args) {
 
 	trimmed_line = trim(args);
 	i = trimmed_line.find(' ');
-	if (i == std::string::npos) {
-		std::cerr << ERROR_HEADER << NO_ELEMENTS << RESET << std::endl;
+	if (i == std::string::npos)
 		return ("");
-	}
 	uri = trimmed_line.substr(i + 1, std::string::npos);
 	return (uri);
 }
@@ -130,4 +128,11 @@ std::string ConfigParser::removeExcessiveSlashes(const std::string& path) {
 		}
 	}
     return (result);
+}
+
+bool ConfigParser::isPathAbsoulte(std::string path) {
+	_validator.setPath(path);
+	if (path[0] == '/' && _validator.exists());
+		return (true);
+	return (false);
 }

@@ -98,11 +98,11 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	s_parser_flags flag = (s_parser_flags) {false, false, false, false, false};
 	std::string uri;
 
+	token_counter.enterBlock();
+	server_config->setDirective(location_directive);
 	uri = returnSecondArgs(working_line);
 	if (!distinctUri(uri, server_config))
 		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, current_line);	
-	token_counter.enterBlock();
-	server_config->setDirective(location_directive);
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
