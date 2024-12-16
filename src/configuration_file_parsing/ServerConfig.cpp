@@ -186,17 +186,17 @@ std::ostream& operator<<(std::ostream& os, ServerBlock *params) {
 	const std::set<std::string> server_names = params->getServerName();
 	const std::map<unsigned int, std::string> error_pages_record = params->getErrorPagesRecord();
 
-	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
-	os << static_cast<const ADirective *>(params);
-	for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
-		os << "Listening ports : " << (*it) << "\n"; 
-	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
-		os << "Server name : " << (*it) << "\n";
-	for (std::map<unsigned int, std::string>::const_iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
-		if (it == error_pages_record.begin())
-			os << "Error pages redefinition" << "\n";
-		os << "Port : " << (*it).first << " | Path : " << (*it).second << std::endl;
-	}
+	// std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
+	// os << static_cast<const ADirective *>(params);
+	// for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
+	// 	os << "Listening ports : " << (*it) << "\n"; 
+	// for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
+	// 	os << "Server name : " << (*it) << "\n";
+	// for (std::map<unsigned int, std::string>::const_iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
+	// 	if (it == error_pages_record.begin())
+	// 		os << "Error pages redefinition" << "\n";
+	// 	os << "Port : " << (*it).first << " | Path : " << (*it).second << std::endl;
+	// }
 	return (os);
 }
 
@@ -335,24 +335,24 @@ bool LocationBlock::hasAutoIndexModified(void) const {
 }
 
 std::ostream& operator<<(std::ostream& os, LocationBlock *params) {
-	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
+	// std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
-	os << static_cast<const ADirective *>(params);
-	if (params->isCgiAllowed()) {
-		os	<< "CGI Path: " << params->getCgiPath() << "\n";
-	}
-	os	<< "URI: " << params->getUri() << "\n"
-		<< "Content Path: " << params->getContentPath() << "\n"
-		<< "Allowed Methods: " << "\n";
-	if (params->getReturnArgs()._status_code != NO_RETURN)
-		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
-	if (!params->getReturnArgs()._redirection_url.empty())
-		os << "Redirection URL : " << params->getReturnArgs()._redirection_url << "\n";
-	if (params->isGetAllowed()) 
-		os << "GET ";
-	if (params->isPostAllowed()) 
-		os << "POST ";
-	if (params->isDeleteAllowed()) 
-		os << "DELETE ";
+	// os << static_cast<const ADirective *>(params);
+	// if (params->isCgiAllowed()) {
+	// 	os	<< "CGI Path: " << params->getCgiPath() << "\n";
+	// }
+	// os	<< "URI: " << params->getUri() << "\n"
+	// 	<< "Content Path: " << params->getContentPath() << "\n"
+	// 	<< "Allowed Methods: " << "\n";
+	// if (params->getReturnArgs()._status_code != NO_RETURN)
+	// 	os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
+	// if (!params->getReturnArgs()._redirection_url.empty())
+	// 	os << "Redirection URL : " << params->getReturnArgs()._redirection_url << "\n";
+	// if (params->isGetAllowed()) 
+	// 	os << "GET ";
+	// if (params->isPostAllowed()) 
+	// 	os << "POST ";
+	// if (params->isDeleteAllowed()) 
+	// 	os << "DELETE ";
 	return (os);
 }

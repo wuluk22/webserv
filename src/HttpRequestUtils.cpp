@@ -97,13 +97,13 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 	{
 		out << *it << "\n";
 	}
-	out << "\nallowedPaths : \n";
+	// out << "\nallowedPaths : \n";
 	for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
 	{
 		out << *it << "\n";
 	}
-	out << "\nallowedPath : \n";
-	out << handler.getAllowedPath() << "\n";
+	// out << "\nallowedPath : \n";
+	// out << handler.getAllowedPath() << "\n";
 	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }

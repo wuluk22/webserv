@@ -100,6 +100,7 @@ void	HttpResponseHandler::setStatusCode(int code) { this->code = code; }
 void	HttpResponseHandler::setStatusMsg(std::string message) { this->status = message; }
 void	HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { headers[headerName] = headerValue; }
 void	HttpResponseHandler::setBody(std::string body) { this->body = body; }
+void    HttpResponseHandler::setQuery(std::string query) { this->_query = query;}
 void	HttpResponseHandler::setResponse(std::string output)
 {
     
@@ -132,4 +133,5 @@ std::string                         HttpResponseHandler::getAll() const
 	all << body;
 	return all.str();
 }
+std::string							HttpResponseHandler::getQuery() const { return _query;}
 

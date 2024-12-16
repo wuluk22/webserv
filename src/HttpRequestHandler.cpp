@@ -9,12 +9,12 @@ HttpRequestHandler::~HttpRequestHandler()
 
 void HttpRequestHandler::reset()
 {
-	std::cerr << "\n--------cleaner------" << std::endl;
+	// std::cerr << "\n--------cleaner------" << std::endl;
 
     this->allowedPaths.clear();
 	for (std::vector<std::string>::iterator it = this->allowedMethods.begin(); it != this->allowedMethods.end(); ++it)
 	{
-		std::cerr << "method cleaner: " << *it << std::endl;
+		// std::cerr << "method cleaner: " << *it << std::endl;
 	}
     this->allowedMethods.clear();
 	this->allowedPath.clear();
@@ -30,7 +30,7 @@ void HttpRequestHandler::reset()
     this->headers.clear();
     this->statusCode = 0;
     this->cgiEnabled = false;*/
-	std::cerr << "\n--------cleaner------" << std::endl;
+	// std::cerr << "\n--------cleaner------" << std::endl;
 }
 
 HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock)

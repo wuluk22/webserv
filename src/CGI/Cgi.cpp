@@ -60,8 +60,11 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
 
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
-    if (rrstate.getRequest().getMethod() == "GET")
+    if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
+        if (!getQuery(rrstate.getRequest().getPath()).empty())
+            rrstate.getResponse().setQuery(getQuery(rrstate.getRequest().getPath()));
+    }
     if (rrstate.getRequest().getMethod() == "POST") {
         stringEnv.push_back("CONTENT_TYPE=" + findAccept(rrstate.getRequest().getHeaders()));
         stringEnv.push_back("CONTENT_LENGTH=" + rrstate.getRequest().getHeader("CONTENT_LENGTH"));
@@ -137,14 +140,15 @@ void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseH
         }
 }
 
-void    Cgi::handleCGI(RRState& rrstate)
+std::string    Cgi::handleCGI(RRState& rrstate)
 {
     int pid;
     int pipefd[2];
+    std::string output;
     if (pipe(pipefd) == -1)
     {
         setErrorResponse(rrstate, 500, "Internal Server Error - Pipe creation failed");
-        return ;
+        return "";
     }
 
     std::string cgiPath = "/usr/bin/python3";
@@ -155,7 +159,7 @@ void    Cgi::handleCGI(RRState& rrstate)
         //std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            //std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
+            // std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
@@ -165,7 +169,7 @@ void    Cgi::handleCGI(RRState& rrstate)
         close(pipefd[0]);
         close(pipefd[1]);
         setErrorResponse(rrstate, 500, "Internal Server Error - Fork creation failed");
-        return;
+        return "";
     }
     else if (pid == 0)
     { // Processus enfant
@@ -185,9 +189,9 @@ void    Cgi::handleCGI(RRState& rrstate)
         // for (std::vector<char *>::iterator it = envp.begin(); it != envp.end(); it++) {
         //     std::clog << "ENVP : " << *it << std::endl;
         // }
-        std::clog << "QUERY : " << getQuery(rrstate.getRequest().getPath()) << std::endl;
         if (access(cgiPath.c_str(), X_OK) == 0)
         {
+            
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
             exit(1);
@@ -195,18 +199,17 @@ void    Cgi::handleCGI(RRState& rrstate)
     } 
     else 
     { // Processus parent
-        std::string output;
+
         int status;
         close(pipefd[1]);
         output = readDatasFromScript(pipefd[0]);
-
         waitpid(pid, &status, 0);
-        if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-        {
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             rrstate.getResponse().handleCgiResponse(output, rrstate.getResponse());
         }
-        // else
-        //     Logger::log("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));
+        else
+            setErrorResponse(rrstate, 500, "Internal Server Error - CGI script failed");
     }
+    return output;
 }
 

@@ -39,6 +39,7 @@ class HttpResponseHandler
 		void		setHeader(const std::string &headerName, const std::string &headerValue);
 		void		setBody(std::string body);
 		void		setResponse(std::string output);
+		void    	setQuery(std::string query);
 		
 		std::string							getHttpVersion() const;
 		int									getStatusCode() const;
@@ -47,6 +48,7 @@ class HttpResponseHandler
 		std::map<std::string, std::string>	getHeaders() const;
 		std::string							getBody() const;
 		std::string							getAll() const;
+		std::string							getQuery() const;
 		
 		HttpResponseHandler					handlePath(RRState& rrstate);
 		void								handleResponse(RRState& rrstate);
@@ -61,6 +63,7 @@ class HttpResponseHandler
 		std::string							status;
 		std::map<std::string, std::string>	headers;
 		std::string							body;
+		std::string							_query;
 };
 void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);
 std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);

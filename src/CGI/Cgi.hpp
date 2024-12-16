@@ -23,7 +23,7 @@ class Cgi
         Cgi();
         ~Cgi();
         std::string         getQuery(std::string path);
-        void                handleCGI(RRState& rrstate);
+        std::string         handleCGI(RRState& rrstate);
         std::string         getClientIP(RRState& rrstate);
         int                 getClientPort(RRState& rrstate);
         void				handleCgi(RRState& rrstate);
