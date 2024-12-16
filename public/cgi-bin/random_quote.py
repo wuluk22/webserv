@@ -34,21 +34,22 @@ def main():
     random_phrase = get_random_phrase(PHRASES_FILE)
 
     # Vérifier si l'image existe
-    image_path = os.path.join(IMAGES_DIR, selected_image)
-    if not os.path.isfile(image_path):
-        selected_image = "Image non trouvée"
+    if os.environ.get("REQUEST_METHOD") == "GET":
+        image_path = os.path.join(IMAGES_DIR, selected_image)
+        if not os.path.isfile(image_path):
+            selected_image = "Image non trouvée"
 
-    # Générer la page HTML
-    print("Content-Type: text/html\r\n\r\n") 
-    print("<html>")
-    print("<head><title>Phrase et Image</title></head>")
-    print("<body>")
-    print(f"<p>{random_phrase}</p>")
-    print(f"<p>{selected_image}</p>")
-    if selected_image != "Aucune image sélectionnée" and selected_image != "Image non trouvée":
-        print(f'<img src="/Images/{selected_image}" alt="Image sélectionnée" style="max-width:300px;">')
-    print("</body>")
-    print("</html>")
+        # Générer la page HTML
+        print("Content-Type: text/html\r\n\r\n") 
+        print("<html>")
+        print("<head><title>Phrase et Image</title></head>")
+        print("<body>")
+        print(f"<p>{random_phrase}</p>")
+        print(f"<p>{selected_image}</p>")
+        if selected_image != "Aucune image sélectionnée" and selected_image != "Image non trouvée":
+            print(f'<img src="/Images/{selected_image}" alt="Image sélectionnée" style="max-width:300px;">')
+        print("</body>")
+        print("</html>")
 
 if __name__ == "__main__":
     main()

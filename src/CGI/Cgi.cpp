@@ -152,10 +152,10 @@ void    Cgi::handleCGI(RRState& rrstate)
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        std::cout << "path : " << it->c_str() << "\n";
+        //std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
+            //std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
@@ -186,9 +186,8 @@ void    Cgi::handleCGI(RRState& rrstate)
         //     std::clog << "ENVP : " << *it << std::endl;
         // }
         std::clog << "QUERY : " << getQuery(rrstate.getRequest().getPath()) << std::endl;
-        if (access(cgiPath.c_str(), X_OK) == 0) //  && getQuery(request.getPath()) != ""
+        if (access(cgiPath.c_str(), X_OK) == 0)
         {
-            std::clog << "ICI" << std::endl;
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
             exit(1);
