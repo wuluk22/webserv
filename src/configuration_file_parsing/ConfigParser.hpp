@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <map>
+#include <string>
 #include <vector>
 #include <fstream>
 #include <stack>
@@ -78,10 +79,11 @@ class ConfigParser {
 		std::string					removeExcessiveSlashes(const std::string& path);
 		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
 		bool						isPathAbsoulte(std::string path);
+		std::string					simplifyPath(const std::string& path);
 
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock *current_server, ServerConfig *server_config);
-		void finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string location_line);
+		void finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string location_line, size_t current_line);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig *server_config);
 
 		void processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, size_t current_line);
