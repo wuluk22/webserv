@@ -32,6 +32,10 @@ void HttpRequestHandler::handleFileUpload(const std::string& requestData, const 
 	std::string::size_type	contentEnd;
 
 	contentType = getHeader("Content-Type");
+    /*
+    BODY SIZE ------------------------------------------
+    std::string contentSize = getHeader("Content-Size");
+    std::cout << "\n\nKOOOOO : " << contentSize << std::endl;*/
 	boundary = extractBoundary(contentType); 
     if (boundary.empty())
     {

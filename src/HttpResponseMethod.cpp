@@ -43,12 +43,9 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate.getRequest().getPath());
     std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
 
-
     const unsigned int& max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
     std::cout << "MAXBODY : " << max << std::endl;
-
     std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()) << std::endl;
-
 
 
 
@@ -118,6 +115,24 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         std::cout << "\n--- ::" << valid << std::endl;
         return response;
     }*/
+
+    /*
+    BODY SIZE ----------------------------------------
+
+    const unsigned int& maxBodySize = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
+    std::map<std::string, std::string> headers = rrstate.getRequest().getHeaders();
+    std::map<std::string, std::string>::iterator contentLengthIt = headers.find("Content-Length");
+
+    if (contentLengthIt != headers.end())
+    {
+        size_t contentLength = static_cast<size_t>(std::atoi(contentLengthIt->second.c_str()));
+        std::cout << "CONTENTLENGTH : " << contentLength << std::endl;
+        if (maxBodySize > 0 && contentLength > maxBodySize)
+        {
+            setErrorResponse(rrstate, 413, "Payload Too Large");
+            return rrstate.getResponse();
+        }
+    }*/
     if (rrstate.getRequest().getPath() == "/")
     {
         filePath = staticDir + "/index.html";
@@ -151,7 +166,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
-    if (rrstate.getRequest().getPath() == "/static")
+    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()))
 	{
         std::cout << "------HERE------" << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
