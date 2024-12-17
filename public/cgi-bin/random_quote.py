@@ -3,8 +3,8 @@ import os
 import random
 import cgi
 import cgitb
+import signal
 
-# Activer le mode debug pour les erreurs CGI
 cgitb.enable()
 
 PHRASES_FILE = "/home/salowie/Documents/webserv/public/phrases.txt"
@@ -25,19 +25,15 @@ def get_random_phrase(file_path):
         return f"Erreur : {e}"
 
 def main():
-    # Récupérer les données de la query string
     form = cgi.FieldStorage()
     selected_image = form.getvalue("image", "Aucune image sélectionnée")
 
-    # Obtenir une phrase aléatoire
     random_phrase = get_random_phrase(PHRASES_FILE)
 
-    # Vérifier si l'image existe
     image_path = os.path.join(IMAGES_DIR, selected_image)
     if not os.path.isfile(image_path):
-        selected_image = None  # Pas d'image valide
+        selected_image = None
 
-    # Générer la page HTML avec le contenu dynamique
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -71,13 +67,13 @@ def main():
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background-color: rgba(0, 0, 0, 0.6); /* Fond semi-transparent */
+                background-color: rgba(0, 0, 0, 0.6);
                 color: white;
                 padding: 5px 10px;
                 border-radius: 5px;
                 font-size: 18px;
-                text-align: center; /* Centre le texte si plusieurs lignes */
-                white-space: nowrap; /* Empêche le retour à la ligne (optionnel) */
+                text-align: center;
+                white-space: nowrap;
             }}
             .home-link {{
                 display: inline-block;
@@ -108,10 +104,10 @@ def main():
     </html>
     """
 
-    # Afficher la réponse
     print("Content-Type: text/html\r\n\r\n")
     print(html_content)
     # while True:
     #     print("Hello World!")
+
 if __name__ == "__main__":
     main()
