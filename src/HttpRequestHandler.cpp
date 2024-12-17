@@ -82,7 +82,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         {
             locInfo[locationUri]["max_body"].push_back(request.toString((*it)->getClientMaxBodySize()));
             maxBody = (*it)->getClientMaxBodySize();
-            std::cout << "\n!!!!!!!!!!!!!!\n" << (*it)->getClientMaxBodySize() << std::endl;
+            // std::cout << "\n!!!!!!!!!!!!!!\n" << (*it)->getClientMaxBodySize() << std::endl;
         }
         if (!(*it)->getContentPath().empty())
         {
@@ -99,7 +99,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
     if (locInfo.empty())
     {
-        std::cout << "\n------meowwww-----" << std::endl;
+        // std::cout << "\n------meowwww-----" << std::endl;
         std::vector<std::string> emptyMethods;
         tmpRequest.setAllowedMethods(emptyMethods);
         tmpRequest.setRootDirectory(root);
@@ -112,25 +112,25 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         it->second["root_directory"].push_back(root);
     }
 
-    std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
-    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
-    {
-        std::cerr << "URI: " << it->first << std::endl;
-        for (std::map<std::string, std::vector<std::string> >::iterator innerIt = it->second.begin(); innerIt != it->second.end(); ++innerIt)
-        {
-            std::cerr << "  " << innerIt->first << ": ";
-            for (std::vector<std::string>::iterator vecIt = innerIt->second.begin(); vecIt != innerIt->second.end(); ++vecIt)
-            {
-                std::cerr << *vecIt << " ";
-            }
-            std::cerr << std::endl;
-        }
-    }
+    // std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
+    // for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
+    // {
+    //     std::cerr << "URI: " << it->first << std::endl;
+    //     for (std::map<std::string, std::vector<std::string> >::iterator innerIt = it->second.begin(); innerIt != it->second.end(); ++innerIt)
+    //     {
+    //         std::cerr << "  " << innerIt->first << ": ";
+    //         for (std::vector<std::string>::iterator vecIt = innerIt->second.begin(); vecIt != innerIt->second.end(); ++vecIt)
+    //         {
+    //             std::cerr << *vecIt << " ";
+    //         }
+    //         std::cerr << std::endl;
+    //     }
+    // }
     tmpRequest.setCgiPath(cgiPath);
     tmpRequest.setLocInfo(locInfo);
     tmpRequest.setAutoIndex(autoIndex);
     tmpRequest.setMaxBody(maxBody);
-    std::cout << "\n????????????\n" << tmpRequest.getMaxBody() << " " << maxBody << std::endl;
+    // std::cout << "\n????????????\n" << tmpRequest.getMaxBody() << " " << maxBody << std::endl;
     return tmpRequest;
 }
 

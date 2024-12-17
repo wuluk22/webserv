@@ -186,22 +186,34 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (isCgiRequest(rrstate.getRequest().getPath()))
     {
         Cgi cgi;
-		std::string test = cgi.handleCGI(rrstate);
 
-        std::string staticDir = "public";  // ou récupérez votre répertoire statique
-        filePath = staticDir + "/cgi.html"; // Chargez cgi.html si la réponse CGI est vide
+        std::string query = cgi.getQuery(rrstate.getRequest().getPath());
+        if (query.empty()) {
+            std::string staticDir = "public";
+            filePath = staticDir + "/cgi.html";
+            std::cout << "QUERY : " << query << std::endl;
+            if (query != "")
+                rrstate.getResponse().setQuery(query);
+        }
+        else {
+		    std::string test = cgi.handleCGI(rrstate);
+            std::cout << " *************** CGI RESPONSE : " << std::endl << test << std::endl;
+            // std::string staticDir = "public";
+            filePath = test;
+            return rrstate.getResponse();
+        }
+        // return rrstate.getResponse();
         
         // content = rrstate.getRequest().readFile(filePath);
-        rrstate.getResponse().setStatusCode(200);
-        rrstate.getResponse().setStatusMsg("OK");
-        rrstate.getResponse().setBody(test);
-        rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
-        //rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
-        rrstate.getResponse().setHttpVersion("HTTP/1.1");
-        rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
-        rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
-        rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
-        return rrstate.getResponse();
+        // rrstate.getResponse().setStatusCode(200);
+        // rrstate.getResponse().setStatusMsg("OK");
+        // rrstate.getResponse().setBody(test);
+        // rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
+        // //rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
+        // rrstate.getResponse().setHttpVersion("HTTP/1.1");
+        // rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
+        // rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
+        // rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
     }
     content = rrstate.getRequest().readFile(filePath);
     std::cout << "MWOOOO: " << filePath << std::endl;
