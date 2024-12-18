@@ -29,31 +29,29 @@ std::vector<std::string> ConfigParser::split(const std::string& str, char delimi
 std::string ConfigParser::trim(const std::string& str) {
 	size_t start = str.find_first_not_of(" \t\n\r\f\v");
 	if (start == std::string::npos)
-		return "";
+		return ("");
 	size_t end = str.find_last_not_of(" \t\n\r\f\v");
-	return str.substr(start, end - start + 1);
+	return (str.substr(start, end - start + 1));
 }
 
 bool ConfigParser::is_only_whitespace(const std::string& str) {
 	for (size_t i = 0; i < str.size(); ++i) {
-		if (!std::isspace(str[i])) {
-			return false;
-		}
+		if (!std::isspace(str[i]))
+			return (false);
 	}
-	return true;
+	return (true);
 }
 
 bool ConfigParser::is_token_valid_multiple(const std::string& line, const std::vector <std::string> tokens) {
 	for (size_t i = 0; i < tokens.size(); ++i) {
-		if (line.find(tokens[i]) != std::string::npos) {
+		if (line.find(tokens[i]) != std::string::npos)
 			return (true);
-		}
 	}
-	return false;
+	return (false);
 }
 
 bool ConfigParser::is_token_valid(const std::string& line, const std::string token) {
-	return line == token;
+	return (line == token);
 }
 
 void ConfigParser::initializeVector(std::vector<std::string>& vec, std::string items[], size_t count) {
@@ -99,15 +97,15 @@ bool ConfigParser::isValidServerName(std::string name) {
 
 std::string ConfigParser::returnSecondArgs(std::string args) {
 	std::string trimmed_line;
-	std::string uri;
+	std::string second_args;
 	std::size_t i;
 
 	trimmed_line = trim(args);
 	i = trimmed_line.find(' ');
 	if (i == std::string::npos)
 		return ("");
-	uri = trimmed_line.substr(i + 1, std::string::npos);
-	return (uri);
+	second_args = trimmed_line.substr(i + 1, std::string::npos);
+	return (second_args);
 }
 
 std::string ConfigParser::removeExcessiveSlashes(const std::string& path) {

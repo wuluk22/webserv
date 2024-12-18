@@ -121,6 +121,9 @@ void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	}
 	directive->setListeningPort(ports);
 }
+
+// REFACTOR !!! 
+
 void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
 	std::map <unsigned int, std::string> error_pages_record;
 	std::size_t arg_size = args.size();
@@ -153,6 +156,8 @@ void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *
 	}
 	directive->setErrorPagesRecord(error_pages_record);
 }
+
+// REFACTOR
 
 void ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *directive, size_t current_line) {
 	std::size_t arg_size = args.size();

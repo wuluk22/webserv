@@ -10,7 +10,8 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <cctype>
-#include "ServerConfig.hpp"
+#include "../server_config/ServerConfig.hpp"
+#include "../utils/TokenCounter.hpp"
 
 #define SERVER_TERMINATOR	"end-server"
 #define LOC_TERMINATOR		"end-location"
@@ -28,19 +29,6 @@
     #undef IS_LINUX
     #define IS_LINUX 1
 #endif
-
-class TokenCounter {
-	private:
-		std::stack<std::map<std::string, int> > blockStack;
-	public:
-		TokenCounter();
-
-		void	enterBlock();
-		void	exitBlock();
-		void	incrementToken(const std::string& token);
-		int		getTokenCount(const std::string& token) const;
-		bool	oneOccurenceCheck(std::vector <std::string> unrepeatable_tokens);
-};
 
 typedef struct s_parser_flags {
 	bool went_in_directive;

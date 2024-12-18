@@ -2,7 +2,7 @@
 #define CONFIGEXCEPTION_HPP
 
 #include <iostream>
-#include "../ErrorHandler.hpp"
+#include "../../ErrorHandler.hpp"
 
 // COMMON MACROS
 #define ERROR_HEADER "\e[91m[CONFIG_PARSER | ERROR] : "

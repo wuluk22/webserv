@@ -1,12 +1,13 @@
-#include "ConfigException.hpp"
-#include "ServerConfig.hpp"
 #include "ConfigParser.hpp"
+#include "ConfigException.hpp"
+#include "../server_config/ServerConfig.hpp"
 
 ConfigParser* ConfigParser::_instance = NULL;
 
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
+	// Weird INIT hack, should check a more clean way to initialize those token elements
 	std::string l_items[] = { "cgi_path", "alias", "allowed_method", "return"};
     initializeVector(_l_params, l_items, ARRAY_SIZE(l_items));
     std::string s_items[] = { "server_name", "listen", "error_pages" };
@@ -61,6 +62,8 @@ void ConfigParser::setServerConfig(size_t server_id, ServerConfig *current_serve
 	this->_servers_config.insert(std::make_pair(server_id, current_server));
 }
 
+// TODO : REFACTOR THIS MONSTROSITY P1
+
 void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
 	std::string server_root = server_config->getRoot();
 	std::string location_root = directive->getRoot();
@@ -76,17 +79,18 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
 	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root)))
 		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
-	if (directive->getIndex().empty() && server_config->getIndex().empty()) {
-		default_index.insert("index.html");
-		default_index.insert("index.htm");
-		directive->setIndex(default_index);
-	} else if (directive->getIndex().empty() && !server_config->getIndex().empty())
+ 	if (directive->getIndex().empty() && !server_config->getIndex().empty())
 		directive->setIndex(server_config->getIndex());
 	if (!directive->hasAutoIndexModified())
 		directive->setAutoIndex(server_config->getAutoIndex());
 	if (!directive->hasClientMaxBodySizeModified())
 		directive->setClientMaxBodySize(server_config->getClientMaxBodySize());
+	_validator.setPath(directive->getUri());
+	if (!_validator.isDirectory())
+		directive->setAutoIndex(0);
 }
+
+// TODO : REFACTOR THIS MONSTROSITY P1
 
 void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerBlock *current_server, ServerConfig *server_config) {
 	std::vector<std::string> working_line_splitted;
@@ -192,8 +196,10 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 		working_line_splitted = split(working_line, ' ');
 		if (working_line_splitted[0] == B_SERVER && working_line.size()) {
 			processServerBlock(config_file, working_line, current_line, server_config);
-		} else 
+		} else {
+			delete server_config;
 			throw ConfigParserError(TOKEN_POSITION_MISMATCH, __FUNCTION__, __LINE__, current_line);
+		}
 		setServerConfig(server_id, server_config);
 		server_id++;
 	}
@@ -205,66 +211,6 @@ bool ConfigParser::distinctUri(std::string current_uri, ServerConfig *current_se
 		return (false);
 	for (std::vector<LocationBlock *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
 		if ((*it)->getUri() == current_uri)
-			return (false);
-	}
-	return (true);
-}
-
-bool ConfigParser::checkPathLocationDirective(LocationBlock *location_block) {
-	std::set <std::string> index_copy = location_block->getIndex();
-	
-	if (location_block->getReturnArgs()._status_code != NO_RETURN)
-		return (true);
-	else {
-		_validator.setPath(location_block->getContentPath());
-		if (!(_validator.exists() && _validator.isReadable() && _validator.isDirectory()))
-			return (false);
-		if ((location_block->isCgiAllowed())) {
-			_validator.setPath(location_block->getCgiPath());
-			if (!(_validator.exists() && _validator.isReadable() && _validator.isFile()) && _validator.isExecutable()) {
-				return (false);
-			}
-		}
-	}
-	return (true);
-}
-
-bool ConfigParser::checkPathServerDirective(ServerBlock *current_server_block) {
-	if (!current_server_block->getRoot().empty()) {
-		_validator.setPath(current_server_block->getRoot());
-		if (!(_validator.exists() && _validator.isDirectory() && _validator.isReadable())) {
-			return (false);
-		}
-	}
-	if (!current_server_block->getAccessLogPath().empty()) {
-		_validator.setPath(current_server_block->getAccessLogPath());
-		if (!(_validator.exists() && _validator.isFile() && _validator.isWritable())) {
-			return (false);
-		}
-	}
-	if (!current_server_block->getErrorLogPath().empty()) {
-		_validator.setPath(current_server_block->getErrorLogPath());
-		if (!(_validator.exists() && _validator.isFile() && _validator.isWritable())) {
-			return (false);
-		}
-	}
-	return (true);
-}
-
-bool ConfigParser::areAllPathAccessible(ServerConfig *current_server_config) {
-	std::vector<LocationBlock *> all_directives;
-	ServerBlock *current_server_block;
-
-	if (!current_server_config)
-		return (false);
-	all_directives = current_server_config->getDirectives();
-	current_server_block = current_server_config->getServerHeader();
-	if (!checkPathServerDirective(current_server_block))
-		return (false);
-	if (!current_server_block->getErrorLogPath().empty())
-		return (false);
-	for (int i = 0; i < all_directives.size(); i++) {
-		if (!checkPathLocationDirective(all_directives[i]))
 			return (false);
 	}
 	return (true);
