@@ -5,7 +5,6 @@
 #include "HttpResponseHandler.hpp"
 #include "HttpRequestHandler.hpp"
 #include "ErrorHandler.hpp"
-#include "configuration_file_parsing/ServerConfig.hpp"
 
 //METHODS
 ServerBase::ServerBase() : maxSock(0)
