@@ -91,7 +91,6 @@ def main():
         </style>
     </head>
     <body>
-        <h1>CGI Response</h1>
 
         <!-- Conteneur de l'image et du texte -->
         <div class="image-container">
