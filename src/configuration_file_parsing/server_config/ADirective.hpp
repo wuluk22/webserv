@@ -26,8 +26,9 @@ class ADirective {
 	public:
 		ADirective(void);
 		virtual			~ADirective();
-		bool			isValidFileName(std::string filename);
-
+		virtual	std::ostream&	printAttributes(std::ostream& os) const;
+		bool					isValidFileName(std::string filename);
+		
 		// Setters
 		bool setRoot(std::string root_args);
 		void setIndex(std::set <std::string> index_args);
@@ -40,7 +41,5 @@ class ADirective {
 		bool					getAutoIndex(void) const;
 		unsigned int			getClientMaxBodySize(void) const;
 };
-
-std::ostream& operator<<(std::ostream& os, const s_common_params *params);
 
 #endif
