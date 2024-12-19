@@ -154,7 +154,7 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-void    Cgi::handleCGI(RRState& rrstate)
+std::string    Cgi::handleCGI(RRState& rrstate)
 {
     int pid;
     int pipefd[2];
@@ -243,4 +243,6 @@ void    Cgi::handleCGI(RRState& rrstate)
             }
         }
     }
+    std::cout << "OUTPUT : " << std::endl << output << std::endl;
+    return output;
 }

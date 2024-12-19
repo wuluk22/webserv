@@ -104,7 +104,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     std::string content;
 
     filePath = staticDir + rrstate.getRequest().getPath();
-    std::cout << " ===============================================================Init filepath : " << filePath << "\n";
 	valid = "/" + staticDir + rrstate.getRequest().getPath();
     // request.isPathAllowed(request, request.getPath())
     std::cout << rrstate.getRequest() << std::endl;
@@ -169,7 +168,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     }
     if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()))
 	{
-        std::cout << "------HERE------" << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
 	    {
 	    	if (S_ISDIR(pathStat.st_mode))
@@ -187,21 +185,19 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     {
         Cgi cgi;
 
-        std::string query = cgi.getQuery(rrstate.getRequest().getPath());
-        if (query.empty()) {
-            std::string staticDir = "public";
-            filePath = staticDir + "/cgi.html";
-            std::cout << "QUERY : " << query << std::endl;
-            if (query != "")
-                rrstate.getResponse().setQuery(query);
-        }
-        else {
-		    cgi.handleCGI(rrstate);
-            return rrstate.getResponse();
-        }
+        // std::string query = cgi.getQuery(rrstate.getRequest().getPath());
+        // if (query.empty()) {
+        //     std::string staticDir = "public";
+        //     filePath = staticDir + "/cgi.html";
+        //     if (query != "")
+        //         rrstate.getResponse().setQuery(query);
+        // }
+        // else {
+        filePath = cgi.handleCGI(rrstate);
+        return rrstate.getResponse();
+        // }
     }
     content = rrstate.getRequest().readFile(filePath);
-    std::cout << "MWOOOO: " << filePath << std::endl;
     rrstate.getResponse().setStatusCode(200);
     rrstate.getResponse().setStatusMsg("OK");
     rrstate.getResponse().setBody(content);

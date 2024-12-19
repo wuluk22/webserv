@@ -3,105 +3,242 @@ import os
 import random
 import cgi
 import cgitb
-import signal
 
 cgitb.enable()
 
 PHRASES_FILE = "/home/salowie/Documents/webserv/public/phrases.txt"
 IMAGES_DIR = "/home/salowie/Documents/webserv/public/Images/"
 
+
 def get_random_phrase(file_path):
-    """Retourne une phrase aléatoire à partir d'un fichier."""
     try:
         with open(file_path, "r") as file:
             phrases = file.readlines()
         if phrases:
             return random.choice(phrases).strip()
         else:
-            return "Aucune phrase disponible dans le fichier."
+            return "No phrase available in the file."
     except FileNotFoundError:
-        return "Le fichier 'phrases.txt' est introuvable."
+        return "'phrases.txt' file is not found."
     except Exception as e:
         return f"Erreur : {e}"
 
+def get_available_images(directory):
+    try:
+        if not os.path.exists(directory):
+            return []
+        return [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
+    except Exception as e:
+        return []
+
+def generate_image_html(images):
+    return "\n".join(
+        f'<img src="/Images/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
+        for image in images
+    )
+
 def main():
     form = cgi.FieldStorage()
-    selected_image = form.getvalue("image", "Aucune image sélectionnée")
+    method = os.environ.get("REQUEST_METHOD", "GET").upper()
+    query = os.environ.get("QUERY_STRING", "")
 
-    random_phrase = get_random_phrase(PHRASES_FILE)
+    if method == "POST":
+        file_item = form["image"]
+        if file_item.filename:
+            # Nom de fichier sécurisé
+            filename = os.path.basename(file_item.filename)
+            upload_path = os.path.join(UPLOAD_DIR, filename)
+        else:
+            message = "No selected file to upload."
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head><title>Upload Result</title></head>
+        <body>
+            <h1>{message}</h1>
+            <a href="/">Return Home</a>
+        </body>
+        </html>
+        """
 
-    image_path = os.path.join(IMAGES_DIR, selected_image)
-    if not os.path.isfile(image_path):
-        selected_image = None
+    else:
+        if query:
+            selected_image = form.getvalue("image", "Aucune image sélectionnée")
+            random_phrase = get_random_phrase(PHRASES_FILE)
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CGI Response</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                text-align: center;
-                margin: 20px;
-            }}
-            h1 {{
-                color: #333;
-            }}
-            .image-container {{
-                position: relative;
-                display: inline-block;
-                margin: 20px;
-            }}
-            .image-container img {{
-                max-width: 100%;
-                height: auto;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            }}
-            .image-container .caption {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: rgba(0, 0, 0, 0.6);
-                color: white;
-                padding: 5px 10px;
-                border-radius: 5px;
-                font-size: 18px;
-                text-align: center;
-                white-space: nowrap;
-            }}
-            .home-link {{
-                display: inline-block;
-                margin-top: 20px;
-                padding: 10px 20px;
-                font-size: 16px;
-                color: white;
-                background-color: #007bff;
-                text-decoration: none;
-                border-radius: 5px;
-            }}
-            .home-link:hover {{
-                background-color: #0056b3;
-            }}
-        </style>
-    </head>
-    <body>
+            image_path = os.path.join(IMAGES_DIR, selected_image)
+            if not os.path.isfile(image_path):
+                selected_image = None
 
-        <!-- Conteneur de l'image et du texte -->
-        <div class="image-container">
-            {"<img src='/Images/" + selected_image + "' alt='Selected Image'>" if selected_image else "<p>Aucune image sélectionnée</p>"}
-            <div class="caption">{random_phrase}</div>
-        </div>
+            html_content = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>CGI Response</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        margin: 20px;
+                    }}
+                    h1 {{
+                        color: #333;
+                    }}
+                    .image-container {{
+                        position: relative;
+                        display: inline-block;
+                        margin: 20px;
+                    }}
+                    .image-container img {{
+                        max-width: 100%;
+                        height: auto;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    }}
+                    .image-container .caption {{
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background-color: rgba(0, 0, 0, 0.6);
+                        color: white;
+                        padding: 5px 10px;
+                        border-radius: 5px;
+                        font-size: 18px;
+                        text-align: center;
+                        white-space: nowrap;
+                    }}
+                    .home-link {{
+                        display: inline-block;
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        color: white;
+                        background-color: #007bff;
+                        text-decoration: none;
+                        border-radius: 5px;
+                    }}
+                    .home-link:hover {{
+                        background-color: #0056b3;
+                    }}
+                </style>
+            </head>
+            <body>
 
-        <a href="/" class="home-link">Return Home</a>
-    </body>
-    </html>
-    """
+                <!-- Conteneur de l'image et du texte -->
+                <div class="image-container">
+                    {"<img src='/Images/" + selected_image + "' alt='Selected Image'>" if selected_image else "<p>Aucune image sélectionnée</p>"}
+                    <div class="caption">{random_phrase}</div>
+                </div>
+
+                <a href="/" class="home-link">Return Home</a>
+            </body>
+            </html>
+            """
+        else:
+            available_images = get_available_images(IMAGES_DIR)
+            image_html = generate_image_html(available_images)
+
+            html_content = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Choose an Image</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        margin: 20px;
+                    }}
+                    h1 {{
+                        text-align: center;
+                        color: #333;
+                    }}
+                    .image-preview {{
+                        display: flex;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        gap: 20px;
+                        margin: 20px 0;
+                    }}
+                    .image-preview img {{
+                        width: 150px;
+                        height: 150px;
+                        object-fit: cover;
+                        cursor: pointer;
+                        border: 2px solid transparent;
+                        transition: transform 0.3s, border 0.3s;
+                    }}
+                    .image-preview img:hover {{
+                        transform: scale(1.1);
+                        border: 2px solid #007bff;
+                    }}
+                    #submit-button {{
+                        margin: 20px auto;
+                        display: block;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        cursor: pointer;
+                    }}
+                    #submit-button:hover {{
+                        background-color: #0056b3;
+                    }}
+                    input[type="file"] {{
+                        margin: 10px 0;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div><a href='/'>Home</a></div>
+
+                <h1>Image Selector & Uploader</h1>
+
+                <div class="section">
+                    <h2>Choose an Existing Image</h2>
+                    <form id="image-form" action="/cgi-bin/random_quote.py" method="GET">
+                        <input type="hidden" id="selected-image" name="image" value="">
+
+                        <!-- Aperçu des images disponibles -->
+                        <div class="image-preview">
+                            {image_html}
+                        </div>
+
+                        <button type="submit" id="submit-button">Submit</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2>Upload a New Image</h2>
+                    <form action="/cgi-bin/random_quote.py" method="POST" enctype="multipart/form-data">
+                        <label for="image">Choose an image to upload:</label><br>
+                        <input type="file" id="image" name="image" accept="image/*"><br>
+                        <button type="submit">Upload</button>
+                    </form>
+                </div>
+                <script>
+                    function selectImage(imageName) {{
+                        document.getElementById('selected-image').value = imageName;
+                        const images = document.querySelectorAll('.image-preview img');
+                        images.forEach(img => img.style.border = "2px solid transparent");
+                        const selectedImage = document.querySelector(`img[alt="${{imageName}}"]`);
+                        if (selectedImage) {{
+                            selectedImage.style.border = "2px solid green";
+                        }} else {{
+                            console.error("Image not found:", imageName);
+                        }}
+                    }}
+                </script>
+            </body>
+            </html>
+            """
 
     print("Content-Type: text/html\r\n\r\n")
     print(html_content)
