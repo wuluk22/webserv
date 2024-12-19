@@ -147,11 +147,10 @@ bool LocationBlock::hasAutoIndexModified(void) const {
 	return (this->_location_params._modified_auto_index);
 }
 
-// TODO : CHECK WHY STATIC CAST WONT WORK
-
 std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
+	static_cast<const ADirective *>(params)->printAttributes(os);
 	if (params->isCgiAllowed()) {
 		os	<< "CGI Path: " << params->getCgiPath() << "\n";
 	}

@@ -10,6 +10,8 @@ ServerBlock::ServerBlock(void) {
 
 ServerBlock::~ServerBlock() {}
 
+// **************************************************************************************
+
 s_server_params ServerBlock::getServerParams(void) const {
 	return (this->_server_params);
 }
@@ -86,14 +88,13 @@ std::string ServerBlock::getErrorLogPath(void) const {
 	return (this->_server_params._error_log_file_path);
 } 
 
-// TODO : CHECK WHY STATIC CAST WONT WORK 
-
 std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 	const std::set<unsigned int> listening_ports = params->getListeningPort();
 	const std::set<std::string> server_names = params->getServerName();
 	const std::map<unsigned int, std::string> error_pages_record = params->getErrorPagesRecord();
 
 	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
+	static_cast<const ADirective *>(params)->printAttributes(os);
 	for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
 		os << "Listening ports : " << (*it) << "\n"; 
 	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
