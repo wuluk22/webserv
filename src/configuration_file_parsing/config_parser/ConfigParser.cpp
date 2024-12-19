@@ -4,21 +4,20 @@
 
 ConfigParser* ConfigParser::_instance = NULL;
 
+/**
+ * @brief Construct a new Config Parser:: Config Parser object
+ * Initialize vectors of allowed tokens as well as unrepeatable
+ * tokens in the context of either locations block or server blocks
+ * @param init_path The config file path
+ */
 ConfigParser::ConfigParser(const std::string init_path) {
 	std::ifstream configuration_input_file;
 
-	// Weird INIT hack, should check a more clean way to initialize those token elements
-	std::string l_items[] = { "cgi_path", "alias", "allowed_method", "return"};
-    initializeVector(_l_params, l_items, ARRAY_SIZE(l_items));
-    std::string s_items[] = { "server_name", "listen", "error_pages" };
-    initializeVector(_s_params, s_items, ARRAY_SIZE(s_items));
-    std::string c_items[] = { "root", "index", "auto_index", "client_max_body_size", "access_log", "error_log"};
-    initializeVector(_c_params, c_items, ARRAY_SIZE(c_items));
-    std::string non_repeat_s[] = { "root" };
-    initializeVector(_non_repeat_s_token, non_repeat_s,ARRAY_SIZE(non_repeat_s));
-    std::string non_repeat_l[] = { "root", "cgi_path" };
-    initializeVector(_non_repeat_l_token, non_repeat_l, ARRAY_SIZE(non_repeat_l));
-
+	initializeVector(_c_params, C_TOKENS);
+	initializeVector(_l_params, L_BLOCK_TOKENS);
+	initializeVector(_s_params, S_BLOCK_TOKENS);
+	initializeVector(_non_repeat_tokens_l, L_NO_RPT_TOKENS);
+	initializeVector(_non_repeat_tokens_s, S_NO_RPT_TOKENS);
 	if (init_path.empty() || !endsWith(init_path, FILE_EXT))
 		throw ConfigParserError(BAD_CONFIG_FILE, __FUNCTION__, __LINE__);
 	this->_path_of_configuration_file = init_path;
@@ -90,94 +89,113 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 		directive->setAutoIndex(0);
 }
 
-// TODO : REFACTOR THIS MONSTROSITY P1
+bool ConfigParser::handleLocationTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *l_directive, 
+		s_parser_flags &flag, size_t line_num, ServerBlock *curr_serv, ServerConfig *serv_conf, std::ifstream &config_file, TokenCounter &token_counter) {
+	if (tokens.empty())
+		return (false);
+	if (is_token_valid(tokens[0], B_LOC)) {
+		if (tokens.size() != 2)
+			throw ConfigParserError(NO_URI_LOCATION, __FUNCTION__, __LINE__, line_num);
+		if (l_directive->getRoot().empty()) {
+			if (curr_serv->getRoot().empty())
+				throw ConfigParserError(NO_ROOT_DEFINITION, __FUNCTION__, __LINE__, line_num);
+			l_directive->setRoot(curr_serv->getRoot());
+		}
+		processLocationBlock(config_file, working_line, token_counter, line_num, curr_serv, serv_conf);
+		flag.went_in_directive = true;
+		return (true);
+	}
+	return (false);
+}
 
-void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, size_t &current_line, ServerBlock *current_server, ServerConfig *server_config) {
-	std::vector<std::string> working_line_splitted;
-	std::streampos last_position;
-	LocationBlock *location_directive = new LocationBlock();
-	s_parser_flags flag = (s_parser_flags) {false, false, false, false, false};
+bool ConfigParser::handleDirectiveTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *location_directive,
+		TokenCounter &token_counter, s_parser_flags &flag, size_t current_line) {
+	if (tokens.empty())
+		return (false);
+	if (is_token_valid_multiple(tokens[0], _l_params) || is_token_valid_multiple(tokens[0], _c_params)) {
+		token_counter.incrementToken(tokens[0]);
+		if (!token_counter.oneOccurenceCheck(_non_repeat_tokens_l))
+			throw ConfigParserError(TOKEN_REPEATED, __FUNCTION__, __LINE__, current_line);
+		else if (flag.went_in_directive && tokens[0] == "root")
+			throw ConfigParserError(ROOT_PRIORITY, __FUNCTION__, __LINE__, current_line);
+		processDirectiveLoc(location_directive, working_line, tokens, current_line);
+		if (tokens[0] == "client_max_body_size")
+			location_directive->clientMaxBodySizeModified();
+		else if (tokens[0] == "auto_index")
+			location_directive->autoIndexModified();
+		return (true);
+	}
+	return (false);
+}
+
+void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string working_line, TokenCounter &token_counter, 
+		size_t &current_line, ServerBlock *current_server, ServerConfig *server_config) {
+	LocationBlock *l_directive = new LocationBlock();
+	std::vector<std::string> splitted_line;
+	s_parser_flags flag = {false, false, false, false, false};
 	std::string uri;
 	size_t uri_line;
+	std::streampos last_position;
 
 	token_counter.enterBlock();
+	server_config->setDirective(l_directive);
 	uri_line = current_line;
-	server_config->setDirective(location_directive);
 	uri = returnSecondArgs(working_line);
 	if (!distinctUri(uri, server_config))
-		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, current_line);	
+		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, current_line);
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
 		if (is_only_whitespace(working_line))
 			continue;
 		working_line = trim(working_line);
-		working_line_splitted = split(working_line, ' ');
-		flag.alias_defined = (working_line_splitted[0] == "alias") ? true : flag.alias_defined;
-		flag.root_defined = (working_line_splitted[0] == "root") ? true : flag.root_defined;
-		if (flag.root_defined && flag.alias_defined)
-			throw ConfigParserError(AMBIGUOUS_URI_DEFINITION, __FUNCTION__, __LINE__, current_line);
-		if (is_token_valid(working_line_splitted[0], B_LOC)) {
-			if (working_line_splitted.size() != 2)
-				throw ConfigParserError(NO_URI_LOCATION, __FUNCTION__, __LINE__, current_line);
-			if (location_directive->getRoot().empty()) {
-				if (current_server->getRoot().empty())
-					throw ConfigParserError(NO_ROOT_DEFINITION, __FUNCTION__, __LINE__, current_line);
-				location_directive->setRoot(current_server->getRoot());
-			}
-			processLocationBlock(config_file, working_line, token_counter, current_line, current_server, server_config);
-			flag.went_in_directive = true;
-		} else if (is_token_valid(working_line_splitted[0], LOC_TERMINATOR) && working_line_splitted.size()) {
+		splitted_line = split(working_line, ' ');
+		if (handleLocationTokens(splitted_line, working_line, l_directive, flag, current_line, current_server, server_config, config_file, token_counter))
+			continue;
+		else if (is_token_valid(splitted_line[0], LOC_TERMINATOR))
 			break;
-		} else if (is_token_valid_multiple(working_line_splitted[0], _l_params) || is_token_valid_multiple(working_line_splitted[0], _c_params)) {
-			token_counter.incrementToken(working_line_splitted[0]);
-			if (!token_counter.oneOccurenceCheck(_non_repeat_l_token))
-				throw ConfigParserError(TOKEN_REPEATED, __FUNCTION__, __LINE__, current_line);
-			if (flag.went_in_directive && working_line_splitted[0] == "root")
-				throw ConfigParserError(ROOT_PRIORITY, __FUNCTION__, __LINE__, current_line);
-			processDirectiveLoc(location_directive, working_line, working_line_splitted, current_line);
-			(working_line_splitted[0] == "client_max_body_size") ? location_directive->clientMaxBodySizeModified() :
-			(working_line_splitted[0] == "auto_index") ? location_directive->autoIndexModified() : void();
-
-		} else
-			throw ConfigParserError(INVALID_TOKEN, __FUNCTION__, __LINE__, current_line);
+		else if (handleDirectiveTokens(splitted_line, working_line, l_directive, token_counter, flag, current_line))
+			continue;
+		throw ConfigParserError(INVALID_TOKEN, __FUNCTION__, __LINE__, current_line);
 	}
-	finalizeLocationBlock(location_directive, current_server, uri, uri_line);
+	finalizeLocationBlock(l_directive, current_server, uri, uri_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
+	std::cout << l_directive << std::endl;
 }
 
 void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config) {
-	std::vector<std::string> working_line_splitted;
+	std::vector<std::string> splitted_line;
 	std::streampos last_position;
 	TokenCounter token_counter;
-	ServerBlock *server_directive = new ServerBlock();
+	ServerBlock *s_directive = new ServerBlock();
 
 	token_counter.enterBlock();
-	server_config->setServerHeader(server_directive);
+	server_config->setServerHeader(s_directive);
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
 		if (is_only_whitespace(working_line))
 			continue;
 		working_line = trim(working_line);
-		working_line_splitted = split(working_line, ' ');
-		if (is_token_valid(working_line_splitted[0], B_LOC)) {
-			if (working_line_splitted.size() != 2)
+		splitted_line = split(working_line, ' ');
+		if (is_token_valid(splitted_line[0], B_LOC)) {
+			if (splitted_line.size() != 2)
 				throw ConfigParserError(NO_URI_LOCATION, __FUNCTION__, __LINE__, current_line);
-			processLocationBlock(config_file, working_line, token_counter, current_line, server_directive, server_config);
-		} else if (is_token_valid(working_line_splitted[0], SERVER_TERMINATOR) && working_line_splitted.size()) {
+			processLocationBlock(config_file, working_line, token_counter, current_line, s_directive, server_config);
+		} else if (is_token_valid(splitted_line[0], SERVER_TERMINATOR) && splitted_line.size()) {
 			break;
-		} else if (is_token_valid_multiple(working_line_splitted[0], _c_params) || is_token_valid_multiple(working_line_splitted[0], _s_params)) {
-			token_counter.incrementToken(working_line_splitted[0]);
-			if (!token_counter.oneOccurenceCheck(_non_repeat_s_token))
+		} else if (is_token_valid_multiple(splitted_line[0], _c_params) || is_token_valid_multiple(splitted_line[0], _s_params)) {
+			token_counter.incrementToken(splitted_line[0]);
+			if (!token_counter.oneOccurenceCheck(_non_repeat_tokens_s))
 				throw ConfigParserError(TOKEN_REPEATED, __FUNCTION__, __LINE__, current_line);
-			processDirectiveServ(server_directive, working_line, working_line_splitted, current_line);
+			processDirectiveServ(s_directive, working_line, splitted_line, current_line);
 		} else
 			throw ConfigParserError(INVALID_TOKEN, __FUNCTION__, __LINE__, current_line);
 	}
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
+	std::cout << s_directive << std::endl;
 }
 
 void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
