@@ -2,7 +2,7 @@
 #define CONFIGEXCEPTION_HPP
 
 #include <iostream>
-#include "../ErrorHandler.hpp"
+#include "../../ErrorHandler.hpp"
 
 // COMMON MACROS
 #define ERROR_HEADER "\e[91m[CONFIG_PARSER | ERROR] : "
@@ -23,7 +23,6 @@
 #define URI_STYLE_FORMAT_ERROR ERROR_HEADER "Error pages uses either an absolute path, or an URI based on the existing root," AB RESET
 
 // CONFIG PARSER RULES ERROR MESSAGES
-#define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET
 #define INVALID_TOKEN ERROR_HEADER  "Invalid token in the configuration file," AB RESET
 #define TOKEN_REPEATED ERROR_HEADER "Non-repeatable token repeated within block," AB RESET
 #define BAD_INSTRUCTION ERROR_HEADER "Bad instruction within a directive," AB RESET
@@ -40,10 +39,14 @@
 #define DOUBLE_LOCATION_URI ERROR_HEADER "Repeated URI," AB RESET
 
 // SERVER HEADER ERROR MESSAGES
+#define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET
+#define SERVER_NAME_DUPE ERROR_HEADER "Duplicate server name," AB RESET
 #define EXCEEDING_LIMIT ERROR_HEADER "Size limit exceeded," AB RESET
 #define PORT_SCOPE_LINUX ERROR_HEADER "Port scope is limited to 1024 - 65.535 for linux," AB RESET
 #define PORT_SCOPE_GENERAL ERROR_HEADER "Port scope is limited to 0 - 65.535 for your system," AB RESET 
+#define PORT_DUPE ERROR_HEADER "Port already declared in other server configuration," AB RESET
 #define WRONG_ERROR_PAGES_SCOPE ERROR_HEADER "Wrong error pages scope," AB RESET
+
 
 // LOCATION RELATED ERROR MESSAGES
 #define NO_URI_LOCATION ERROR_HEADER "Location token contain no URI," AB RESET

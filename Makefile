@@ -1,7 +1,7 @@
 NAME	= webserv
 
 CC	= c++
-FLAGS	= -g3 -std=c++98
+FLAGS	= -std=c++98 -g3
 RM	= rm -rf
 
 OBJDIR	= .objs
@@ -21,12 +21,16 @@ FILES	=	src/main \
 			src/RequestResponseState \
 			src/Logger \
 			src/ErrorHandler \
-			src/configuration_file_parsing/PathValidator \
-			src/configuration_file_parsing/ConfigParser \
-			src/configuration_file_parsing/ServerConfig \
-			src/configuration_file_parsing/ConfigParserUtils \
-			src/configuration_file_parsing/TokenCounter \
-			src/configuration_file_parsing/DirectiveParser
+			src/configuration_file_parsing/config_parser/ConfigParser \
+			src/configuration_file_parsing/config_parser/ConfigParserUtils \
+			src/configuration_file_parsing/config_parser/DirectiveParser \
+			src/configuration_file_parsing/server_config/ADirective \
+			src/configuration_file_parsing/server_config/LocationBlock \
+			src/configuration_file_parsing/server_config/ServerBlock \
+			src/configuration_file_parsing/server_config/ServerConfig \
+			src/configuration_file_parsing/utils/PathValidator \
+			src/configuration_file_parsing/utils/TokenCounter 
+
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
@@ -38,10 +42,13 @@ HEADER	=	src/CGI/Cgi.hpp \
 			src/RequestResponseState.hpp \
 			src/Logger.hpp \
 			src/ErrorHandler.hpp \
-			src/configuration_file_parsing/ConfigException.hpp \
-			src/configuration_file_parsing/ConfigParser.hpp \
-			src/configuration_file_parsing/ServerConfig.hpp \
-			src/configuration_file_parsing/PathValidator.hpp
+			src/configuration_file_parsing/config_parser/ConfigParser.hpp \
+			src/configuration_file_parsing/server_config/ADirective.hpp \
+			src/configuration_file_parsing/server_config/LocationBlock.hpp \
+			src/configuration_file_parsing/server_config/ServerBlock.hpp \
+			src/configuration_file_parsing/server_config/ServerConfig.hpp \
+			src/configuration_file_parsing/utils/PathValidator.hpp \
+			src/configuration_file_parsing/utils/TokenCounter.hpp 
 
 GREEN	= \e[92m
 YELLOW	= \e[93m

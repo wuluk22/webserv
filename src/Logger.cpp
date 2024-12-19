@@ -36,7 +36,7 @@ void Logger::genericMessage(std::string color, std::string header, std::string m
 	std::string fully_fledged_message;
 	std::string timestamp = outputTimestamp();
 
-	fully_fledged_message = color + header + " [" + timestamp + "] "  + ": " + msg + RESET;
+	fully_fledged_message = color + header + " [" + timestamp + "] "  + ": " + msg + RESET + '\n';
 	output_stream << fully_fledged_message;
 	output_stream.flush();
 	if (output_file_stream.is_open())

@@ -1,7 +1,7 @@
 #include "ErrorHandler.hpp"
 #include "ServerBase.hpp"
-#include "configuration_file_parsing/ConfigParser.hpp"
-#include "configuration_file_parsing/ServerConfig.hpp"
+#include "configuration_file_parsing/config_parser/ConfigParser.hpp"
+#include "configuration_file_parsing/server_config/ServerConfig.hpp"
 
 // const int BACKLOG = 3;
 

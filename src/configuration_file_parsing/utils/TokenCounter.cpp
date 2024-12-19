@@ -1,14 +1,14 @@
-#include "ConfigParser.hpp"
+#include "TokenCounter.hpp"
 
-TokenCounter::TokenCounter() {
+TokenCounter::TokenCounter(void) {
 	blockStack.push(std::map<std::string, int>());
 }
 
-void TokenCounter::enterBlock() {
+void TokenCounter::enterBlock(void) {
 	blockStack.push(std::map<std::string, int>());
 }
 
-void TokenCounter::exitBlock() {
+void TokenCounter::exitBlock(void) {
 	if (blockStack.size() > 1) {
 		blockStack.pop();
 	} else {
