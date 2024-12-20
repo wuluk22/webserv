@@ -1,207 +1,240 @@
-#include "HttpRequestHandler.hpp"
-#include <string>
-#include <iostream>
+# include "HttpRequestHandler.hpp"
+# include "RequestResponseState.hpp"
+# include <stdlib.h>
 
-const int BUFFER_SIZE = 1024;
+HttpRequestHandler::HttpRequestHandler()
+{}
 
-std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i)
+HttpRequestHandler::~HttpRequestHandler()
+{}
+
+void HttpRequestHandler::reset()
 {
-	out << i.getMethod() << " " << i.getPath() << " " << i.getHttpVersion() << std::endl;
-	std::map<std::string, std::string> headers = i.getHeaders();
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = headers.begin(); it != headers.end(); ++it)
+	std::cerr << "\n--------cleaner------" << std::endl;
+
+    this->allowedPaths.clear();
+	for (std::vector<std::string>::iterator it = this->allowedMethods.begin(); it != this->allowedMethods.end(); ++it)
 	{
-		out << it->first << ": " << it->second << std::endl;
+		std::cerr << "method cleaner: " << *it << std::endl;
 	}
-	return out;
+    this->allowedMethods.clear();
+	this->allowedPath.clear();
+    
+
+    /*this->rootDirectory.clear();
+    this->path.clear();
+    this->method.clear();
+    this->httpVersion.clear();
+    this->body.clear();
+    
+
+    this->headers.clear();
+    this->statusCode = 0;
+    this->cgiEnabled = false;*/
+	std::cerr << "\n--------cleaner------" << std::endl;
 }
 
-void	HttpRequestHandler::setMethod(const std::string &m)
+HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock)
 {
-	method = m;
-}
+	//request.reset();
+	HttpRequestHandler tmpRequest(request);
+    //tmpRequest.reset();
+	std::map<std::string, std::map<std::string, std::vector<std::string> > > locInfo;
 
-void	HttpRequestHandler::setPath(const std::string &p)
-{
-	path = p;
-}
+	std::string					root;
+	std::vector<std::string>	cgiPath;
+    unsigned int                maxBody;
+    bool                        autoIndex;
 
-void	HttpRequestHandler::setHttpVersion(const std::string &h)
-{
-	httpVersion = h;
-}
+	root = "public";
 
-void HttpRequestHandler::setHeader(const std::string &headerName, const std::string &headerValue)
-{
-    headers[headerName] = headerValue;
-}
-
-void HttpRequestHandler::setBody(const std::string &b)
-{
-    body = b;
-}
-
-std::string HttpRequestHandler::getMethod(void) const
-{
-	return method;
-}
-
-std::string HttpRequestHandler::getPath(void) const
-{
-	return path;
-}
-
-std::string HttpRequestHandler::getHttpVersion(void) const
-{
-	return httpVersion;
-}
-
-std::string HttpRequestHandler::getHeader(const std::string &headerName) const
-{
-    std::map<std::string, std::string>::const_iterator it = headers.find(headerName);
-    if (it != headers.end())
-	{
-        return it->second;
-    }
-    return ""; // Return empty string if header is not found
-}
-
-std::map<std::string, std::string> HttpRequestHandler::getHeaders() const
-{
-    return headers;
-}
-
-std::string HttpRequestHandler::getBody() const
-{
-    return body;
-}
-
-HttpRequestHandler	HttpRequestHandler::httpParsing(const std::string &buffer)
-{
-	HttpRequestHandler	request;
-	size_t	methodPos;
-	size_t	pathPos;
-	size_t	httpVersionPos;
-
-	/*std::cout << "-----------------" << std::endl;
-    std::cout << "Received request:\n" << buffer << std::endl;
-	std::cout << "-----------------" << std::endl;*/
-
-	std::istringstream	stream(buffer);
-	std::string	line;
-	std::getline(stream, line);
-	//std::cout << line << std::endl;
-
-	// method
-	methodPos = line.find(" ");
-	request.setMethod(line.substr(0, methodPos));
-	
-	
-	// path
-	pathPos = methodPos + 1;
-	httpVersionPos = line.find(" ", pathPos);
-	request.setPath(line.substr(pathPos, httpVersionPos - pathPos));
-
-	// http version
-	request.setHttpVersion(line.substr(httpVersionPos + 1, '\n'));
-
-	while (std::getline(stream, line) && line != "\r" && !line.empty())
-	{
-		std::string	headerName;
-		std::string	headerValue;
-		size_t	pos;
-
-		pos = line.find(":");
-		headerName = line.substr(0, pos);
-		headerValue = line.substr(pos + 2);
-		request.setHeader(headerName, headerValue);
-	}
-
-    std::string bodyContent;
-    while (std::getline(stream, line))
-	{
-        bodyContent += line + "\n";
-    }
-    setBody(bodyContent);
-
-
-	return request;
-}
-
-HttpResponseHandler HttpRequestHandler::handlePath(HttpRequestHandler &http, HttpResponseHandler &httpRes)
-{
-	if (http.getPath() == "/")
-	{
-		httpRes.setHttpVersion("HTTP/1.1");
-		httpRes.setStatusCode(200);
-		httpRes.setStatusMsg("OK");
-		httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "13");
-		httpRes.setHeader("Connection", "close");
-		httpRes.setBody("Hello, World!");
-	}
-	else if (http.getPath() == "/about")
-	{
-		httpRes.setHttpVersion("HTTP/1.1");
-		httpRes.setStatusCode(200);
-		httpRes.setStatusMsg("OK");
-		httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "13");
-		httpRes.setHeader("Connection", "close");
-		httpRes.setBody("About page");
-	}
-	else
-	{
-		httpRes.setHttpVersion("HTTP/1.1");
-		httpRes.setStatusCode(404);
-		httpRes.setStatusMsg("OK");
-		httpRes.setHeader("Content-Type", "text/plain");
-		httpRes.setHeader("Content-Length", "13");
-		httpRes.setHeader("Connection", "close");
-		httpRes.setBody("Error 404");
-	}
-	return httpRes;
-}
-
-void HttpRequestHandler::handle_request(int client_sock)
-{
-	HttpRequestHandler http;
-    char buffer[BUFFER_SIZE];
-    int valread = recv(client_sock, buffer, BUFFER_SIZE, 0);
-
-    if (valread == 0)  // Client disconnected
+    for (std::vector<LocationBlock*>::const_iterator it = locationsBlock.begin(); it != locationsBlock.end(); ++it)
     {
-        std::cout << "Client disconnected, closing socket" << std::endl;
-        close(client_sock);
-        return;
+        const std::string& locationUri = (*it)->getUri();
+
+        if (locInfo.find(locationUri) == locInfo.end())
+        {
+            locInfo[locationUri] = std::map<std::string, std::vector<std::string> >();
+        }
+
+        if ((*it)->isGetAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "GET") == locInfo[locationUri]["allowed_methods"].end())
+        {
+            locInfo[locationUri]["allowed_methods"].push_back("GET");
+        }
+        if ((*it)->isPostAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "POST") == locInfo[locationUri]["allowed_methods"].end())
+        {
+            locInfo[locationUri]["allowed_methods"].push_back("POST");
+        }
+        if ((*it)->isDeleteAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "DELETE") == locInfo[locationUri]["allowed_methods"].end())
+        {
+            locInfo[locationUri]["allowed_methods"].push_back("DELETE");
+        }
+        if ((*it)->isCgiAllowed() && std::find(_CgiPath.begin(), _CgiPath.end(), (*it)->getCgiPath()) == _CgiPath.end())
+        {
+            cgiPath.push_back((*it)->getCgiPath());
+        }
+        if ((*it)->getAutoIndex())
+        {
+            locInfo[locationUri]["auto_index"].push_back("on");
+            autoIndex = (*it)->getAutoIndex();
+        }
+        if ((*it)->getClientMaxBodySize() && std::find(locInfo[locationUri]["max_body"].begin(), locInfo[locationUri]["max_body"].end(), request.toString((*it)->getClientMaxBodySize())) == locInfo[locationUri]["max_body"].end())
+        {
+            locInfo[locationUri]["max_body"].push_back(request.toString((*it)->getClientMaxBodySize()));
+            maxBody = (*it)->getClientMaxBodySize();
+            std::cout << "\n!!!!!!!!!!!!!!\n" << (*it)->getClientMaxBodySize() << std::endl;
+        }
+        if (!(*it)->getContentPath().empty())
+        {
+            locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
+        }
+
+        std::vector<std::string> ind;
+        
+        ind = (*it)->accessibleIndex();
+        if (!ind.empty())
+            locInfo[locationUri]["index"] = ind;
     }
-    else if (valread < 0)
+
+
+    if (locInfo.empty())
     {
-        std::cerr << "Error in receiving data" << std::endl;
-        return;
+        std::cout << "\n------meowwww-----" << std::endl;
+        std::vector<std::string> emptyMethods;
+        tmpRequest.setAllowedMethods(emptyMethods);
+        tmpRequest.setRootDirectory(root);
+        tmpRequest.setCgiPath(cgiPath);
+        return tmpRequest;
     }
 
-    buffer[valread] = '\0';
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
+    {
+        it->second["root_directory"].push_back(root);
+    }
 
-	http = http.httpParsing(buffer);
-	std::cout << " -<- getters --- " << std::endl;
-	std::cout << http;
-	std::cout << " --- getters ->- " << std::endl;
-
-    // Simple HTTP Response
-	HttpResponseHandler	httpRes;
-	httpRes = http.handlePath(http, httpRes);
-
-	std::string	response;
-	response = httpRes.getAll();
-    send(client_sock, response.c_str(), response.length(), 0);
-	std::cout << "   " << std::endl;
-    std::cout << "Response sent to client" << std::endl;
-	std::cout << "   " << std::endl;
-	std::cout << " -<-" << std::endl;
-	std::cout << httpRes << std::endl;
-	std::cout << " ->-" << std::endl;
-
-    close(client_sock);  // Close the client socket after sending response
+    std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
+    {
+        std::cerr << "URI: " << it->first << std::endl;
+        for (std::map<std::string, std::vector<std::string> >::iterator innerIt = it->second.begin(); innerIt != it->second.end(); ++innerIt)
+        {
+            std::cerr << "  " << innerIt->first << ": ";
+            for (std::vector<std::string>::iterator vecIt = innerIt->second.begin(); vecIt != innerIt->second.end(); ++vecIt)
+            {
+                std::cerr << *vecIt << " ";
+            }
+            std::cerr << std::endl;
+        }
+    }
+    tmpRequest.setCgiPath(cgiPath);
+    tmpRequest.setLocInfo(locInfo);
+    tmpRequest.setAutoIndex(autoIndex);
+    tmpRequest.setMaxBody(maxBody);
+    std::cout << "\n????????????\n" << tmpRequest.getMaxBody() << " " << maxBody << std::endl;
+    return tmpRequest;
 }
 
+
+
+HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rrstate)
+{
+    const size_t bufferSize = 1024;
+    char buffer[bufferSize];
+    std::string requestData;
+    HttpRequestHandler request;
+    bool headersComplete = false;
+    unsigned int contentLength = 0;
+    unsigned int bodyLength = 0;
+
+	request.reset();
+	request.setIsValid(false);
+	
+	request = request.handleConfig(request, rrstate.getServer().getLocations());
+	request.setClientSocket(clientSock);
+    while (true)
+	{
+		request.setIsComplete(false);
+        int bytesRead = recv(clientSock, buffer, bufferSize - 1, 0);
+        if (bytesRead <= 0)
+		{
+            request.setFd(bytesRead);
+            return request;
+        }
+        
+        buffer[bytesRead] = '\0';
+        requestData.append(buffer, bytesRead);
+        
+        if (!headersComplete)
+		{
+            std::string::size_type headerEnd = requestData.find("\r\n\r\n");
+            
+            if (headerEnd != std::string::npos)
+			{
+                headersComplete = true;
+                
+                std::string headersPart = requestData.substr(0, headerEnd);
+                HttpRequestHandler tempRequest = httpParsing(headersPart);
+                std::string contentLengthStr = tempRequest.getHeader("Content-Length");
+                
+                if (!contentLengthStr.empty())
+				{
+                    std::istringstream iss(contentLengthStr);
+                    iss >> contentLength;
+                }
+                
+                bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
+                
+                if (contentLength == 0)
+				{
+                    request = httpParsing(requestData);
+                    request.setFd(1);
+					request.setIsComplete(true);
+					request = request.handleConfig(request, rrstate.getServer().getLocations());
+					//std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
+					//std::cout << " \na! " << request << " a! " << std::endl;
+                    return request;
+                }
+            }
+        }
+		else
+		{
+			std::string::size_type headerEnd = requestData.find("\r\n\r\n");
+            bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
+        }
+        bool isRequestComplete = false;
+        if (headersComplete)
+		{
+            if (contentLength > 0)
+			{
+                isRequestComplete = (bodyLength >= contentLength);
+				request.setIsComplete(isRequestComplete);
+            }
+			else
+			{
+                isRequestComplete = true;
+				request.setIsComplete(true);
+            }
+        }
+        if (isRequestComplete)
+		{
+            request = httpParsing(requestData);
+            request.setFd(1);
+			request.setIsComplete(isRequestComplete);
+			request = request.handleConfig(request, rrstate.getServer().getLocations());
+			//std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
+			//std::cout << " \nb! " << request << " b! " << std::endl;
+            return request;
+        }
+        if (static_cast<unsigned int>(bytesRead) < bufferSize - 1 && !headersComplete)
+		{
+            break;
+        }
+    }
+    
+    request = httpParsing(requestData);
+    request.setFd(1);
+	request.setIsComplete(isRequestComplete);
+	request = request.handleConfig(request, rrstate.getServer().getLocations());
+	//std::cout << " \nc! " << request.getIsComplete() << " c! " << std::endl;
+    return request;
+}

@@ -1,15 +1,47 @@
 NAME	= webserv
 
 CC	= c++
-FLAGS	= -Wall -Werror -Wextra -std=c++98
+FLAGS	= -g3 -std=c++98
 RM	= rm -rf
 
 OBJDIR	= .objs
-FILES	= src/main src/SocketHandler src/HttpRequestHandler src/Logger src/HttpResponseHandler
+FILES	=	src/main \
+			src/CGI/Cgi \
+			src/ServerHandler \
+			src/ServerBase \
+			src/HttpRequestHandler \
+			src/HttpResponseHandler \
+			src/HttpResponseMethod \
+			src/HttpResponseUtils \
+			src/HttpRequestUtils \
+			src/HttpRequestParsing \
+			src/HttpRequestDir \
+			src/HttpRequestLocUtils \
+			src/DirectoryHandler \
+			src/RequestResponseState \
+			src/Logger \
+			src/ErrorHandler \
+			src/configuration_file_parsing/PathValidator \
+			src/configuration_file_parsing/ConfigParser \
+			src/configuration_file_parsing/ServerConfig \
+			src/configuration_file_parsing/ConfigParserUtils \
+			src/configuration_file_parsing/TokenCounter \
+			src/configuration_file_parsing/DirectiveParser
 SRC	= $(FILES:=.cpp)
 OBJ	= $(addprefix $(OBJDIR)/, $(FILES:=.o))
 DEPS	= $(OBJ:.o=.d)
-HEADER	= src/SocketHandler.hpp src/HttpRequestHandler.hpp src/Logger.hpp src/HttpResponseHandler.hpp
+HEADER	=	src/CGI/Cgi.hpp \
+			src/ServerHandler.hpp \
+			src/ServerHandler.hpp \
+			src/HttpRequestHandler.hpp \
+			src/HttpResponseHandler.hpp \
+			src/RequestResponseState.hpp \
+			src/Logger.hpp \
+			src/ErrorHandler.hpp \
+			src/configuration_file_parsing/ConfigException.hpp \
+			src/configuration_file_parsing/ConfigParser.hpp \
+			src/configuration_file_parsing/ServerConfig.hpp \
+			src/configuration_file_parsing/PathValidator.hpp
 
 GREEN	= \e[92m
 YELLOW	= \e[93m
