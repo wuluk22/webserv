@@ -184,18 +184,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (isCgiRequest(rrstate.getRequest().getPath()))
     {
         Cgi cgi;
-
-        // std::string query = cgi.getQuery(rrstate.getRequest().getPath());
-        // if (query.empty()) {
-        //     std::string staticDir = "public";
-        //     filePath = staticDir + "/cgi.html";
-        //     if (query != "")
-        //         rrstate.getResponse().setQuery(query);
-        // }
-        // else {
-        filePath = cgi.handleCGI(rrstate);
+        std::vector<std::string> uris = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
+        for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++) {
+            std::cout << "URIURI :::: " << *it << std::endl;
+        }
+        cgi.handleCGI(rrstate);
         return rrstate.getResponse();
-        // }
     }
     content = rrstate.getRequest().readFile(filePath);
     rrstate.getResponse().setStatusCode(200);

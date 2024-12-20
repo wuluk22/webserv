@@ -45,7 +45,6 @@ def main():
     if method == "POST":
         file_item = form["image"]
         if file_item.filename:
-            # Nom de fichier sécurisé
             filename = os.path.basename(file_item.filename)
             upload_path = os.path.join(UPLOAD_DIR, filename)
         else:

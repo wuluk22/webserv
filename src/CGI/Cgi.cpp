@@ -114,8 +114,8 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
             std::string headers = output.substr(0, headerEnd);
             std::string body = output.substr(headerEnd + 4);
             
-            std::clog << "HEADERS : " << headers << std::endl;
-            std::clog << "BODY : " << body << std::endl;
+            // std::clog << "HEADERS : " << headers << std::endl;
+            // std::clog << "BODY : " << body << std::endl;
 
             // Analyser et ajouter les en-têtes
             std::istringstream headerStream(headers);
@@ -154,7 +154,7 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-std::string    Cgi::handleCGI(RRState& rrstate)
+void    Cgi::handleCGI(RRState& rrstate)
 {
     int pid;
     int pipefd[2];
@@ -229,7 +229,7 @@ std::string    Cgi::handleCGI(RRState& rrstate)
         }
         if (timeout == 0) {
             kill(pid, SIGKILL);
-            waitpid(pid, &status, 0); // Nettoyez le processus zombie
+            waitpid(pid, &status, 0);
             setErrorResponse(rrstate, 500, "Internal Server Error - CGI Timeout");
         } else {
             Cgi cgi;
@@ -243,6 +243,4 @@ std::string    Cgi::handleCGI(RRState& rrstate)
             }
         }
     }
-    std::cout << "OUTPUT : " << std::endl << output << std::endl;
-    return output;
 }
