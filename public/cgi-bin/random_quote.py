@@ -54,7 +54,6 @@ def main():
         html_content = f"""
         <!DOCTYPE html>
         <html lang="en">
-        <head><title>Upload Result</title></head>
         <body>
             <h1>{message}</h1>
             <a href="/">Return Home</a>
@@ -64,7 +63,7 @@ def main():
 
     else:
         if query:
-            selected_image = form.getvalue("image", "Aucune image sélectionnée")
+            selected_image = form.getvalue("image", "No selected image")
             random_phrase = get_random_phrase(PHRASES_FILE)
 
             image_path = os.path.join(IMAGES_DIR, selected_image)
@@ -77,7 +76,6 @@ def main():
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>CGI Response</title>
                 <style>
                     body {{
                         font-family: Arial, sans-serif;
@@ -131,7 +129,7 @@ def main():
 
                 <!-- Conteneur de l'image et du texte -->
                 <div class="image-container">
-                    {"<img src='/Images/" + selected_image + "' alt='Selected Image'>" if selected_image else "<p>Aucune image sélectionnée</p>"}
+                    {"<img src='/Images/" + selected_image + "' alt='Selected Image'>" if selected_image else "<p>No selected image</p>"}
                     <div class="caption">{random_phrase}</div>
                 </div>
 
@@ -142,6 +140,7 @@ def main():
         else:
             available_images = get_available_images(IMAGES_DIR)
             image_html = generate_image_html(available_images)
+            image_section_style = "" if image_html else 'style="display:none;"'
 
             html_content = f"""
             <!DOCTYPE html>
@@ -175,7 +174,7 @@ def main():
                         transition: transform 0.3s, border 0.3s;
                     }}
                     .image-preview img:hover {{
-                        transform: scale(1.1);
+                        transform: scale(1);
                         border: 2px solid #007bff;
                     }}
                     #submit-button {{
@@ -199,10 +198,10 @@ def main():
             <body>
                 <div><a href='/'>Home</a></div>
 
-                <h1>Image Selector & Uploader</h1>
+                <h1>KitshGI</h1>
 
-                <div class="section">
-                    <h2>Choose an Existing Image</h2>
+                <div class="section" {image_section_style}>
+                    <h2>Choose you favorite one or ... </h2>
                     <form id="image-form" action="/cgi-bin/random_quote.py" method="GET">
                         <input type="hidden" id="selected-image" name="image" value="">
 
@@ -211,7 +210,7 @@ def main():
                             {image_html}
                         </div>
 
-                        <button type="submit" id="submit-button">Submit</button>
+                        <button type="submit" id="submit-button" disabled>Submit</button>
                     </form>
                 </div>
 
@@ -220,7 +219,7 @@ def main():
                     <form action="/cgi-bin/random_quote.py" method="POST" enctype="multipart/form-data">
                         <label for="image">Choose an image to upload:</label><br>
                         <input type="file" id="image" name="image" accept="image/*"><br>
-                        <button type="submit">Upload</button>
+                        <button type="submit" id="upload-button" disabled>Upload</button>
                     </form>
                 </div>
                 <script>
@@ -231,10 +230,23 @@ def main():
                         const selectedImage = document.querySelector(`img[alt="${{imageName}}"]`);
                         if (selectedImage) {{
                             selectedImage.style.border = "2px solid green";
+                            const submitButton = document.getElementById('submit-button');
+                            submitButton.disabled = false;
                         }} else {{
                             console.error("Image not found:", imageName);
                         }}
                     }}
+                </script>
+                <script>
+                    const fileInput = document.getElementById('image');
+                    const Upload = document.getElementById('upload-button');
+                    fileInput.addEventListener('change', () => {{
+                        if (fileInput.files.length > 0) {{
+                            Upload.disabled = false;
+                        }} else {{
+                            Upload.disabled = true;
+                        }}
+                    }});
                 </script>
             </body>
             </html>
