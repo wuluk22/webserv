@@ -46,14 +46,40 @@ std::vector<std::string>    HttpRequestHandler::getAllowedMethodsFromLoc(const s
     return std::vector<std::string>();
 }
 
-std::vector<std::string>    HttpRequestHandler::getContentPathsFromLoc(const std::string& uri) const
+std::vector<std::string> HttpRequestHandler::getContentPathsFromLoc(const std::string& uri) const
 {
-    if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find("content_path") != _locInfo.find(uri)->second.end())
+    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
+
+    std::string requestUri = uri;
+    bool isRoot = (requestUri == "/");
+    if (!isRoot && requestUri.find("/public") != 0)
     {
-        return _locInfo.find(uri)->second.find("content_path")->second;
+        requestUri = "/public" + requestUri;
+    }
+
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
+    {
+        const std::string& locationUri = it->first;
+
+        if (requestUri.find(locationUri) == 0 && 
+            (matchedLocation == _locInfo.end() || locationUri.size() > matchedLocation->first.size()))
+        {
+            matchedLocation = it;
+        }
+    }
+
+    if (matchedLocation == _locInfo.end())
+        return std::vector<std::string>();
+
+    const std::map<std::string, std::vector<std::string> >& locConfig = matchedLocation->second;
+    std::map<std::string, std::vector<std::string> >::const_iterator contentPathIt = locConfig.find("content_path");
+    if (contentPathIt != locConfig.end())
+    {
+        return contentPathIt->second;
     }
     return std::vector<std::string>();
 }
+
 
 std::string HttpRequestHandler::getRootDirectoryFromLoc(const std::string& uri) const
 {

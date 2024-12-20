@@ -6,6 +6,7 @@
 #include "HttpRequestHandler.hpp"
 #include "ErrorHandler.hpp"
 
+
 //METHODS
 ServerBase::ServerBase() : maxSock(0)
 {
@@ -36,11 +37,13 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 	{
 		s_server_params server_params = it->second->getServerHeader()->getServerParams();
 		std::vector<LocationBlock *> directives = it->second->getDirectives();
+		std::map<unsigned int, std::string> errorPages = it->second->getServerHeader()->getErrorPagesRecord();
 		for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++)
 		{
 			ServerHandler NewServer;
 			NewServer.InitializeServerSocket(*it, 3);
 			NewServer.setLocations(directives);
+			NewServer.setErrors(errorPages);
 			std::cout << "NewServer -> " << "FD : " << NewServer.getSock() << "|| PORT : " << NewServer.getPort() << std::endl;
 			FD_SET(NewServer.getSock(), &getReadfds());
 			this->maxSock = std::max(this->maxSock, NewServer.getSock());

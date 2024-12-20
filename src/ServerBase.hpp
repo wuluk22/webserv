@@ -15,23 +15,22 @@
 class	ServerBase
 {
 	private:
-		int							maxSock;
-		std::map<int, RRState>		ClientSockets;
-		std::vector<ServerHandler>	Servers;
-		fd_set 						readfds, writefds;
+		int									maxSock;
+		std::map<int, RRState>				ClientSockets;
+		std::vector<ServerHandler>			Servers;
+		fd_set 								readfds, writefds;
 
 	public:
 		//METHODS
 		ServerBase();
 		~ServerBase();
-		fd_set&						getReadfds();
-		fd_set&						getWritefds();
-		std::vector<ServerHandler>	getServers();
+		fd_set&								getReadfds();
+		fd_set&								getWritefds();
+		std::vector<ServerHandler>			getServers();
 
-
-		void						processClientConnections();
-		void						acceptConnection(ServerHandler	Server);
-		void						addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
+		void								processClientConnections();
+		void								acceptConnection(ServerHandler	Server);
+		void								addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
 };
 
 #endif

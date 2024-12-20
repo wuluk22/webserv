@@ -13,6 +13,8 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
     std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
+    std::vector<std::string> meow = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
+    std::cout << "MEOOWWWW : " << meow[0] << std::endl;
 
     if (config.empty())
     {
@@ -47,7 +49,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::cout << "MAXBODY : " << max << std::endl;
     std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()) << std::endl;
 
-
+    //std::cout << "ERROR_PAGES : " << rrstate.getServer().getErrorPagesRecord()
 
 	//filePath = staticDir + rrstate.getRequest().getPath();
     filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath());
