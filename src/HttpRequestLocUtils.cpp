@@ -105,8 +105,6 @@ bool HttpRequestHandler::isAutoIndexEnabled(const std::string& uri) const
     return false;
 }
 
-
-
 std::vector<std::string> HttpRequestHandler::getIndexFilesFromLoc(const std::string& uri) const
 {
     if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find("index") != _locInfo.find(uri)->second.end())

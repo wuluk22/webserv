@@ -5,7 +5,6 @@
 #include "HttpResponseHandler.hpp"
 #include "HttpRequestHandler.hpp"
 #include "ErrorHandler.hpp"
-#include "configuration_file_parsing/ServerConfig.hpp"
 
 //METHODS
 ServerBase::ServerBase() : maxSock(0)
@@ -80,7 +79,8 @@ void	ServerBase::processClientConnections()
 	HttpRequestHandler	request;
 	// struct timeval timeout;
 
-	// timeout.tv_sec = 15;
+	// timeout.tv_sec = 0;
+	// timeout.tv_usec = 5;
 	while (true)
     {
 		cpyReadFds = readfds;

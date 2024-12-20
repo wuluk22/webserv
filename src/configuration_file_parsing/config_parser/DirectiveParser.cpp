@@ -7,8 +7,10 @@ void ConfigParser::parseRoot(std::string working_line, ADirective *directive, si
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	if (!directive->setRoot(path))
+	else if (!directive->setRoot(simplifyPath(path)))
 		throw ConfigParserError(PATH_NOT_RECOGNIZED, __FUNCTION__, __LINE__, current_line);
+	else if (!isPathAbsoulte(path))
+		throw ConfigParserError(ABSOULTE_ROOT, __FUNCTION__, __LINE__, current_line);
 }
 
 void ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective *directive, size_t current_line) {
@@ -84,22 +86,29 @@ void ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 }
 
 void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
-	std::set <std::string> server_names;
-	
+	std::set <std::string> current_server;
+	std::set<std::string>::iterator it;
+
 	if (args.empty() || args.size() == 1)
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
 	args.erase(args.begin());
 	for (int i = 0; i < args.size(); i++) {
 		if (!isValidServerName(args[i]))
 			throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
-		else if (!server_names.insert(args[i]).second)
+		it = _server_names.find(args[i]);
+		if (it == _server_names.end())
+			_server_names.insert(args[i]);
+		else
+			throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
+		if (!current_server.insert(args[i]).second)
 			throw ConfigParserError(DUPE_ELEMS, __FUNCTION__, __LINE__, current_line);
 	}
-	directive->setServerName(server_names);
+	directive->setServerName(current_server);
 }
 
 void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
-	std::set <unsigned int> ports;
+	std::set <unsigned int> current_working_ports;
+	std::set <unsigned int>::iterator it;
 	std::string current_string;
 	unsigned int value;
 
@@ -114,11 +123,24 @@ void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 			throw ConfigParserError(PORT_SCOPE_LINUX, __FUNCTION__, __LINE__, current_line);
 		else if (!(value <= 65535))
 			throw ConfigParserError(PORT_SCOPE_GENERAL, __FUNCTION__, __LINE__, current_line);
-		if (!ports.insert(value).second)
+		it = _ports.find(value);
+		if (it == _ports.end())
+			_ports.insert(value);
+		else
+			throw ConfigParserError(PORT_DUPE, __FUNCTION__, __LINE__, current_line);
+		if (!current_working_ports.insert(value).second)
 			throw ConfigParserError(DUPE_ELEMS, __FUNCTION__, __LINE__, current_line);
 	}
-	directive->setListeningPort(ports);
+	directive->setListeningPort(current_working_ports);
 }
+
+bool ConfigParser::checkErrorPagesAvailability(std::string path, size_t current_line) {
+	_validator.setPath(path);
+	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable()))
+		return (false);
+	return (true);
+}
+
 void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
 	std::map <unsigned int, std::string> error_pages_record;
 	std::size_t arg_size = args.size();
@@ -127,23 +149,20 @@ void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *
 
 	if (args.empty() || arg_size < 3)
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	if (directive->getRoot().empty()) {
-		std::cout << NO_ROOT_DEFINED_ERROR_PAGES << std::endl;
-		path = args.back();
-	} else
-		path = removeExcessiveSlashes(directive->getRoot() + args.back());  
-	_validator.setPath(path);
-	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable()))
+	path = args.back();
+	if (path[0] == '.')
+		throw ConfigParserError(URI_STYLE_FORMAT_ERROR, __FUNCTION__, __LINE__, current_line);
+	if (checkErrorPagesAvailability(directive->getRoot() + path, current_line))
+		path = directive->getRoot() + path;
+	else if (checkErrorPagesAvailability( directive->getRoot() + '/' + path, current_line))
+		path = directive->getRoot() + '/' + path;
+	else if (!checkErrorPagesAvailability(path, current_line))
 		throw ConfigParserError(BAD_ACCESS, __FUNCTION__, __LINE__, current_line);
-	for (int i = 1; i < arg_size - 1; i++) {
-		std::pair<unsigned int, std::string> single_error_page_record;
+	for (int i = 1; i < arg_size - 1; ++i) {
 		error_code = std::strtoul(args[i].c_str(), NULL, 10);
-		if (error_code < 400 || error_code > 527)
+		if (error_code < 400 || error_code > 527) 
 			throw ConfigParserError(WRONG_ERROR_PAGES_SCOPE, __FUNCTION__, __LINE__, current_line);
-		single_error_page_record.first = error_code;
-		single_error_page_record.second = path;
-		error_pages_record.erase(error_code);
-		error_pages_record.insert(single_error_page_record);
+		error_pages_record[error_code] = path;
 	}
 	directive->setErrorPagesRecord(error_pages_record);
 }

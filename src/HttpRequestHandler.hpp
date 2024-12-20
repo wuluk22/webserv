@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestHandler.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2024/12/03 16:43:33 by clegros          ###   ########.fr       */
+/*   Updated: 2024/12/20 14:47:31 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef HTTPREQUESTHANDLER_HPP
 # define HTTPREQUESTHANDLER_HPP
 # include "DirectoryHandler.hpp"
-# include "configuration_file_parsing/ServerConfig.hpp"
+# include "configuration_file_parsing/server_config/ServerConfig.hpp"
 
 # include <sys/socket.h> // recv | send
 # include <iostream>

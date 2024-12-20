@@ -22,6 +22,8 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     }
 
 
+
+
     std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
     if (it != config.end())
     {
@@ -42,7 +44,6 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate.getRequest().getPath());
     std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
 
-
     std::cout << "MAXBODY : " << max << std::endl;
     std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()) << std::endl;
 
@@ -52,13 +53,13 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath());
 	if (!rrstate.getRequest().isMethodAllowed(rrstate.getRequest(), rrstate.getRequest().getMethod()))
 	{
-        //std::cerr << "Http method not allowed: " << rrstate.getRequest().getMethod() << std::endl;
+        std::cerr << "Http method not allowed: " << rrstate.getRequest().getMethod() << std::endl;
 	    setErrorResponse(rrstate, 405, "Method_not_allowed");
 		return rrstate.getResponse();
 	}
     if (!rrstate.getRequest().getIsValid())
     {
-        //std::cerr << "Access denied for path: " << rrstate.getRequest().getPath() << std::endl;
+        std::cerr << "Access denied for path: " << rrstate.getRequest().getPath() << std::endl;
         setErrorResponse(rrstate, 403, "Forbidden");
         return rrstate.getResponse();
     }
@@ -104,7 +105,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
 
-    //std::cout << "\nMAAAAX: " << max << std::endl;
     filePath = staticDir + rrstate.getRequest().getPath();
 	valid = "/" + staticDir + rrstate.getRequest().getPath();
     // request.isPathAllowed(request, request.getPath())
@@ -159,12 +159,22 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 403, "Forbidden");
         return rrstate.getResponse();
     }
-    if (!rrstate.getRequest().fileExists(filePath) && isCgiRequest(rrstate.getRequest().getPath()))
+    if (!rrstate.getRequest().fileExists(filePath) && !isCgiRequest(rrstate.getRequest().getPath()))
     {
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
-
+    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()))
+	{
+        if (stat(filePath.c_str(), &pathStat) == 0)
+	    {
+	    	if (S_ISDIR(pathStat.st_mode))
+	    	{
+				rrstate.getRequest().handleDirectoryRequest(rrstate.getRequest().getPath(), rrstate.getResponse());
+	    		return rrstate.getResponse();
+	    	}
+	    }
+    }
 	/*if (request.getPath().find("/cgi-bin") == 0)
 	{
 		return response;
@@ -172,9 +182,18 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (isCgiRequest(rrstate.getRequest().getPath()))
     {
         Cgi cgi;
-		cgi.handleCGI(rrstate);
-        //setErrorResponse(request, response, 200, "CGI Braowsss");
-		filePath = staticDir + "/cgi.html";
+
+        // std::string query = cgi.getQuery(rrstate.getRequest().getPath());
+        // if (query.empty()) {
+        //     std::string staticDir = "public";
+        //     filePath = staticDir + "/cgi.html";
+        //     if (query != "")
+        //         rrstate.getResponse().setQuery(query);
+        // }
+        // else {
+        filePath = cgi.handleCGI(rrstate);
+        return rrstate.getResponse();
+        // }
     }
     content = rrstate.getRequest().readFile(filePath);
     if (content.length() > max)
@@ -183,19 +202,17 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 413, "response too big");
         return rrstate.getResponse();
     }
-
-    //std::cout << "MWOOOO: " << filePath << std::endl;
     rrstate.getResponse().setStatusCode(200);
     rrstate.getResponse().setStatusMsg("OK");
     rrstate.getResponse().setBody(content);
     rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
     rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
     rrstate.getResponse().setHttpVersion("HTTP/1.1");
-
+    // add connexion keep alive !
     rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
     rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
     rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
-    //std::cout << "MEOW : \n" << rrstate.getResponse() << std::endl;
+    //std::cout << response << std::endl;
     return rrstate.getResponse();
 }
 

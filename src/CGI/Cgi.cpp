@@ -9,6 +9,14 @@
 Cgi::Cgi() {}
 Cgi::~Cgi() {}
 
+void        ft_free(std::vector<char*> vec)
+{
+    for (size_t i = 0; i < vec.size(); i++) {
+        free(vec[i]);
+    }
+    vec.clear();
+}
+
 std::string Cgi::getClientIP(RRState& rrstate) {
     if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
         perror("getsockname");
@@ -60,8 +68,11 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
 
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
-    if (rrstate.getRequest().getMethod() == "GET")
+    if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
+        if (!getQuery(rrstate.getRequest().getPath()).empty())
+            rrstate.getResponse().setQuery(getQuery(rrstate.getRequest().getPath()));
+    }
     if (rrstate.getRequest().getMethod() == "POST") {
         stringEnv.push_back("CONTENT_TYPE=" + findAccept(rrstate.getRequest().getHeaders()));
         stringEnv.push_back("CONTENT_LENGTH=" + rrstate.getRequest().getHeader("CONTENT_LENGTH"));
@@ -83,7 +94,7 @@ std::string Cgi::readDatasFromScript(int pipefd)
 {
     std::ostringstream output;
     std::string outputStr;
-    char buffer[4096];
+    char buffer[8192];
     ssize_t bytesRead;
 
     while((bytesRead = read(pipefd, buffer, sizeof(buffer))) > 0)
@@ -95,7 +106,7 @@ std::string Cgi::readDatasFromScript(int pipefd)
     return outputStr;
 }
 
-void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseHandler& response)
+void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
 {
         std::string::size_type headerEnd = output.find("\r\n\r\n");
         if (headerEnd != std::string::npos) 
@@ -120,42 +131,46 @@ void    HttpResponseHandler::handleCgiResponse(std::string output, HttpResponseH
                     if (!headerValue.empty() && headerValue[headerValue.length() - 1] == '\r') {
                         headerValue = headerValue.substr(0, headerValue.length() - 1);
                     }
-                    response.setHeader(headerName, headerValue);
+                    rrstate.getResponse().setHeader(headerName, headerValue);
                 }
             }
-            // Ajouter le corps de la réponse
-            response.setStatusCode(200);
-            response.setStatusMsg("OK");
-            response.setBody(body);
+            rrstate.getResponse().setBody(body);
+            rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html")); // not good
+            rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(body.length()));
         } 
         else
         {
             // Si aucun en-tête n'est trouvé, tout est traité comme le corps
-            response.setStatusCode(200);
-            response.setStatusMsg("OK");
-            response.setBody(output);
+            rrstate.getResponse().setBody(output);
+            rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
+            rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(output.length()));
         }
+        rrstate.getResponse().setStatusCode(200);
+        rrstate.getResponse().setStatusMsg("OK");
+        rrstate.getResponse().setHttpVersion("HTTP/1.1");
+        // add connexion keep alive !
+        rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
+        rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
+        rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-void    Cgi::handleCGI(RRState& rrstate)
+std::string    Cgi::handleCGI(RRState& rrstate)
 {
     int pid;
     int pipefd[2];
+    std::string output;
     if (pipe(pipefd) == -1)
-    {
         setErrorResponse(rrstate, 500, "Internal Server Error - Pipe creation failed");
-        return ;
-    }
 
     std::string cgiPath = "/usr/bin/python3";
     std::vector<std::string> scriptPaths = rrstate.getRequest().getCgiPath();
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        std::cout << "path : " << it->c_str() << "\n";
+        //std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
+            // std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
@@ -165,7 +180,6 @@ void    Cgi::handleCGI(RRState& rrstate)
         close(pipefd[0]);
         close(pipefd[1]);
         setErrorResponse(rrstate, 500, "Internal Server Error - Fork creation failed");
-        return;
     }
     else if (pid == 0)
     { // Processus enfant
@@ -185,29 +199,50 @@ void    Cgi::handleCGI(RRState& rrstate)
         // for (std::vector<char *>::iterator it = envp.begin(); it != envp.end(); it++) {
         //     std::clog << "ENVP : " << *it << std::endl;
         // }
-        std::clog << "QUERY : " << getQuery(rrstate.getRequest().getPath()) << std::endl;
-        if (access(cgiPath.c_str(), X_OK) == 0) //  && getQuery(request.getPath()) != ""
+        if (access(cgiPath.c_str(), X_OK) == 0)
         {
-            std::clog << "ICI" << std::endl;
+            
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
+            ft_free(argv);
+            ft_free(envp);
             exit(1);
         }
-    } 
-    else 
-    { // Processus parent
-        std::string output;
-        int status;
-        close(pipefd[1]);
-        output = readDatasFromScript(pipefd[0]);
-
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-        {
-            rrstate.getResponse().handleCgiResponse(output, rrstate.getResponse());
-        }
-        // else
-        //     Logger::log("CGI script exited with code: " + toStrInt(WEXITSTATUS(status)));
+        ft_free(argv);
+        ft_free(envp);
     }
-}
+    else 
+    {
+        // Processus parent : impose un timeout
+        int status;
+        int timeout = 15; // Timeout en secondes
 
+        close(pipefd[1]);
+        while (timeout > 0) {
+            // sleep(1);
+            timeout--;
+
+            // Vérifiez si le processus enfant est terminé
+            if (waitpid(pid, &status, 0) != 0) {
+                break;
+            }
+        }
+        if (timeout == 0) {
+            kill(pid, SIGKILL);
+            waitpid(pid, &status, 0); // Nettoyez le processus zombie
+            setErrorResponse(rrstate, 500, "Internal Server Error - CGI Timeout");
+        } else {
+            Cgi cgi;
+
+            output = readDatasFromScript(pipefd[0]);
+            waitpid(pid, &status, 0);
+            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                cgi.handleCgiResponse(output, rrstate);
+            } else {
+                setErrorResponse(rrstate, 500, "Internal Server Error - CGI Execution Failed");
+            }
+        }
+    }
+    std::cout << "OUTPUT : " << std::endl << output << std::endl;
+    return output;
+}

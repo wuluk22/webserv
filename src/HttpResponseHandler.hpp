@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponseHandler.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: clegros <clegros@student.s19.be>           +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/12/06 11:19:25 by clegros          ###   ########.fr       */
+/*   Updated: 2024/12/20 14:47:51 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class HttpResponseHandler
 		void		setHeader(const std::string &headerName, const std::string &headerValue);
 		void		setBody(std::string body);
 		void		setResponse(std::string output);
+		void    	setQuery(std::string query);
 		
 		std::string							getHttpVersion() const;
 		int									getStatusCode() const;
@@ -47,6 +48,7 @@ class HttpResponseHandler
 		std::map<std::string, std::string>	getHeaders() const;
 		std::string							getBody() const;
 		std::string							getAll() const;
+		std::string							getQuery() const;
 		
 		HttpResponseHandler					handlePath(RRState& rrstate);
 		void								handleResponse(RRState& rrstate);
@@ -54,13 +56,12 @@ class HttpResponseHandler
 		std::string							urlDecode(const std::string& url);
 		HttpResponseHandler					handleGet(RRState& rrstate);
 		bool								isCgiRequest(const std::string& path);
-		void                				handleCgiResponse(std::string output, HttpResponseHandler& response);
-	private:
 		std::string							httpVersion;
 		int									code;
 		std::string							status;
 		std::map<std::string, std::string>	headers;
 		std::string							body;
+		std::string							_query;
 };
 void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);
 std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);

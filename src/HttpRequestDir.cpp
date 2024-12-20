@@ -84,8 +84,12 @@ void HttpRequestHandler::handleFileUpload(const std::string& requestData, const 
     // Extract file content
     fileContent = requestData.substr(pos, contentEnd - pos);
 
+    // if its a CGI request
+    if (response.isCgiRequest(this->getPath()))
+        uploadPath = "public/Images";
+    else
+        uploadPath = "public" + path;
     // Ensure directory exists
-    uploadPath = "public" + path;
     if (!DirectoryHandler::isDirectory(uploadPath.c_str()))
     {
         if (!DirectoryHandler::createDirectory(uploadPath.c_str()))

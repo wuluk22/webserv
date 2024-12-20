@@ -1,7 +1,7 @@
 #ifndef SOCKETHANDLER_HPP
 # define SOCKETHANDLER_HPP
 
-#include "configuration_file_parsing/ServerConfig.hpp"
+#include "configuration_file_parsing/server_config/ServerConfig.hpp"
 
 #include <netinet/in.h>
 #include <sys/select.h>
