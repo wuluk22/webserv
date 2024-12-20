@@ -70,11 +70,38 @@ std::string HttpRequestHandler::getRootDirectoryFromLoc(const std::string& uri) 
 
 bool HttpRequestHandler::isAutoIndexEnabled(const std::string& uri) const
 {
-    if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find("auto_index") != _locInfo.find(uri)->second.end())
+    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
+
+    std::string requestUri = uri;
+    bool isRoot = (requestUri == "/");
+    
+    if (!isRoot && requestUri.find("/public") != 0)
     {
-        const std::vector<std::string>& autoIndex = _locInfo.find(uri)->second.find("auto_index")->second;
-        return !autoIndex.empty() && autoIndex[0] == "on";
+        requestUri = "/public" + requestUri;
     }
+
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
+    {
+        const std::string& locationUri = it->first;
+
+        if (requestUri.find(locationUri) == 0 && 
+            (matchedLocation == _locInfo.end() || locationUri.size() > matchedLocation->first.size()))
+        {
+            matchedLocation = it;
+        }
+    }
+
+    const std::map<std::string, std::vector<std::string> >& locConfig = matchedLocation->second;
+    std::map<std::string, std::vector<std::string> >::const_iterator autoIndexIt = locConfig.find("auto_index");
+
+    if (autoIndexIt != locConfig.end() && !autoIndexIt->second.empty())
+    {
+        if (autoIndexIt->second[0] == "on")
+        {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -89,18 +116,43 @@ std::vector<std::string> HttpRequestHandler::getIndexFilesFromLoc(const std::str
 
 unsigned int HttpRequestHandler::getMaxBodyFromLoc(const std::string& uri) const
 {
-    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator locIt = _locInfo.find(uri);
+    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
-    if (locIt != _locInfo.end())
+    std::string requestUri = uri;
+    bool isRoot = (requestUri == "/");
+
+    if (!isRoot && requestUri.find("/public") != 0)
     {
-        std::map<std::string, std::vector<std::string> >::const_iterator maxBodyIt = locIt->second.find("max_body");
-        if (maxBodyIt != locIt->second.end() && !maxBodyIt->second.empty())
+        requestUri = "/public" + requestUri;
+    }
+
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
+    {
+        const std::string& locationUri = it->first;
+
+        if (requestUri.find(locationUri) == 0 && 
+            (matchedLocation == _locInfo.end() || locationUri.size() > matchedLocation->first.size()))
         {
-            return static_cast<unsigned int>(std::atoi(maxBodyIt->second[0].c_str()));
+            matchedLocation = it;
         }
+    }
+
+    if (matchedLocation == _locInfo.end())
+    {
+        return 1;
+    }
+
+    const std::map<std::string, std::vector<std::string> >& locConfig = matchedLocation->second;
+    std::map<std::string, std::vector<std::string> >::const_iterator maxBodyIt = locConfig.find("max_body");
+
+    if (maxBodyIt != locConfig.end() && !maxBodyIt->second.empty())
+    {
+        unsigned int maxBody = static_cast<unsigned int>(std::atoi(maxBodyIt->second[0].c_str()));
+        return maxBody;
     }
     return 1;
 }
+
 
 
 std::vector<std::string> HttpRequestHandler::getConfigFieldFromLoc(const std::string& uri, const std::string& field) const
