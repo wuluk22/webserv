@@ -95,3 +95,6 @@ void ServerHandler::setNonblocking(int sock)
     if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1)
 		throw ServerHandlerError("fcntl failed: unable to set non-blocking", __FUNCTION__, __LINE__);
 }
+
+void	ServerHandler::setErrors(std::map<unsigned int, std::string> errorPages) { _errorPagesRecord = errorPages; }
+std::map<unsigned int, std::string> ServerHandler::getErrors() const { return _errorPagesRecord; }

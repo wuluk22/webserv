@@ -6,8 +6,8 @@ import cgitb
 
 cgitb.enable()
 
-PHRASES_FILE = "/home/salowie/Documents/webserv/public/phrases.txt"
-IMAGES_DIR = "/home/salowie/Documents/webserv/public/Images/"
+PHRASES_FILE = "/home/clegros/Desktop/merge/public/phrases.txt"
+IMAGES_DIR = "/home/clegros/Desktop/merge/public/Images/"
 
 
 def get_random_phrase(file_path):

@@ -12,6 +12,9 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	std::string			content;
 
     std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
+    std::vector<std::string> meow = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
+    std::cout << "MEOOWWWW : " << meow[0] << std::endl;
 
     if (config.empty())
     {
@@ -43,11 +46,10 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate.getRequest().getPath());
     std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
 
-    const unsigned int& max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
     std::cout << "MAXBODY : " << max << std::endl;
     std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()) << std::endl;
 
-
+    //std::cout << "ERROR_PAGES : " << rrstate.getServer().getErrorPagesRecord()
 
 	//filePath = staticDir + rrstate.getRequest().getPath();
     filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath());
@@ -103,6 +105,9 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     std::string errorPage;
     std::string content;
 
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
+
+
     filePath = staticDir + rrstate.getRequest().getPath();
 	valid = "/" + staticDir + rrstate.getRequest().getPath();
     // request.isPathAllowed(request, request.getPath())
@@ -116,23 +121,19 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         return response;
     }*/
 
-    /*
-    BODY SIZE ----------------------------------------
-
-    const unsigned int& maxBodySize = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
-    std::map<std::string, std::string> headers = rrstate.getRequest().getHeaders();
-    std::map<std::string, std::string>::iterator contentLengthIt = headers.find("Content-Length");
-
-    if (contentLengthIt != headers.end())
-    {
-        size_t contentLength = static_cast<size_t>(std::atoi(contentLengthIt->second.c_str()));
-        std::cout << "CONTENTLENGTH : " << contentLength << std::endl;
-        if (maxBodySize > 0 && contentLength > maxBodySize)
-        {
-            setErrorResponse(rrstate, 413, "Payload Too Large");
-            return rrstate.getResponse();
-        }
-    }*/
+    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()))
+	{
+        //std::cout << "------HERE------" << std::endl;
+        //std::cout << "yo : " << filePath << std::endl;
+        if (stat(filePath.c_str(), &pathStat) == 0)
+	    {
+	    	if (S_ISDIR(pathStat.st_mode))
+	    	{
+				rrstate.getRequest().handleDirectoryRequest(rrstate.getRequest().getPath(), rrstate.getResponse());
+	    		return rrstate.getResponse();
+	    	}
+	    }
+    }
     if (rrstate.getRequest().getPath() == "/")
     {
         filePath = staticDir + "/index.html";
@@ -192,6 +193,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         return rrstate.getResponse();
     }
     content = rrstate.getRequest().readFile(filePath);
+    if (content.length() > max)
+    {
+        //std::cout << "\nLENGTH: " << content.length() << " MAX: " << max << std::endl;
+        setErrorResponse(rrstate, 413, "response too big");
+        return rrstate.getResponse();
+    }
     rrstate.getResponse().setStatusCode(200);
     rrstate.getResponse().setStatusMsg("OK");
     rrstate.getResponse().setBody(content);
