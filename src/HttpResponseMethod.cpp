@@ -13,8 +13,9 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
     std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
-    std::vector<std::string> meow = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
-    std::cout << "MEOOWWWW : " << meow[0] << std::endl;
+
+
+
 
     if (config.empty())
     {
@@ -213,12 +214,39 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     return rrstate.getResponse();
 }
 
-void    setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg)
+void setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg)
 {
+    std::map<unsigned int, std::string> meow = rrstate.getServer().getErrors();
+    std::map<unsigned int, std::string>::const_iterator it = meow.find(statusCode);
+    if (it != meow.end())
+    {
+        const std::string& errorFilePath = it->second;
+        std::ifstream errorFile(errorFilePath.c_str());
+        if (errorFile.is_open())
+        {
+            std::ostringstream buffer;
+            buffer << errorFile.rdbuf();
+            std::string errorPageContent = buffer.str();
+
+            rrstate.getResponse().setStatusCode(statusCode);
+            rrstate.getResponse().setStatusMsg(statusMsg);
+            rrstate.getResponse().setBody(errorPageContent);
+            rrstate.getResponse().setHeader("Content-Type", "text/html");
+            rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(errorPageContent.length()));
+
+            errorFile.close();
+            return;
+        }
+        else
+        {
+            std::cerr << "Error: Could not open error file: " << errorFilePath << std::endl;
+        }
+    }
+
     rrstate.getResponse().setStatusCode(statusCode);
     rrstate.getResponse().setStatusMsg(statusMsg);
     std::string errorPage = rrstate.getRequest().createErrorPage(statusCode, statusMsg);
     rrstate.getResponse().setBody(errorPage);
     rrstate.getResponse().setHeader("Content-Type", "text/html");
-    rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString((errorPage.length())));
+    rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(errorPage.length()));
 }
