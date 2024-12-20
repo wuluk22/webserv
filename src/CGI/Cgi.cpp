@@ -61,13 +61,14 @@ std::string         Cgi::findAccept(std::map<std::string, std::string> headers)
     return result;
 }
 
-std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath)
+std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath, std::string path)
 {
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
 
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
+    stringEnv.push_back("PATH=" + path);
     if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
         if (!getQuery(rrstate.getRequest().getPath()).empty())
@@ -154,7 +155,7 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-void    Cgi::handleCGI(RRState& rrstate)
+void    Cgi::handleCGI(RRState& rrstate, std::string path)
 {
     int pid;
     int pipefd[2];
@@ -188,7 +189,7 @@ void    Cgi::handleCGI(RRState& rrstate)
         close(pipefd[1]);
 
         std::vector<char*> argv;
-        std::vector<char *> envp = homeMadeSetEnv(rrstate, selectedScriptPath);
+        std::vector<char *> envp = homeMadeSetEnv(rrstate, selectedScriptPath, path);
 
         argv.push_back(strdup(cgiPath.c_str()));
         argv.push_back(strdup(selectedScriptPath.c_str()));

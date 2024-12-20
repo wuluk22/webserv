@@ -13,8 +13,6 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
     std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
-    std::vector<std::string> meow = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
-    std::cout << "MEOOWWWW : " << meow[0] << std::endl;
 
     if (config.empty())
     {
@@ -185,11 +183,13 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (isCgiRequest(rrstate.getRequest().getPath()))
     {
         Cgi cgi;
+        std::string path;
+
         std::vector<std::string> uris = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++) {
-            std::cout << "URIURI :::: " << *it << std::endl;
+            path = *it;
         }
-        cgi.handleCGI(rrstate);
+        cgi.handleCGI(rrstate, path);
         return rrstate.getResponse();
     }
     content = rrstate.getRequest().readFile(filePath);
