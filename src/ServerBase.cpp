@@ -37,12 +37,14 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 		s_server_params server_params = it->second->getServerHeader()->getServerParams();
 		std::vector<LocationBlock *> directives = it->second->getDirectives();
 		Logger server_logger = it->second->getLogger();
+		std::string	server_name = it->second->getServerHeader()->getServerName();
 		for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++)
 		{
 			ServerHandler NewServer;
-			NewServer.InitializeServerSocket(*it, 3);
 			NewServer.setLocations(directives);
 			NewServer.setLogger(server_logger);
+			NewServer.setServerName(server_name);
+			NewServer.InitializeServerSocket(*it, 3);
 			server_logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
 			FD_SET(NewServer.getSock(), &getReadfds());
 			this->maxSock = std::max(this->maxSock, NewServer.getSock());
