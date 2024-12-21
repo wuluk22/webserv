@@ -1,5 +1,6 @@
 #include "HttpRequestHandler.hpp"
 #include "HttpResponseHandler.hpp"
+#include "RequestResponseState.hpp"
 
 void	HttpRequestHandler::handleDirectoryRequest(const std::string& path, HttpResponseHandler& response)
 {
@@ -16,105 +17,87 @@ void	HttpRequestHandler::handleDirectoryRequest(const std::string& path, HttpRes
 	response.setHeader("Content-Type", "text/html");
 	response.setHeader("Content-Length", toString(content.length()));
 	response.setBody(content);
-    std::cout << response << std::endl;
+    //std::cout << response << std::endl;
 }
 
-void HttpRequestHandler::handleFileUpload(const std::string& requestData, const std::string& path, HttpResponseHandler& response)
+void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response)
 {
-    std::string				contentType;
-    std::string				boundary;
-	std::string				filename;
-	std::string				fileContent;
-	std::string				uploadPath;
-	std::string				fullPath;
-	std::string::size_type	pos;
-	std::string::size_type	endPos;
-	std::string::size_type	contentEnd;
+    std::string contentType = getHeader("Content-Type");
+    std::string filename;
+    std::string fileContent = requestData;
+    std::string uploadPath;
+    std::string fullPath;
 
-	contentType = getHeader("Content-Type");
-    /*
-    BODY SIZE ------------------------------------------
-    std::string contentSize = getHeader("Content-Size");
-    std::cout << "\n\nKOOOOO : " << contentSize << std::endl;*/
-	boundary = extractBoundary(contentType); 
-    if (boundary.empty())
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
+    if (requestData.length() > max)
     {
-        throw std::runtime_error("Missing or invalid boundary in multipart form data");
+        setErrorResponse(rrstate, 413, "Payload Too Large");
+        return;
+    }
+    if (contentType == "plain/text") {
+        time_t now = time(0);
+        std::ostringstream oss;
+        oss << "upload_" << now << ".txt";
+        filename = oss.str();
+    } else if (contentType.find("multipart/form-data") != std::string::npos) {
+        std::string boundary = extractBoundary(contentType);
+        if (boundary.empty()) {
+            throw std::runtime_error("Missing or invalid boundary in multipart form data");
+        }
+
+        std::string::size_type pos = requestData.find(boundary);
+        if (pos == std::string::npos) {
+            throw std::runtime_error("Invalid multipart form data");
+        }
+
+        pos = requestData.find("filename=\"", pos);
+        if (pos == std::string::npos) {
+            throw std::runtime_error("No filename found in upload");
+        }
+
+        pos += 10;
+        std::string::size_type endPos = requestData.find("\"", pos);
+        if (endPos == std::string::npos) {
+            throw std::runtime_error("Invalid filename format");
+        }
+
+        filename = requestData.substr(pos, endPos - pos);
+        pos = requestData.find("\r\n\r\n", endPos);
+        if (pos == std::string::npos) {
+            throw std::runtime_error("Invalid file content format");
+        }
+
+        pos += 4;
+        std::string::size_type contentEnd = requestData.find(boundary, pos);
+        if (contentEnd == std::string::npos) {
+            throw std::runtime_error("Invalid file content ending");
+        }
+
+        contentEnd -= 4;
+        fileContent = requestData.substr(pos, contentEnd - pos);
+    } else {
+        throw std::runtime_error("Unsupported Content-Type: " + contentType);
     }
 
-    // Find the boundary in the request data
-    pos = requestData.find(boundary);
-    if (pos == std::string::npos)
-    {
-        throw std::runtime_error("Invalid multipart form data");
-    }
-
-    // Find the filename
-    pos = requestData.find("filename=\"", pos);
-    if (pos == std::string::npos)
-    {
-        throw std::runtime_error("No filename found in upload");
-    }
-
-    pos += 10; // length of 'filename="'
-    endPos = requestData.find("\"", pos);
-    if (endPos == std::string::npos)
-    {
-        throw std::runtime_error("Invalid filename format");
-    }
-
-    filename = requestData.substr(pos, endPos - pos);
-    
-    // Find the start of file content (after the headers)
-    pos = requestData.find("\r\n\r\n", endPos);
-    if (pos == std::string::npos)
-    {
-        throw std::runtime_error("Invalid file content format");
-    }
-    pos += 4;
-
-    // Find the end of the file content (before the closing boundary)
-    contentEnd = requestData.find(boundary, pos);
-    if (contentEnd == std::string::npos)
-    {
-        throw std::runtime_error("Invalid file content ending");
-    }
-    contentEnd -= 4;  // Account for the \r\n-- before the boundary
-
-    // Extract file content
-    fileContent = requestData.substr(pos, contentEnd - pos);
-
-    // if its a CGI request
-    if (response.isCgiRequest(this->getPath()))
-        uploadPath = "public/Images";
-    else
-        uploadPath = "public" + path;
-    // Ensure directory exists
-    if (!DirectoryHandler::isDirectory(uploadPath.c_str()))
-    {
-        if (!DirectoryHandler::createDirectory(uploadPath.c_str()))
-        {
+    uploadPath = "public" + path;
+    if (!DirectoryHandler::isDirectory(uploadPath.c_str())) {
+        if (!DirectoryHandler::createDirectory(uploadPath.c_str())) {
             throw std::runtime_error("Failed to create upload directory");
         }
     }
 
-    // Create file path
     fullPath = uploadPath + "/" + filename;
-    
-    // Save file
-	std::ofstream	file(fullPath.c_str(), std::ios::binary);
-    if (!file)
-    {
+    std::ofstream file(fullPath.c_str(), std::ios::binary);
+    if (!file) {
         throw std::runtime_error("Failed to create output file");
     }
 
     file.write(fileContent.c_str(), fileContent.length());
     file.close();
 
-    // Redirect back to directory listing
     response.setHttpVersion("HTTP/1.1");
-    response.setStatusCode(302);
-    response.setStatusMsg("Found");
-    response.setHeader("Location", path);
+    response.setStatusCode(201);
+    response.setStatusMsg("Created");
+    response.setHeader("Content-Type", "text/plain");
     response.setHeader("Content-Length", "0");
 }

@@ -9,7 +9,7 @@
 Cgi::Cgi() {}
 Cgi::~Cgi() {}
 
-void        ft_free(std::vector<char*> vec)
+void        ftFree(std::vector<char*> vec)
 {
     for (size_t i = 0; i < vec.size(); i++) {
         free(vec[i]);
@@ -27,8 +27,8 @@ std::string Cgi::getClientIP(RRState& rrstate) {
 }
 
 int Cgi::getClientPort(RRState& rrstate) {
-    struct sockaddr_in client_addr;
-    socklen_t addr_len = sizeof(client_addr);
+    struct sockaddr_in clientAddr;
+    socklen_t addr_len = sizeof(clientAddr);
 
     if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
         perror("getsockname");
@@ -205,12 +205,12 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
             
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
-            ft_free(argv);
-            ft_free(envp);
+            ftFree(argv);
+            ftFree(envp);
             exit(1);
         }
-        ft_free(argv);
-        ft_free(envp);
+        ftFree(argv);
+        ftFree(envp);
     }
     else 
     {

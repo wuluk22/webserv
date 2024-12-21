@@ -1,4 +1,5 @@
 #include "HttpRequestHandler.hpp"
+#include "RequestResponseState.hpp"
 
 std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoByUri(HttpRequestHandler request)
 {
@@ -46,7 +47,7 @@ std::vector<std::string>    HttpRequestHandler::getAllowedMethodsFromLoc(const s
     return std::vector<std::string>();
 }
 
-std::vector<std::string> HttpRequestHandler::getContentPathsFromLoc(const std::string& uri) const
+std::vector<std::string> HttpRequestHandler::getContentPathsFromLoc(RRState& rrstate, const std::string& uri) const
 {
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
@@ -81,20 +82,45 @@ std::vector<std::string> HttpRequestHandler::getContentPathsFromLoc(const std::s
 }
 
 
-std::string HttpRequestHandler::getRootDirectoryFromLoc(const std::string& uri) const
+std::string HttpRequestHandler::getRootDirectoryFromLoc(RRState& rrstate, const std::string& uri) const
 {
-    if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find("root_directory") != _locInfo.find(uri)->second.end())
+    std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
+    
+    std::string requestUri = uri;
+    bool isRoot = (requestUri == "/");
+    //std::cout << "ROOT ??? : " << rrstate.getRequest().getRootDirectory() << std::endl;
+    
+    if (!isRoot && requestUri.find("/public") != 0)
     {
-        const std::vector<std::string>& roots = _locInfo.find(uri)->second.find("root_directory")->second;
-        if (!roots.empty())
+        requestUri = "/public" + requestUri;
+    }
+
+    for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
+    {
+        const std::string& locationUri = it->first;
+        
+        if (requestUri.find(locationUri) == 0 && 
+            (matchedLocation == _locInfo.end() || locationUri.size() > matchedLocation->first.size()))
         {
-            return roots[0];
+            matchedLocation = it;
+        }
+    }
+
+    if (matchedLocation != _locInfo.end())
+    {
+        const std::map<std::string, std::vector<std::string> >& locConfig = matchedLocation->second;
+        std::map<std::string, std::vector<std::string> >::const_iterator rootDirIt = locConfig.find("root_directory");
+
+        if (rootDirIt != locConfig.end() && !rootDirIt->second.empty())
+        {
+            return rootDirIt->second[0];
         }
     }
     return "";
 }
 
-bool HttpRequestHandler::isAutoIndexEnabled(const std::string& uri) const
+
+bool HttpRequestHandler::isAutoIndexEnabled(RRState& rrstate, const std::string& uri) const
 {
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
@@ -140,7 +166,7 @@ std::vector<std::string> HttpRequestHandler::getIndexFilesFromLoc(const std::str
     return std::vector<std::string>();
 }
 
-unsigned int HttpRequestHandler::getMaxBodyFromLoc(const std::string& uri) const
+unsigned int HttpRequestHandler::getMaxBodyFromLoc(RRState& rrstate, const std::string& uri) const
 {
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
@@ -190,9 +216,9 @@ std::vector<std::string> HttpRequestHandler::getConfigFieldFromLoc(const std::st
     return std::vector<std::string>();
 }
 
-std::string HttpRequestHandler::getFullPathFromLoc(const std::string& relativePath) const
+std::string HttpRequestHandler::getFullPathFromLoc(RRState& rrstate, const std::string& relativePath) const
 {
-    std::string rootDirectory = getRootDirectoryFromLoc(relativePath);
+    std::string rootDirectory = getRootDirectoryFromLoc(rrstate, relativePath);
     if (!rootDirectory.empty())
     {
         return rootDirectory + relativePath;
@@ -226,14 +252,14 @@ bool HttpRequestHandler::isIndexFile(const std::string& uri, const std::string& 
     return false;
 }
 
-bool HttpRequestHandler::isAutoIndexEnabledForUri(const std::string& uri) const
+bool HttpRequestHandler::isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const
 {
-    return isAutoIndexEnabled(uri);
+    return isAutoIndexEnabled(rrstate, uri);
 }
 
-bool HttpRequestHandler::isPathAllowedInLoc(const std::string& uri, const std::string& path) const
+bool HttpRequestHandler::isPathAllowedInLoc(RRState& rrstate, const std::string& uri, const std::string& path) const
 {
-    std::vector<std::string> contentPaths = getContentPathsFromLoc(uri);
+    std::vector<std::string> contentPaths = getContentPathsFromLoc(rrstate, uri);
     for (std::vector<std::string>::const_iterator it = contentPaths.begin(); it != contentPaths.end(); ++it)
     {
         if (*it == path)

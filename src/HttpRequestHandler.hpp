@@ -111,18 +111,18 @@ class HttpRequestHandler
 		bool										getIsValid() const;
 
 		std::vector<std::string>					getAllowedMethodsFromLoc(const std::string& uri) const;
-		std::vector<std::string>					getContentPathsFromLoc(const std::string& uri) const;
-		std::string									getRootDirectoryFromLoc(const std::string& uri) const;
-		bool										isAutoIndexEnabled(const std::string& uri) const;
+		std::vector<std::string>					getContentPathsFromLoc(RRState& rrstate, const std::string& uri) const;
+		std::string									getRootDirectoryFromLoc(RRState& rrstate, const std::string& uri) const;
+		bool										isAutoIndexEnabled(RRState& rrstate, const std::string& uri) const;
 		std::vector<std::string>					getIndexFilesFromLoc(const std::string& uri) const;
 		std::vector<std::string>					getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
-		std::string									getFullPathFromLoc(const std::string& relativePath) const;
-		unsigned int								getMaxBodyFromLoc(const std::string& uri) const;
+		std::string									getFullPathFromLoc(RRState& rrstate, const std::string& relativePath) const;
+		unsigned int								getMaxBodyFromLoc(RRState& rrstate, const std::string& uri) const;
 
 		bool										isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
 		bool										isIndexFile(const std::string& uri, const std::string& fileName) const;
-		bool										isAutoIndexEnabledForUri(const std::string& uri) const;
-		bool										isPathAllowedInLoc(const std::string& uri, const std::string& path) const;
+		bool										isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const;
+		bool										isPathAllowedInLoc(RRState& rrstate, const std::string& uri, const std::string& path) const;
 		void										reset();
 
 // --------------------------------
@@ -131,7 +131,7 @@ class HttpRequestHandler
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
 		//HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
 		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);
-    	void										handleFileUpload(const std::string& requestData, const std::string& path, HttpResponseHandler& response);
+    	void										handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 		HttpRequestHandler							handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
 		HttpRequestHandler							initRequest(const HttpRequestHandler& request);
 };

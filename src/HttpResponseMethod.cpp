@@ -12,13 +12,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	std::string			content;
 
     std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
-    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 39378bc4e0d73aae4e6e33c47972f9feadf5ee1e
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
     if (config.empty())
     {
@@ -47,16 +41,16 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
         std::cerr << std::endl;
     }
 
-    std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate.getRequest().getPath());
+    std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
     std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
 
     std::cout << "MAXBODY : " << max << std::endl;
-    std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()) << std::endl;
+    std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()) << std::endl;
 
     //std::cout << "ERROR_PAGES : " << rrstate.getServer().getErrorPagesRecord()
 
 	//filePath = staticDir + rrstate.getRequest().getPath();
-    filePath = rrstate.getRequest().getFullPathFromLoc(rrstate.getRequest().getPath());
+    filePath = rrstate.getRequest().getFullPathFromLoc(rrstate, rrstate.getRequest().getPath());
 	if (!rrstate.getRequest().isMethodAllowed(rrstate.getRequest(), rrstate.getRequest().getMethod()))
 	{
         std::cerr << "Http method not allowed: " << rrstate.getRequest().getMethod() << std::endl;
@@ -76,7 +70,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     }
 	if (rrstate.getRequest().getMethod() == "POST")
 	{
-		rrstate.getRequest().handleFileUpload(rrstate.getRequest().getBody(), rrstate.getRequest().getPath(), rrstate.getResponse());
+		rrstate.getRequest().handleFileUpload(rrstate, rrstate.getRequest().getBody(), rrstate.getRequest().getPath(), rrstate.getResponse());
 		return rrstate.getResponse();
 	}
 	if (rrstate.getRequest().getMethod() == "DELETE")
@@ -102,20 +96,21 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {
-    std::string staticDir = "public";
+    std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
     std::string filePath;
     std::string valid;
     struct stat pathStat;
     std::string errorPage;
     std::string content;
+    //std::cout << "PATHHHHH : " << rrstate.getRequest().getPath() << std::endl;
+    std::cout << "PUBLIC : " << rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath()) << std::endl;
 
-    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
 
     filePath = staticDir + rrstate.getRequest().getPath();
 	valid = "/" + staticDir + rrstate.getRequest().getPath();
-    // request.isPathAllowed(request, request.getPath())
-    std::cout << rrstate.getRequest() << std::endl;
+    
     std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << rrstate.getRequest().getPath() << std::endl;
     std::cout << "staticDir-----------------------------: " << rrstate.getRequest().getRootDirectory() << std::endl;
     /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
@@ -125,7 +120,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         return response;
     }*/
 
-    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()))
+    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
 	{
         //std::cout << "------HERE------" << std::endl;
         //std::cout << "yo : " << filePath << std::endl;
@@ -171,17 +166,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
-    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate.getRequest().getPath()))
-	{
-        if (stat(filePath.c_str(), &pathStat) == 0)
-	    {
-	    	if (S_ISDIR(pathStat.st_mode))
-	    	{
-				rrstate.getRequest().handleDirectoryRequest(rrstate.getRequest().getPath(), rrstate.getResponse());
-	    		return rrstate.getResponse();
-	    	}
-	    }
-    }
 	/*if (request.getPath().find("/cgi-bin") == 0)
 	{
 		return response;
@@ -191,7 +175,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         Cgi cgi;
         std::string path;
 
-        std::vector<std::string> uris = rrstate.getRequest().getContentPathsFromLoc(rrstate.getRequest().getPath());
+        std::vector<std::string> uris = rrstate.getRequest().getContentPathsFromLoc(rrstate, rrstate.getRequest().getPath());
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++) {
             path = *it;
         }
