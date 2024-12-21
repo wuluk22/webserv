@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <stack>
 #include <limits.h>
 #include <stdlib.h>
@@ -53,7 +54,6 @@ class ConfigParser {
 		std::set <std::string>				_server_names;
 		std::set <unsigned int>				_ports;
 		static ConfigParser*				_instance;
-		std::string							_path_of_configuration_file;
 		std::map<size_t , ServerConfig *>	_servers_config;
 		PathValidator						_validator;
 		
@@ -77,6 +77,7 @@ class ConfigParser {
 		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
 		bool						isPathAbsoulte(std::string path);
 		std::string					simplifyPath(const std::string& path);
+		std::string 				toStrInt(int value);
 
 		// Config File parsing
 		bool handleDirectiveTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *location_directive, TokenCounter &token_counter, s_parser_flags &flag, size_t current_line);
@@ -108,7 +109,6 @@ class ConfigParser {
 	public:
 		~ConfigParser();
 		static ConfigParser*				getInstance(const std::string init_path);
-		const std::string&					getPathOfConfigurationFile(void) const;
 		ServerConfig*						getServerConfig(unsigned int id) const;
 		std::map <size_t, ServerConfig *>	getAllServerConfig(void) const;
 		void								setServerConfig(size_t server_id, ServerConfig *current_server);

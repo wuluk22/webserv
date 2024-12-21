@@ -164,3 +164,9 @@ std::string ConfigParser::simplifyPath(const std::string& path) {
 	}
 	return (simplifiedPath);
 }
+
+std::string ConfigParser::toStrInt(int value) {
+	std::ostringstream	oss;
+	oss << value;
+	return oss.str();
+}

@@ -20,7 +20,6 @@ ConfigParser::ConfigParser(const std::string init_path) {
 	initializeVector(_non_repeat_tokens_s, S_NO_RPT_TOKENS);
 	if (init_path.empty() || !endsWith(init_path, FILE_EXT))
 		throw ConfigParserError(BAD_CONFIG_FILE, __FUNCTION__, __LINE__);
-	this->_path_of_configuration_file = init_path;
 	configuration_input_file.open(init_path.c_str());
 	if (!configuration_input_file.is_open())
 		throw ConfigParserError(BAD_CONFIG_FILE, __FUNCTION__, __LINE__);
@@ -37,10 +36,6 @@ ConfigParser* ConfigParser::getInstance(const std::string init_path = "") {
 	if (!_instance)
 		_instance = new ConfigParser(init_path);
 	return (_instance);
-}
-
-const std::string& ConfigParser::getPathOfConfigurationFile(void) const {
-	return (this->_path_of_configuration_file);
 }
 
 ServerConfig* ConfigParser::getServerConfig(unsigned int id) const {
@@ -161,7 +156,6 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	finalizeLocationBlock(l_directive, current_server, uri, uri_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
-	std::cout << l_directive << std::endl;
 }
 
 void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config) {
@@ -195,7 +189,6 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 	}
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
-	std::cout << s_directive << std::endl;
 }
 
 void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
@@ -206,6 +199,7 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 
 	while (std::getline(config_file, working_line)) {
 		ServerConfig *server_config = new ServerConfig();
+		Logger current_logger;
 		current_line++;
 		if (is_only_whitespace(working_line))
 			continue;
@@ -217,6 +211,9 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 			throw ConfigParserError(TOKEN_POSITION_MISMATCH, __FUNCTION__, __LINE__, current_line);
 		}
 		setServerConfig(server_id, server_config);
+		server_config->setLogger();
+		current_logger = server_config->getLogger();
+		current_logger.info("Server config " + toStrInt(server_id + 1) + " is OK, proceeding...");
 		server_id++;
 	}
 }
