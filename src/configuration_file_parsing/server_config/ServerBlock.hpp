@@ -8,7 +8,7 @@
 #include "ADirective.hpp"
 
 struct s_server_params {
-	std::set<std::string>					_server_name;
+	std::string								_server_name;
 	std::set<unsigned int>					_listen;
 	std::map<unsigned int, std::string>		_error_pages_record;
 	std::string								_access_log_file_path;
@@ -36,14 +36,14 @@ class ServerBlock : public ADirective {
 		s_server_params getServerParams(void) const;
 		
 		// Setters
-		void setServerName(std::set<std::string> server_names);
+		void setServerName(std::string server_names);
 		bool setListeningPort(std::set<unsigned int> listening_ports);
 		void setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record);
 		bool setAcessLogPath(std::string path);
 		bool setErrorLogPath(std::string path);
 
 		// Getter
-		std::set<std::string>				getServerName(void) const;
+		std::string							getServerName(void) const;
 		std::set<unsigned int>				getListeningPort(void) const;
 		std::map<unsigned int, std::string>	getErrorPagesRecord(void) const;
 		std::string							getAccessLogPath(void) const;

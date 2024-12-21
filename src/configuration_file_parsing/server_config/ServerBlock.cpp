@@ -16,7 +16,7 @@ s_server_params ServerBlock::getServerParams(void) const {
 	return (this->_server_params);
 }
 
-void ServerBlock::setServerName(std::set<std::string> server_names) {
+void ServerBlock::setServerName(std::string server_names) {
 	this->_server_params._server_name = server_names;
 }
 
@@ -68,7 +68,7 @@ bool ServerBlock::setErrorLogPath(std::string path) {
 	return (true);
 }
 
-std::set <std::string> ServerBlock::getServerName(void) const {
+std::string ServerBlock::getServerName(void) const {
 	return (this->_server_params._server_name);
 }
 
@@ -90,15 +90,14 @@ std::string ServerBlock::getErrorLogPath(void) const {
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
 	const std::set<unsigned int> listening_ports = params->getListeningPort();
-	const std::set<std::string> server_names = params->getServerName();
+	const std::string server_names = params->getServerName();
 	const std::map<unsigned int, std::string> error_pages_record = params->getErrorPagesRecord();
 
 	std::cout << "\n\n" << "SERVER BLOCK" << "\n\n";
 	static_cast<const ADirective *>(params)->printAttributes(os);
+	os << server_names << "\n";
 	for (std::set<unsigned int>::iterator it = listening_ports.begin(); it != listening_ports.end(); it++)
 		os << "Listening ports : " << (*it) << "\n"; 
-	for (std::set<std::string>::iterator it = server_names.begin(); it != server_names.end(); it++)
-		os << "Server name : " << (*it) << "\n";
 	for (std::map<unsigned int, std::string>::const_iterator it = error_pages_record.begin(); it != error_pages_record.end(); it++) {
 		if (it == error_pages_record.begin())
 			os << "Error pages redefinition" << "\n";
