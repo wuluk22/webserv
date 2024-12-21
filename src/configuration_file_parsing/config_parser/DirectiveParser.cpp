@@ -86,23 +86,17 @@ void ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 }
 
 void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
-	std::set <std::string> current_server;
+	std::string current_server;
 	std::set<std::string>::iterator it;
 
-	if (args.empty() || args.size() == 1)
-		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
+	if (args.size() != 2)
+		throw ConfigParserError(SERVER_NAME_ONE_NAME, __FUNCTION__, __LINE__, current_line);
 	args.erase(args.begin());
-	for (int i = 0; i < args.size(); i++) {
-		if (!isValidServerName(args[i]))
-			throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
-		it = _server_names.find(args[i]);
-		if (it == _server_names.end())
-			_server_names.insert(args[i]);
-		else
-			throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
-		if (!current_server.insert(args[i]).second)
-			throw ConfigParserError(DUPE_ELEMS, __FUNCTION__, __LINE__, current_line);
-	}
+	it = _server_names.find(args[0]);
+	if (it == _server_names.end())
+		_server_names.insert(args[0]);
+	else
+		throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
 	directive->setServerName(current_server);
 }
 
