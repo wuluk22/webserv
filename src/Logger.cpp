@@ -3,6 +3,10 @@
 Logger::Logger(void) {}
 
 Logger::Logger(std::string access_log_path, std::string error_log_path) {
+	setPath(access_log_path, error_log_path);
+}
+
+void Logger::setPath(std::string access_log_path, std::string error_log_path) {
 	if (!access_log_path.empty()) {
 		_access_log_output_stream.open(access_log_path.c_str());
 		if (!_access_log_output_stream.is_open())
@@ -13,6 +17,21 @@ Logger::Logger(std::string access_log_path, std::string error_log_path) {
 		if (!_error_log_output_stream.is_open())
 			std::cerr << RED << "Error Log file could not be opened, resuming init";
 	}
+}
+
+Logger& Logger::operator=(const Logger& assign) {
+	if (this != &assign) {
+		_access_log_path = assign._access_log_path;
+		_error_log_path = assign._error_log_path;
+		setPath(_access_log_path, _error_log_path);
+	}
+	return (*this);
+}
+
+Logger::Logger(const Logger& copy) {
+	_access_log_path = copy._access_log_path;
+	_error_log_path = copy._error_log_path;
+	setPath(_access_log_path, _error_log_path);
 }
 
 Logger::~Logger(void) {
@@ -34,13 +53,16 @@ std::string Logger::outputTimestamp(void) {
 
 void Logger::genericMessage(std::string color, std::string header, std::string msg, std::ostream &output_stream, std::ofstream& output_file_stream) {
 	std::string fully_fledged_message;
+	std::string log_message;
 	std::string timestamp = outputTimestamp();
 
 	fully_fledged_message = color + header + " [" + timestamp + "] "  + ": " + msg + RESET + '\n';
 	output_stream << fully_fledged_message;
 	output_stream.flush();
-	if (output_file_stream.is_open())
-		output_file_stream << fully_fledged_message;
+	if (output_file_stream.is_open()) {
+		log_message = header + " [" + timestamp + "] "  + ": " + msg + '\n';
+		output_file_stream << log_message;
+	}
 }
 
 void Logger::info(std::string msg) {
