@@ -1,29 +1,37 @@
 #include "ServerConfig.hpp"
 
 ServerConfig::ServerConfig(void) {
-	this->server_header = NULL;
+	this->_server_header = NULL;
 }
 
 ServerConfig::~ServerConfig() {
-	for (int i = 0; i < directives.size(); i++) {
-		delete directives[i];
+	for (int i = 0; i < _directives.size(); i++) {
+		delete _directives[i];
 	}
-	if (server_header)
-		delete server_header;
+	if (_server_header)
+		delete _server_header;
 }
 
 std::vector<LocationBlock *> ServerConfig::getDirectives(void) const {
-	return (this->directives);
+	return (this->_directives);
 }
 
 void ServerConfig::setDirective(LocationBlock *new_directive) {
-	this->directives.push_back(new_directive);
+	this->_directives.push_back(new_directive);
 }
 
 void ServerConfig::setServerHeader(ServerBlock *server_header) {
-	this->server_header = server_header;
+	this->_server_header = server_header;
 }
 
 ServerBlock* ServerConfig::getServerHeader(void) const {
-	return (this->server_header);
+	return (this->_server_header);
+}
+
+void ServerConfig::setLogger(void) {
+	_logger.setPath(this->_server_header->getAccessLogPath(), this->_server_header->getErrorLogPath());
+}
+
+Logger ServerConfig::getLogger(void) {
+	return (this->_logger);
 }
