@@ -32,7 +32,10 @@ class Logger {
 	public:
 		Logger(void);
 		~Logger(void);
+		Logger(const Logger& copy);
+		Logger& operator=(const Logger& assign);
 		Logger(std::string access_log_path, std::string error_log_path);
+		void setPath(std::string access_log_path, std::string error_log_path);
 		void info(std::string msg);
 		void warn(std::string msg);
 		void error(std::string msg);
