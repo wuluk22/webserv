@@ -2,7 +2,7 @@
 # define SOCKETHANDLER_HPP
 
 #include "configuration_file_parsing/server_config/ServerConfig.hpp"
-
+#include "Logger.hpp"
 #include <netinet/in.h>
 #include <sys/select.h>
 #include <sys/socket.h>
@@ -21,6 +21,7 @@ class ServerHandler
 		int								_sock;
 		int								_port;
 		std::vector<LocationBlock *>	_locations;
+		Logger							_logger;
 
 	public:
 		// METHODS
@@ -34,6 +35,8 @@ class ServerHandler
 		std::vector<LocationBlock *>&	getLocations();
 
 		void				setLocations(std::vector<LocationBlock *>& locations);
+		void				setLogger(Logger logger);
+		Logger				getLogger(void);
 		void				InitializeServerSocket(int port, const int backlog);
 		int					createSocket();
 		void				setSocketOptions(int sock);
