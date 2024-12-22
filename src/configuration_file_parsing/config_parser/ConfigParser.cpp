@@ -198,13 +198,14 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	size_t server_id = 0;
 
 	while (std::getline(config_file, working_line)) {
-		ServerConfig *server_config = new ServerConfig();
+		ServerConfig *server_config;
 		Logger current_logger;
 		current_line++;
 		if (is_only_whitespace(working_line))
 			continue;
 		working_line_splitted = split(working_line, ' ');
 		if (working_line_splitted[0] == B_SERVER && working_line.size()) {
+			server_config = new ServerConfig();
 			processServerBlock(config_file, working_line, current_line, server_config);
 		} else {
 			delete server_config;
