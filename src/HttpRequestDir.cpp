@@ -81,7 +81,7 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     }
 
     //uploadPath = path;
-    uploadPath = rrstate.getRequest().getContPath();
+    uploadPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
     std::cout << "UPPPP : " << uploadPath << std::endl;
     if (!DirectoryHandler::isDirectory(uploadPath.c_str())) {
         if (!DirectoryHandler::createDirectory(uploadPath.c_str())) {

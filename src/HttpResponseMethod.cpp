@@ -22,7 +22,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     }
     std::string alles = rrstate.getRequest().getContentPath(config);
     rrstate.getRequest().setContentPath(alles);
-    //std::cout << "\n\nAFSGSE : " << alles << std::endl;
+    std::cout << "\n\nAFSGSE : " << alles << std::endl;
 
 
 
@@ -95,7 +95,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
             fileName = rrstate.getRequest().getPath();
         }
 
-        std::string resultPath = rrstate.getRequest().getContPath() + "/" + fileName;
+        std::string resultPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
         path = urlDecode(resultPath);
         std::cout << "\n\n---YOWWWW : " << path << std::endl;
 		//std::cout << request << std::endl;
