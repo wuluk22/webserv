@@ -3,6 +3,8 @@
 #include "RequestResponseState.hpp"
 #include "CGI/Cgi.hpp"
 
+// TO CLEAN
+
 /*std::cerr << "\nConfiguration for URI: " << rrstate.getRequest().getPath() << std::endl;
 for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
 {
