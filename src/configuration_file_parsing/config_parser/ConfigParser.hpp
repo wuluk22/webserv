@@ -58,7 +58,7 @@ class ConfigParser {
 		PathValidator						_validator;
 		
 		// Constructor
-		ConfigParser(const std::string init_path);
+		ConfigParser(const std::string initPath);
 
 		// Utils
 		std::string					trim(const std::string& str);
@@ -79,12 +79,12 @@ class ConfigParser {
 		std::string					simplifyPath(const std::string& path);
 
 		// Config File parsing
-		bool handleDirectiveTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *location_directive, TokenCounter &token_counter, s_parser_flags &flag, size_t current_line);
-		bool handleLocationTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *location_directive, s_parser_flags &flag, size_t current_line, ServerBlock *current_server, ServerConfig *server_config, std::ifstream &config_file, TokenCounter &token_counter);
-		void parseConfigurationFile(std::ifstream &configuration_file);
-		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock *current_server, ServerConfig *server_config);
+		bool handleDirectiveTokens(std::vector<std::string> tokens, std::string workingLine, LocationBlock *location_directive, TokenCounter &tokenCounter, s_parser_flags &flag, size_t currentLine);
+		bool handleLocationTokens(std::vector<std::string> tokens, std::string workingLine, LocationBlock *location_directive, s_parser_flags &flag, size_t current_line, ServerBlock *current_server, ServerConfig *server_config, std::ifstream &config_file, TokenCounter &token_counter);
+		void parseConfigurationFile(std::ifstream &configFile);
+		void processLocationBlock(std::ifstream &configFile, std::string wLine, TokenCounter &Tk,  size_t &currentLine, ServerBlock *current_server, ServerConfig *serverConfig);
 		void finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string location_line, size_t current_line);
-		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig *server_config);
+		void processServerBlock(std::ifstream &configFile, std::string wLine,  size_t &currentLine, ServerConfig *serverConfig);
 
 		// Directive parsing
 		void processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, size_t current_line);
@@ -107,7 +107,7 @@ class ConfigParser {
 		void parseAccessLogPath(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 	public:
 		~ConfigParser();
-		static ConfigParser*				getInstance(const std::string init_path);
+		static ConfigParser*				getInstance(const std::string initPath);
 		const std::string&					getPathOfConfigurationFile(void) const;
 		ServerConfig*						getServerConfig(unsigned int id) const;
 		std::map <size_t, ServerConfig *>	getAllServerConfig(void) const;

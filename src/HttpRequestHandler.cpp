@@ -46,7 +46,10 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     unsigned int                maxBody;
     bool                        autoIndex;
 
-	root = "public";
+	root = request.getPath();
+    /*std::cout << "\n\n---GET PATH: " << request.getPath() << std::endl;
+    std::cout << "---GET C PATH: " << request.getRootDirectory() << std::endl;
+    std::cout << "---GET A PATH: " << request.getAllowedPath() << std::endl;*/
 
     for (std::vector<LocationBlock*>::const_iterator it = locationsBlock.begin(); it != locationsBlock.end(); ++it)
     {
