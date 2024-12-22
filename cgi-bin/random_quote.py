@@ -46,7 +46,7 @@ def main():
         file_item = form["image"]
         if file_item.filename:
             filename = os.path.basename(file_item.filename)
-            upload_path = os.path.join(UPLOAD_DIR, filename)
+            upload_path = os.path.join(IMAGES_DIR, filename)
         else:
             message = "No selected file to upload."
         

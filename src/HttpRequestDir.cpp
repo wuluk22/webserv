@@ -29,6 +29,9 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     std::string uploadPath;
     std::string fullPath;
 
+    std::cout << "IN HANDLEFILEUPLOAD : " << std::endl;
+    std::cout << "PATH : " << path << std::endl;
+
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     /*if (requestData.length() > max)
     {

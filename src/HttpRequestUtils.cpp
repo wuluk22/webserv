@@ -82,33 +82,33 @@ bool HttpRequestHandler::fileExists(const std::string& path)
 
 std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 {
-	// out << "\n---------------------------REQUEST---------------------------------\n";
-    // out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
-    // const std::map<std::string, std::string>&	headers = handler.getHeaders();
-	// const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
-	// const std::vector<std::string>&				allowedPaths = handler.getAllowedPaths();
-    // for (std::map<std::string, std::string>::const_iterator it = headers.begin(); 
-    //      it != headers.end(); ++it)
-	// {
-    //     out << it->first << ": " << it->second << "\n";
-    // }
-	// out << "\nallowedMethods : \n";
-	// for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
-	// {
-	// 	out << *it << "\n";
-	// }
-	// // out << "\nallowedPaths : \n";
-	// for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
-	// {
-	// 	out << *it << "\n";
-	// }
-	// out << "\nallowedPath : \n";
-	// out << handler.getAllowedPath() << "\n";
-	// out << "\n \n";
-	// out << handler.getAutoIndex() << "\n";
-	// out << "\nmaxBody: \n";
-	// out << handler.getMaxBody() << "\n";
-	// out << "\n---------------------------REQUEST---------------------------------\n";
+	out << "\n---------------------------REQUEST---------------------------------\n";
+    out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
+    const std::map<std::string, std::string>&	headers = handler.getHeaders();
+	const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
+	const std::vector<std::string>&				allowedPaths = handler.getAllowedPaths();
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); 
+         it != headers.end(); ++it)
+	{
+        out << it->first << ": " << it->second << "\n";
+    }
+	out << "\nallowedMethods : \n";
+	for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
+	{
+		out << *it << "\n";
+	}
+	// out << "\nallowedPaths : \n";
+	for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
+	{
+		out << *it << "\n";
+	}
+	out << "\nallowedPath : \n";
+	out << handler.getAllowedPath() << "\n";
+	out << "\n \n";
+	out << handler.getAutoIndex() << "\n";
+	out << "\nmaxBody: \n";
+	out << handler.getMaxBody() << "\n";
+	out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
 
