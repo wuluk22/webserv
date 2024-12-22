@@ -13,22 +13,12 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
     std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 39378bc4e0d73aae4e6e33c47972f9feadf5ee1e
-
     if (config.empty())
     {
         std::cerr << "No matching configuration found for URI: " << rrstate.getRequest().getPath() << std::endl;
         setErrorResponse(rrstate, 404, "Not FFFound");
         return rrstate.getResponse();
     }
-
-
-
 
     std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
     if (it != config.end())
