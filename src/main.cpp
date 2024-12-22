@@ -15,11 +15,7 @@ int main()
 		ServerConfig* c = config->getServerConfig(0);
 		ServerBlock	*server_header = c->getServerHeader();
 		ServerBase.addPortAndServers(config->getAllServerConfig());
-		// for (unsigned long i = 0; i < ServerBase.getServers().size(); i++)
-		// {
-			// std::cout << "nbr of servers : " << ServerBase.getServers().size() << std::endl;
-			ServerBase.processClientConnections();
-		// }
+		ServerBase.processClientConnections();
 	}
 	catch (const ServerHandlerError& e)
 	{

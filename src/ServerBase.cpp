@@ -61,19 +61,11 @@ void	ServerBase::acceptConnection(ServerHandler	Server)
 	}
 	std::cout << "New accepted connection : " << newSocket << std::endl;
 	FD_SET(newSocket, &readfds);
-	// if (ClientSockets.find(newSocket) == ClientSockets.end()) {
-		RRState NewConnectionState;
-		NewConnectionState.setServer(Server);
-		// std::cout << "TEST SERVER PORT : " << NewConnectionState.getServer().getPort() << std::endl; 
-		// for (std::vector<LocationBlock *>::iterator it = NewConnectionState.getServer().getLocations().begin(); it != NewConnectionState.getServer().getLocations().end(); it++) {
-		// 	std::cout << "SOCKETPART : ";
-		// 	std::cout << *it << std::endl;
-		// }
-        ClientSockets.insert(std::make_pair(newSocket, NewConnectionState));
-	// }
+	RRState NewConnectionState;
+	NewConnectionState.setServer(Server);
+	ClientSockets.insert(std::make_pair(newSocket, NewConnectionState));
 	if (newSocket > maxSock)
 		maxSock = newSocket;
-	// std::cout << "maxSock : " << maxSock << std::endl;
 }
 
 void	ServerBase::processClientConnections()
@@ -90,12 +82,10 @@ void	ServerBase::processClientConnections()
 		cpyWriteFds = writefds;
 		std::vector<int> clientToRemove;
 
-        // Wait for an activity on one of the sockets
         if (select(maxSock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
 		{
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 		}
-        // If activity on server socket, it's an incoming connection
 		for (unsigned long i = 0; i < this->Servers.size(); i++)
 		{
 			int serverSocket = this->Servers[i].getSock();
@@ -112,12 +102,8 @@ void	ServerBase::processClientConnections()
 			if (FD_ISSET(client_sock, &cpyReadFds))
 			{
 				it->second.setClientSock(client_sock);
-				// HttpRequestHandler request = it->second.getRequest();
 				request = request.handleRequest(client_sock, it->second);
-				//request = it->second.initRequest(request);
 				it->second.setRequest(request);
-				// std::cout << "Request reponse : " << request.getFd() << std::endl;
-				//std::cerr << "process 2-\n" << request << "end!" << std::endl;
 				if (request.getFd() <= 0)
 				{ 
 					// Client Disconnected
@@ -137,7 +123,6 @@ void	ServerBase::processClientConnections()
             {
 				HttpResponseHandler response = it->second.getResponse();
                 response.handleResponse(it->second);
-				//std::cerr << "process 3-\n" << it->second.getResponse() << "end!" << std::endl;
 				it->second.setResponse(response);
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);

@@ -80,9 +80,9 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     }
     stringEnv.push_back("SERVER_PROTOCOL=" + rrstate.getRequest().getHttpVersion());
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
-    stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
     stringEnv.push_back("REMOTE_ADDR=" + getClientIP(rrstate));
     stringEnv.push_back("REMOTE_PORT=" + toStrInt(getClientPort(rrstate)));
+    stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
     // stringEnv.push_back("SERVER_NAME=" + rrstate.getServer().getServerName());
     for (size_t i = 0; i < stringEnv.size(); i++) {
         envp.push_back(strdup(stringEnv[i].c_str()));
@@ -114,11 +114,6 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         {
             std::string headers = output.substr(0, headerEnd);
             std::string body = output.substr(headerEnd + 4);
-            
-            // std::clog << "HEADERS : " << headers << std::endl;
-            // std::clog << "BODY : " << body << std::endl;
-
-            // Analyser et ajouter les en-têtes
             std::istringstream headerStream(headers);
             std::string headerLine;
             while (std::getline(headerStream, headerLine))
@@ -136,13 +131,14 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
                 }
             }
             rrstate.getResponse().setBody(body);
-            rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html")); // not good
+            // CAREFULL
+            rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(body.length()));
         } 
         else
         {
-            // Si aucun en-tête n'est trouvé, tout est traité comme le corps
             rrstate.getResponse().setBody(output);
+            // CARREFULL
             rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(output.length()));
         }
@@ -168,10 +164,8 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        //std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
@@ -194,12 +188,6 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
         argv.push_back(strdup(cgiPath.c_str()));
         argv.push_back(strdup(selectedScriptPath.c_str()));
         argv.push_back(NULL);
-        // for (std::vector<char *>::iterator it = argv.begin(); it != argv.end(); it++) {
-        //     std::clog << "ARGV : " << *it << std::endl;
-        // }
-        // for (std::vector<char *>::iterator it = envp.begin(); it != envp.end(); it++) {
-        //     std::clog << "ENVP : " << *it << std::endl;
-        // }
         if (access(cgiPath.c_str(), X_OK) == 0)
         {
             
@@ -214,7 +202,6 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
     }
     else 
     {
-        // Processus parent : impose un timeout
         int status;
         int timeout = 15; // Timeout en secondes
 
@@ -222,8 +209,6 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
         while (timeout > 0) {
             // sleep(1);
             timeout--;
-
-            // Vérifiez si le processus enfant est terminé
             if (waitpid(pid, &status, 0) != 0) {
                 break;
             }
