@@ -86,15 +86,12 @@ void ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 }
 
 void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
-	std::string current_server;
-	std::set<std::string>::iterator it;
-
 	if (args.size() != 2)
 		throw ConfigParserError(SERVER_NAME_ONE_NAME, __FUNCTION__, __LINE__, current_line);
-	args.erase(args.begin());
-	it = _server_names.find(args[0]);
+	std::string current_server = args[1];
+	std::set<std::string>::iterator it = _server_names.find(current_server);
 	if (it == _server_names.end())
-		_server_names.insert(args[0]);
+		_server_names.insert(current_server);
 	else
 		throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
 	directive->setServerName(current_server);
