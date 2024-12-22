@@ -9,7 +9,7 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	std::vector<FileInfo>	files;
 
 	dirPath	= rrstate.getRequest().getContPath() + path;
-    std::cout << "DIO : " << dirPath << std::endl;
+    std::cout << "\n\nDIO : " << dirPath << "\n\n" << std::endl;
 	files = DirectoryHandler::getDirectoryListing(dirPath);
 	content = DirectoryHandler::generateDirectoryPage(path, files);
 	rrstate.getResponse().setHttpVersion("HTTP/1.1");
@@ -85,6 +85,11 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
 
     //uploadPath = path;
     uploadPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
+    std::cout << "UPPPP : " << uploadPath << std::endl;
+    if (rrstate.getResponse().isCgiRequest(rrstate.getRequest().getPath()))
+    {
+        uploadPath = rrstate.getRequest().getContPath() + "/Images/";
+    }
     std::cout << "UPPPP : " << uploadPath << std::endl;
     if (!DirectoryHandler::isDirectory(uploadPath.c_str())) {
         if (!DirectoryHandler::createDirectory(uploadPath.c_str())) {
