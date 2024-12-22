@@ -30,7 +30,8 @@ class ServerBaseError : public Error
 		virtual ~ServerBaseError() throw();
 };
 
-class ConfigParserError : public Error {
+class ConfigParserError : public Error
+{
 	public:
    		explicit ConfigParserError(const std::string& msg, const char* function, int line, int config_line = -1);
    		virtual ~ConfigParserError() throw();

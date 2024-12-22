@@ -20,7 +20,6 @@ std::string toStrInt(int value)
     return oss.str();
 }
 
-// METHODS ERRORS
 Error::Error(const std::string& msg) : msg(msg) {};
 const char* Error::what() const throw() { return msg.c_str(); }
 Error::~Error() throw() {}

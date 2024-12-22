@@ -7,11 +7,9 @@ void HttpResponseHandler::handleResponse(RRState& rrstate)
     try
     {
         *this = handlePath(rrstate);
-
         std::string responseStr = getAll();
         size_t totalSent = 0;
         ssize_t sent;
-
         while (totalSent < responseStr.length())
         {
             sent = send(rrstate.getClientSock(), 
@@ -31,4 +29,3 @@ void HttpResponseHandler::handleResponse(RRState& rrstate)
         throw;
     }
 }
-

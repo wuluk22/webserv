@@ -84,7 +84,7 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 		directive->setAutoIndex(serverConfig->getAutoIndex());
 	if (!directive->hasClientMaxBodySizeModified())
 		directive->setClientMaxBodySize(serverConfig->getClientMaxBodySize());
-	_validator.setPath(directive->getUri());
+	_validator.setPath(directive->getContentPath());
 	if (!_validator.isDirectory())
 		directive->setAutoIndex(0);
 }

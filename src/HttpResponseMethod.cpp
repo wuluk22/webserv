@@ -3,55 +3,38 @@
 #include "RequestResponseState.hpp"
 #include "CGI/Cgi.hpp"
 
+/*std::cerr << "\nConfiguration for URI: " << rrstate.getRequest().getPath() << std::endl;
+for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
+{
+    std::cerr << it->first << ": ";
+    for (std::vector<std::string>::iterator vecIt = it->second.begin(); vecIt != it->second.end(); ++vecIt)
+    {
+        std::cerr << *vecIt << " ";
+    }
+    std::cerr << std::endl;
+}*/
+
 HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 {
-    //const std::string	staticDir = rrstate.getRequest().getRootDirectory();
-    std::string			filePath;
-	struct stat			pathStat;
-	std::string			errorPage;
-	std::string			content;
-
-    std::map<std::string, std::vector<std::string> > config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
-    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
-
+    std::string                                         filePath;
+	struct stat                                         pathStat;
+	std::string                                         errorPage;
+	std::string                                         content;
+    std::map<std::string, std::vector<std::string> >    config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
+    unsigned int                                        max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     if (config.empty())
     {
-        std::cerr << "No matching configuration found for URI: " << rrstate.getRequest().getPath() << std::endl;
         setErrorResponse(rrstate, 404, "Not FFFound");
         return rrstate.getResponse();
     }
     std::string alles = rrstate.getRequest().getContentPath(config);
     rrstate.getRequest().setContentPath(alles);
-    std::cout << "\n\nAFSGSE : " << alles << std::endl;
-
-
-
     std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
     if (it != config.end())
     {
         rrstate.getRequest().setAllowedMethods(it->second);
     }
-
-    std::cerr << "\nConfiguration for URI: " << rrstate.getRequest().getPath() << std::endl;
-    for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
-    {
-        std::cerr << it->first << ": ";
-        for (std::vector<std::string>::iterator vecIt = it->second.begin(); vecIt != it->second.end(); ++vecIt)
-        {
-            std::cerr << *vecIt << " ";
-        }
-        std::cerr << std::endl;
-    }
-
     std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
-    std::cout << "METHOD : " << rrstate.getRequest().getMethod() << std::endl;
-
-    std::cout << "MAXBODY : " << max << std::endl;
-    std::cout << "ISAUTO : " << rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()) << std::endl;
-
-    //std::cout << "ERROR_PAGES : " << rrstate.getServer().getErrorPagesRecord()
-
-	//filePath = staticDir + rrstate.getRequest().getPath();
     filePath = rrstate.getRequest().getFullPathFromLoc(rrstate, rrstate.getRequest().getPath());
 	if (!rrstate.getRequest().isMethodAllowed(rrstate.getRequest(), rrstate.getRequest().getMethod()))
 	{
@@ -78,32 +61,26 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	if (rrstate.getRequest().getMethod() == "DELETE")
 	{
 		std::string path;
-
-        /*std::cout << "\n\n---GET PATH: " << rrstate.getRequest().getPath() << std::endl;
-        std::cout << "---GET C PATH: " << rrstate.getRequest().getRootDirectory() << std::endl;
-        std::cout << "---GET A PATH: " << rrstate.getRequest().getAllowedPath() << std::endl;
-		path = rrstate.getRequest().getPath();
-		path = urlDecode(path);*/
         std::size_t lastSlashPos = rrstate.getRequest().getPath().find_last_of('/');
-
         std::string fileName;
-        if (lastSlashPos != std::string::npos) {
-            // Get everything after the last '/'
+        if (lastSlashPos != std::string::npos)
+        {
             fileName = rrstate.getRequest().getPath().substr(lastSlashPos + 1);
-        } else {
-            // If no '/' is found, assume the entire string is the file name
+        }
+        else
+        {
             fileName = rrstate.getRequest().getPath();
         }
-
         std::string resultPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
         path = urlDecode(resultPath);
-        std::cout << "\n\n---YOWWWW : " << path << std::endl;
-		//std::cout << request << std::endl;
-    	if (remove(path.c_str()) == 0) {
+    	if (remove(path.c_str()) == 0)
+        {
         	rrstate.getResponse().setStatusCode(200);
         	rrstate.getResponse().setStatusMsg("OK");
         	rrstate.getResponse().setBody("Resource deleted successfully.");
-    	} else {
+    	}
+        else
+        {
         	rrstate.getResponse().setStatusCode(404);
         	rrstate.getResponse().setStatusMsg("Not Found");
         	rrstate.getResponse().setBody("Resource not found.");
@@ -116,45 +93,28 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {
-    std::string staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
-    std::string filePath;
-    std::string valid;
-    struct stat pathStat;
-    std::string errorPage;
-    std::string content;
-    //std::cout << "PATHHHHH : " << rrstate.getRequest().getPath() << std::endl;
-    std::cout << "PUBLIC : " << rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath()) << std::endl;
-
-    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
-
-
+    std::string     staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
+    std::string     filePath;
+    std::string     valid;
+    struct stat     pathStat;
+    std::string     errorPage;
+    std::string     content;
+    unsigned int    max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     filePath = rrstate.getRequest().getContPath();
-    //std::vector<std::string> fullPath = getContentPathsFromLoc(rrstate, rrstate.getRequest().getPath());
-    //std::cout << "\n\nMEOW PATH : " << fullPath.find("content_path");
-    
-    std::cout << "\n\nFULL PATH : " << rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath()) << std::endl;
 	valid = rrstate.getRequest().getPath();
-    
-    std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << rrstate.getRequest().getPath() << std::endl;
-    std::cout << "staticDir-----------------------------: " << rrstate.getRequest().getRootDirectory() << std::endl;
     /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
     {
         setErrorResponse(request, response, 404, "Path not allowed");
         std::cout << "\n--- ::" << valid << std::endl;
         return response;
     }*/
-
-    if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
+    if (rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
 	{
-        std::cout << "------HERE------" << std::endl;
-        std::cout << "yo : " << filePath << std::endl;
         filePath = filePath + rrstate.getRequest().getPath();
-        std::cout << "yo : " << filePath << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
 	    {
 	    	if (S_ISDIR(pathStat.st_mode))
 	    	{
-                std::cout << "MEOW" << std::endl;
 				rrstate.getRequest().handleDirectoryRequest(rrstate, rrstate.getRequest().getPath(), rrstate.getResponse());
 	    		return rrstate.getResponse();
 	    	}
@@ -166,7 +126,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         content = rrstate.getRequest().readFile(filePath);
         if (content.length() > max)
         {
-            //std::cout << "\nLENGTH: " << content.length() << " MAX: " << max << std::endl;
             setErrorResponse(rrstate, 413, "response too big");
             return rrstate.getResponse();
         }
@@ -176,11 +135,9 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
         rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
         rrstate.getResponse().setHttpVersion("HTTP/1.1");
-        // add connexion keep alive !
         rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
         rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
-        //std::cout << response << std::endl;
         return rrstate.getResponse();
     }
     if (rrstate.getRequest().getPath() == "/favicon.ico")
@@ -217,43 +174,27 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     //     rrstate.getRequest().setPath(tmp);
     // }
     bool fileExists = rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath());
-    std::cout << "Does file exist? " << (fileExists ? "Yes" : "No") << " - " << filePath + rrstate.getRequest().getPath() << std::endl;
+    //std::cout << "Does file exist? " << (fileExists ? "Yes" : "No") << " - " << filePath + rrstate.getRequest().getPath() << std::endl;
     if (!rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath()) && !isCgiRequest(rrstate.getRequest().getPath()))
     {
-        std::cout << "SEFSEFSEFS" << std::endl;
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
-	/*if (request.getPath().find("/cgi-bin") == 0)
-	{
-		return response;
-	}	*/
     if (isCgiRequest(rrstate.getRequest().getPath()))
     {
-        Cgi cgi;
-        std::string path;
-
-        std::vector<std::string> uris = rrstate.getRequest().getContentPathsFromLoc(rrstate, rrstate.getRequest().getPath());
+        Cgi                                     cgi;
+        std::string                             path;
+        std::vector<std::string>                uris = rrstate.getRequest().getContentPathsFromLoc(rrstate, rrstate.getRequest().getPath());
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++) {
             path = *it;
         }
-        
-        std::cout << "PAAAAAATH : " << path << std::endl;
         cgi.handleCGI(rrstate, path);
         return rrstate.getResponse();
     }
     filePath = filePath + rrstate.getRequest().getPath();
-    /*
-    
-    
-    si index -> ne pas faire cette ligne en haut!!! 
-    
-    
-    */
     content = rrstate.getRequest().readFile(filePath);
     if (content.length() > max)
     {
-        //std::cout << "\nLENGTH: " << content.length() << " MAX: " << max << std::endl;
         setErrorResponse(rrstate, 413, "response too big");
         return rrstate.getResponse();
     }
@@ -263,17 +204,15 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
     rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
     rrstate.getResponse().setHttpVersion("HTTP/1.1");
-    // add connexion keep alive !
     rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
     rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
     rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
-    //std::cout << response << std::endl;
     return rrstate.getResponse();
 }
 
 void setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg)
 {
-    std::map<unsigned int, std::string> meow = rrstate.getServer().getErrors();
+    std::map<unsigned int, std::string>                 meow = rrstate.getServer().getErrors();
     std::map<unsigned int, std::string>::const_iterator it = meow.find(statusCode);
     if (it != meow.end())
     {
@@ -284,13 +223,11 @@ void setErrorResponse(RRState& rrstate, int statusCode, const std::string& statu
             std::ostringstream buffer;
             buffer << errorFile.rdbuf();
             std::string errorPageContent = buffer.str();
-
             rrstate.getResponse().setStatusCode(statusCode);
             rrstate.getResponse().setStatusMsg(statusMsg);
             rrstate.getResponse().setBody(errorPageContent);
             rrstate.getResponse().setHeader("Content-Type", "text/html");
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(errorPageContent.length()));
-
             errorFile.close();
             return;
         }

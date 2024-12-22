@@ -17,8 +17,8 @@
 # include <fstream>
 # include <map>
 # include <vector>
-# include <sys/stat.h> // For stat()
-# include <sys/socket.h> // for send
+# include <sys/stat.h>
+# include <sys/socket.h>
 # include <string>
 # include <cstdlib>
 # include <cstdio>
@@ -33,13 +33,13 @@ class RRState;
 class HttpResponseHandler
 {
 	public:
-		void		setHttpVersion(std::string version);
-		void		setStatusCode(int code);
-		void		setStatusMsg(std::string message);
-		void		setHeader(const std::string &headerName, const std::string &headerValue);
-		void		setBody(std::string body);
-		void		setResponse(std::string output);
-		void    	setQuery(std::string query);
+		void								setHttpVersion(std::string version);
+		void								setStatusCode(int code);
+		void								setStatusMsg(std::string message);
+		void								setHeader(const std::string &headerName, const std::string &headerValue);
+		void								setBody(std::string body);
+		void								setResponse(std::string output);
+		void    							setQuery(std::string query);
 		
 		std::string							getHttpVersion() const;
 		int									getStatusCode() const;

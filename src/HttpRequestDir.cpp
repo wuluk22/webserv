@@ -9,7 +9,6 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	std::vector<FileInfo>	files;
 
 	dirPath	= rrstate.getRequest().getContPath() + path;
-    std::cout << "\n\nDIO : " << dirPath << "\n\n" << std::endl;
 	files = DirectoryHandler::getDirectoryListing(dirPath);
 	content = DirectoryHandler::generateDirectoryPage(path, files);
 	rrstate.getResponse().setHttpVersion("HTTP/1.1");
@@ -18,7 +17,6 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	rrstate.getResponse().setHeader("Content-Type", "text/html");
 	rrstate.getResponse().setHeader("Content-Length", toString(content.length()));
 	rrstate.getResponse().setBody(content);
-    //std::cout << response << std::endl;
 }
 
 void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response)
@@ -30,80 +28,83 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     std::string fullPath;
 
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
-    /*if (requestData.length() > max)
+    if (requestData.length() > max)
     {
         setErrorResponse(rrstate, 413, "Payload Too Large");
         return;
-    }*/
-    if (contentType == "plain/text") {
+    }
+    if (contentType == "plain/text")
+    {
         time_t now = time(0);
         std::ostringstream oss;
         oss << "upload_" << now << ".txt";
         filename = oss.str();
-    } else if (contentType.find("multipart/form-data") != std::string::npos) {
+    }
+    else if (contentType.find("multipart/form-data") != std::string::npos)
+    {
         std::string boundary = extractBoundary(contentType);
-        std::cout << "BOUNDARY : "  << boundary << std::endl;
-        if (boundary.empty()) {
+        if (boundary.empty())
+        {
             throw std::runtime_error("Missing or invalid boundary in multipart form data");
         }
 
         std::string::size_type pos = requestData.find(boundary);
-        if (pos == std::string::npos) {
+        if (pos == std::string::npos)
+        {
             throw std::runtime_error("Invalid multipart form data");
         }
 
         pos = requestData.find("filename=\"", pos);
-        if (pos == std::string::npos) {
+        if (pos == std::string::npos)
+        {
             throw std::runtime_error("No filename found in upload");
         }
 
         pos += 10;
         std::string::size_type endPos = requestData.find("\"", pos);
-        if (endPos == std::string::npos) {
+        if (endPos == std::string::npos)
+        {
             throw std::runtime_error("Invalid filename format");
         }
 
         filename = requestData.substr(pos, endPos - pos);
         pos = requestData.find("\r\n\r\n", endPos);
-        if (pos == std::string::npos) {
+        if (pos == std::string::npos)
+        {
             throw std::runtime_error("Invalid file content format");
         }
-
         pos += 4;
         std::string::size_type contentEnd = requestData.find(boundary, pos);
-        if (contentEnd == std::string::npos) {
+        if (contentEnd == std::string::npos)
+        {
             throw std::runtime_error("Invalid file content ending");
         }
 
         contentEnd -= 2; // -4 before
         fileContent = requestData.substr(pos, contentEnd - pos);
-
-        std::cout << "File content length: " << fileContent.length() << std::endl;
-        std::cout << "contentENd : " << contentEnd << std::endl;
-
-
-    } else {
+    }
+    else
+    {
         throw std::runtime_error("Unsupported Content-Type: " + contentType);
     }
 
-    //uploadPath = path;
     uploadPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
-    std::cout << "UPPPP : " << uploadPath << std::endl;
     if (rrstate.getResponse().isCgiRequest(rrstate.getRequest().getPath()))
     {
         uploadPath = rrstate.getRequest().getContPath() + "/Images/";
     }
-    std::cout << "UPPPP : " << uploadPath << std::endl;
-    if (!DirectoryHandler::isDirectory(uploadPath.c_str())) {
-        if (!DirectoryHandler::createDirectory(uploadPath.c_str())) {
+    if (!DirectoryHandler::isDirectory(uploadPath.c_str()))
+    {
+        if (!DirectoryHandler::createDirectory(uploadPath.c_str()))
+        {
             throw std::runtime_error("Failed to create upload directory");
         }
     }
 
     fullPath = uploadPath + "/" + rrstate.getResponse().urlDecode(filename);
-    std::cout << "DOWWWWN : " << fullPath << std::endl;
     std::ofstream file(fullPath.c_str(), std::ios::binary);
-    if (!file) {
+    if (!file)
+    {
         throw std::runtime_error("Failed to create output file");
     }
 

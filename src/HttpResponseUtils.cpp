@@ -3,8 +3,7 @@
 std::string HttpResponseHandler::urlDecode(const std::string& url)
 {
     std::string decoded;
-    size_t length = url.length();
-    
+    size_t      length = url.length();
     for (size_t i = 0; i < length; ++i)
 	{
         if (url[i] == '%')
@@ -12,7 +11,7 @@ std::string HttpResponseHandler::urlDecode(const std::string& url)
             if (i + 2 < length)
 			{
                 std::string hex_value = url.substr(i + 1, 2);
-                char decoded_char = static_cast<char>(strtol(hex_value.c_str(), NULL, 16));
+                char        decoded_char = static_cast<char>(strtol(hex_value.c_str(), NULL, 16));
                 decoded += decoded_char;
                 i += 2;
             }
@@ -34,26 +33,11 @@ bool HttpResponseHandler::isCgiRequest(const std::string& path)
 {
     const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
-
     const std::string cgiDirectory = "/cgi-bin";
-	// std::cout << "\nPATH: " << path << std::endl;
-
     if (path.find(cgiDirectory) == 0)
 	{
         return true;
     }
-
-    /*for (std::vector<std::string>::const_iterator it = cgiExtensions.begin(); it != cgiExtensions.end(); ++it) {
-        const std::string& ext = *it;
-        if (path.length() >= ext.length() &&
-            path.compare(path.length() - ext.length(), ext.length(), ext) == 0) {
-            struct stat fileStat;
-            std::string fullPath = "cgi-bin" + path.substr(cgiDirectory.length());
-            if (stat(fullPath.c_str(), &fileStat) == 0 && (fileStat.st_mode & S_IXUSR)) {
-                return true;
-            }
-        }
-    }*/
     return false;
 }
 
@@ -65,12 +49,10 @@ void HttpResponseHandler::sendError(int clientSock, int statusCode, const std::s
         setStatusCode(statusCode);
         setStatusMsg(statusMsg);
         setHeader("Content-Type", "text/plain");
-
         std::ostringstream oss;
         oss << body.length();
         setHeader("Content-Length", oss.str());
         setBody(body);
-
         std::string responseStr = getAll();
         send(clientSock, responseStr.c_str(), responseStr.length(), 0);
     }
@@ -95,21 +77,17 @@ std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
 	return out;
 }
 
-void	HttpResponseHandler::setHttpVersion(std::string version) { this->httpVersion = version; }
-void	HttpResponseHandler::setStatusCode(int code) { this->code = code; }
-void	HttpResponseHandler::setStatusMsg(std::string message) { this->status = message; }
-void	HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { headers[headerName] = headerValue; }
-void	HttpResponseHandler::setBody(std::string body) { this->body = body; }
-void    HttpResponseHandler::setQuery(std::string query) { this->_query = query;}
-void	HttpResponseHandler::setResponse(std::string output)
-{
-    
-}
-
-std::string HttpResponseHandler::getHttpVersion() const { return httpVersion; }
-int         HttpResponseHandler::getStatusCode() const { return code; }
-std::string HttpResponseHandler::getStatusMsg() const { return status; }
-std::string HttpResponseHandler::getHeader(const std::string &headerName) const
+void	                            HttpResponseHandler::setHttpVersion(std::string version) { this->httpVersion = version; }
+void	                            HttpResponseHandler::setStatusCode(int code) { this->code = code; }
+void	                            HttpResponseHandler::setStatusMsg(std::string message) { this->status = message; }
+void	                            HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { headers[headerName] = headerValue; }
+void	                            HttpResponseHandler::setBody(std::string body) { this->body = body; }
+void                                HttpResponseHandler::setQuery(std::string query) { this->_query = query;}
+void	                            HttpResponseHandler::setResponse(std::string output) {}
+std::string                         HttpResponseHandler::getHttpVersion() const { return httpVersion; }
+int                                 HttpResponseHandler::getStatusCode() const { return code; }
+std::string                         HttpResponseHandler::getStatusMsg() const { return status; }
+std::string                         HttpResponseHandler::getHeader(const std::string &headerName) const
 {
 	std::map<std::string, std::string>::const_iterator it = headers.find(headerName);
 	if (it != headers.end())
@@ -134,4 +112,3 @@ std::string                         HttpResponseHandler::getAll() const
 	return all.str();
 }
 std::string							HttpResponseHandler::getQuery() const { return _query;}
-
