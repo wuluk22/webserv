@@ -87,9 +87,9 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
             maxBody = (*it)->getClientMaxBodySize();
             // std::cout << "\n!!!!!!!!!!!!!!\n" << (*it)->getClientMaxBodySize() << std::endl;
         }
-        if (!(*it)->getContentPath().empty())
+        if (!(*it)->getRoot().empty())
         {
-            locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
+            locInfo[locationUri]["content_path"].push_back((*it)->getRoot());
         }
 
         std::vector<std::string> ind;
