@@ -45,6 +45,7 @@ class HttpRequestHandler
 		std::vector<std::string>					allowedMethods; // GET POST DELETE
 		std::vector<std::string>					allowedPaths; // /static/ / /upload
 		std::string									allowedPath;
+		std::string									contentPath;
 		unsigned int								maxBodySize;
 		bool										autoIndex;
 		std::string									rootDirectory; // /public
@@ -118,6 +119,9 @@ class HttpRequestHandler
 		std::vector<std::string>					getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
 		std::string									getFullPathFromLoc(RRState& rrstate, const std::string& relativePath) const;
 		unsigned int								getMaxBodyFromLoc(RRState& rrstate, const std::string& uri) const;
+		void										setContentPath(const std::string& path);
+		std::string									getContPath();
+		std::string 								getContentPath(const std::map<std::string, std::vector<std::string> >& config);
 
 		bool										isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
 		bool										isIndexFile(const std::string& uri, const std::string& fileName) const;
@@ -130,7 +134,7 @@ class HttpRequestHandler
 		HttpRequestHandler							handleRequest(int clientSock, RRState& rrstate);
 		static HttpRequestHandler					httpParsing(const std::string &buffer);
 		//HttpResponseHandler							handlePath(const HttpRequestHandler &request, HttpResponseHandler &response);
-		void										handleDirectoryRequest(const std::string& path, HttpResponseHandler& response);
+		void										handleDirectoryRequest(RRState& rrstate, const std::string& path, HttpResponseHandler& response);
     	void										handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 		HttpRequestHandler							handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
 		HttpRequestHandler							initRequest(const HttpRequestHandler& request);

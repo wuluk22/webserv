@@ -27,7 +27,7 @@ HttpRequestHandler	RRState::initRequest(const HttpRequestHandler& request)
 		allowedMethods.push_back("GET");
 		allowedMethods.push_back("POST");
 		allowedMethods.push_back("DELETE");
-		root = "public";
+		root = request.getPath();
 		allowedPaths.push_back("/static");
 		allowedPaths.push_back("/index.html");
 		tempRequest.setAllowedMethods(allowedMethods);

@@ -5,10 +5,15 @@ std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoB
 {
     std::string requestUri = request.getPath();
     bool isRoot = (requestUri == "/");
-    if (!isRoot && requestUri.find("/public") != 0)
+    /*if (!isRoot && requestUri.find("/public") != 0)
     {
         requestUri = "/public" + requestUri;
-    }
+    }*/
+    /*std::cout << "\n\n---GET PATH: " << request.getPath() << std::endl;
+    std::cout << "---GET C PATH: " << request.getRootDirectory() << std::endl;
+    std::cout << "---GET A PATH: " << request.getAllowedPath() << std::endl;*/
+
+
 
     std::cout << "Adjusted REQUEST PATH: " << requestUri << std::endl;
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
@@ -52,11 +57,11 @@ std::vector<std::string> HttpRequestHandler::getContentPathsFromLoc(RRState& rrs
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
     std::string requestUri = uri;
-    bool isRoot = (requestUri == "/");
+    /*bool isRoot = (requestUri == "/");
     if (!isRoot && requestUri.find("/public") != 0)
     {
         requestUri = "/public" + requestUri;
-    }
+    }*/
 
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
     {
@@ -87,13 +92,13 @@ std::string HttpRequestHandler::getRootDirectoryFromLoc(RRState& rrstate, const 
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
     
     std::string requestUri = uri;
-    bool isRoot = (requestUri == "/");
+    /*bool isRoot = (requestUri == "/");
     //std::cout << "ROOT ??? : " << rrstate.getRequest().getRootDirectory() << std::endl;
     
     if (!isRoot && requestUri.find("/public") != 0)
     {
         requestUri = "/public" + requestUri;
-    }
+    }*/
 
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
     {
@@ -125,12 +130,12 @@ bool HttpRequestHandler::isAutoIndexEnabled(RRState& rrstate, const std::string&
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
     std::string requestUri = uri;
-    bool isRoot = (requestUri == "/");
+    /*bool isRoot = (requestUri == "/");
     
     if (!isRoot && requestUri.find("/public") != 0)
     {
         requestUri = "/public" + requestUri;
-    }
+    }*/
 
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
     {
@@ -171,12 +176,12 @@ unsigned int HttpRequestHandler::getMaxBodyFromLoc(RRState& rrstate, const std::
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
 
     std::string requestUri = uri;
-    bool isRoot = (requestUri == "/");
+    /*bool isRoot = (requestUri == "/");
 
     if (!isRoot && requestUri.find("/public") != 0)
     {
         requestUri = "/public" + requestUri;
-    }
+    }*/
 
     for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator it = _locInfo.begin(); it != _locInfo.end(); ++it)
     {
@@ -269,3 +274,15 @@ bool HttpRequestHandler::isPathAllowedInLoc(RRState& rrstate, const std::string&
     }
     return false;
 }
+
+std::string HttpRequestHandler::getContentPath(const std::map<std::string, std::vector<std::string> >& config)
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("content_path");
+    if (it != config.end() && !it->second.empty())
+    {
+        return it->second[0]; // Return the first string in the vector
+    }
+    return ""; // Return an empty string if not found or the vector is empty
+}
+std::string HttpRequestHandler::getContPath() { return contentPath; };
+void HttpRequestHandler::setContentPath(const std::string& path) { this->contentPath = path; };

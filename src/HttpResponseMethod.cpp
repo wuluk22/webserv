@@ -20,7 +20,9 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
         setErrorResponse(rrstate, 404, "Not FFFound");
         return rrstate.getResponse();
     }
-
+    std::string alles = rrstate.getRequest().getContentPath(config);
+    rrstate.getRequest().setContentPath(alles);
+    //std::cout << "\n\nAFSGSE : " << alles << std::endl;
 
 
 
@@ -76,8 +78,26 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	if (rrstate.getRequest().getMethod() == "DELETE")
 	{
 		std::string path;
-		path = "public" + rrstate.getRequest().getPath();
-		path = urlDecode(path);
+
+        /*std::cout << "\n\n---GET PATH: " << rrstate.getRequest().getPath() << std::endl;
+        std::cout << "---GET C PATH: " << rrstate.getRequest().getRootDirectory() << std::endl;
+        std::cout << "---GET A PATH: " << rrstate.getRequest().getAllowedPath() << std::endl;
+		path = rrstate.getRequest().getPath();
+		path = urlDecode(path);*/
+        std::size_t lastSlashPos = rrstate.getRequest().getPath().find_last_of('/');
+
+        std::string fileName;
+        if (lastSlashPos != std::string::npos) {
+            // Get everything after the last '/'
+            fileName = rrstate.getRequest().getPath().substr(lastSlashPos + 1);
+        } else {
+            // If no '/' is found, assume the entire string is the file name
+            fileName = rrstate.getRequest().getPath();
+        }
+
+        std::string resultPath = rrstate.getRequest().getContPath() + "/" + fileName;
+        path = urlDecode(resultPath);
+        std::cout << "\n\n---YOWWWW : " << path << std::endl;
 		//std::cout << request << std::endl;
     	if (remove(path.c_str()) == 0) {
         	rrstate.getResponse().setStatusCode(200);
@@ -108,8 +128,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
 
-    filePath = staticDir + rrstate.getRequest().getPath();
-	valid = "/" + staticDir + rrstate.getRequest().getPath();
+    filePath = rrstate.getRequest().getContPath();
+    //std::vector<std::string> fullPath = getContentPathsFromLoc(rrstate, rrstate.getRequest().getPath());
+    //std::cout << "\n\nMEOW PATH : " << fullPath.find("content_path");
+    
+    std::cout << "\n\nFULL PATH : " << rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath()) << std::endl;
+	valid = rrstate.getRequest().getPath();
     
     std::cout << "\n----filepath: " << filePath << " static: " << staticDir << " getPath: " << rrstate.getRequest().getPath() << std::endl;
     std::cout << "staticDir-----------------------------: " << rrstate.getRequest().getRootDirectory() << std::endl;
@@ -122,20 +146,40 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 
     if (rrstate.getRequest().getPath() == "/static" || rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
 	{
-        //std::cout << "------HERE------" << std::endl;
-        //std::cout << "yo : " << filePath << std::endl;
+        std::cout << "------HERE------" << std::endl;
+        std::cout << "yo : " << filePath << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
 	    {
 	    	if (S_ISDIR(pathStat.st_mode))
 	    	{
-				rrstate.getRequest().handleDirectoryRequest(rrstate.getRequest().getPath(), rrstate.getResponse());
+                std::cout << "MEOW" << std::endl;
+				rrstate.getRequest().handleDirectoryRequest(rrstate, rrstate.getRequest().getPath(), rrstate.getResponse());
 	    		return rrstate.getResponse();
 	    	}
 	    }
     }
     if (rrstate.getRequest().getPath() == "/")
     {
-        filePath = staticDir + "/index.html";
+        filePath = "index.html";
+        content = rrstate.getRequest().readFile(filePath);
+        if (content.length() > max)
+        {
+            //std::cout << "\nLENGTH: " << content.length() << " MAX: " << max << std::endl;
+            setErrorResponse(rrstate, 413, "response too big");
+            return rrstate.getResponse();
+        }
+        rrstate.getResponse().setStatusCode(200);
+        rrstate.getResponse().setStatusMsg("OK");
+        rrstate.getResponse().setBody(content);
+        rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
+        rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
+        rrstate.getResponse().setHttpVersion("HTTP/1.1");
+        // add connexion keep alive !
+        rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
+        rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
+        rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
+        //std::cout << response << std::endl;
+        return rrstate.getResponse();
     }
     if (rrstate.getRequest().getPath() == "/favicon.ico")
     {
@@ -161,8 +205,11 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 403, "Forbidden");
         return rrstate.getResponse();
     }
-    if (!rrstate.getRequest().fileExists(filePath) && !isCgiRequest(rrstate.getRequest().getPath()))
+    bool fileExists = rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath());
+    std::cout << "Does file exist? " << (fileExists ? "Yes" : "No") << " - " << filePath + rrstate.getRequest().getPath() << std::endl;
+    if (!rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath()) && !isCgiRequest(rrstate.getRequest().getPath()))
     {
+        std::cout << "SEFSEFSEFS" << std::endl;
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
@@ -182,6 +229,14 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         cgi.handleCGI(rrstate, path);
         return rrstate.getResponse();
     }
+    filePath = filePath + rrstate.getRequest().getPath();
+    /*
+    
+    
+    si index -> ne pas faire cette ligne en haut!!! 
+    
+    
+    */
     content = rrstate.getRequest().readFile(filePath);
     if (content.length() > max)
     {
