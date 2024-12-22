@@ -20,11 +20,9 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
         setErrorResponse(rrstate, 404, "Not FFFound");
         return rrstate.getResponse();
     }
-    ////////////////////////////
-    // TO KEEP ??????
-    std::string alles = rrstate.getRequest().getContentPath(config);
-    rrstate.getRequest().setContentPath(alles);
-    //std::cout << "\n\nAFSGSE : " << alles << std::endl;
+    // std::string alles = rrstate.getRequest().getContentPath(config);
+    // rrstate.getRequest().setContentPath(alles);
+    // std::cout << "\n\nAFSGSE : " << alles << std::endl;
 
 
 
