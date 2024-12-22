@@ -29,9 +29,6 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     std::string uploadPath;
     std::string fullPath;
 
-    std::cout << "IN HANDLEFILEUPLOAD : " << std::endl;
-    std::cout << "PATH : " << path << std::endl;
-
     unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     /*if (requestData.length() > max)
     {
@@ -45,6 +42,7 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
         filename = oss.str();
     } else if (contentType.find("multipart/form-data") != std::string::npos) {
         std::string boundary = extractBoundary(contentType);
+        std::cout << "BOUNDARY : "  << boundary << std::endl;
         if (boundary.empty()) {
             throw std::runtime_error("Missing or invalid boundary in multipart form data");
         }
@@ -77,8 +75,13 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
             throw std::runtime_error("Invalid file content ending");
         }
 
-        contentEnd -= 4;
+        contentEnd -= 2; // -4 before
         fileContent = requestData.substr(pos, contentEnd - pos);
+
+        std::cout << "File content length: " << fileContent.length() << std::endl;
+        std::cout << "contentENd : " << contentEnd << std::endl;
+
+
     } else {
         throw std::runtime_error("Unsupported Content-Type: " + contentType);
     }
