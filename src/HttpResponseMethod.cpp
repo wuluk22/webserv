@@ -228,6 +228,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++) {
             path = *it;
         }
+        
+        std::cout << "PAAAAAATH : " << path << std::endl;
         cgi.handleCGI(rrstate, path);
         return rrstate.getResponse();
     }
