@@ -155,6 +155,7 @@ bool HttpRequestHandler::isAutoIndexEnabled(RRState& rrstate, const std::string&
     {
         if (autoIndexIt->second[0] == "on")
         {
+            //std::cout << " MAKA " << std::endl; 
             return true;
         }
     }

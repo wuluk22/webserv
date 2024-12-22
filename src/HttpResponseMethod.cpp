@@ -150,6 +150,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 	{
         std::cout << "------HERE------" << std::endl;
         std::cout << "yo : " << filePath << std::endl;
+        filePath = filePath + rrstate.getRequest().getPath();
+        std::cout << "yo : " << filePath << std::endl;
         if (stat(filePath.c_str(), &pathStat) == 0)
 	    {
 	    	if (S_ISDIR(pathStat.st_mode))

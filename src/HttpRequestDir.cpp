@@ -8,7 +8,8 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	std::string				content;
 	std::vector<FileInfo>	files;
 
-	dirPath	= rrstate.getRequest().getContPath();
+	dirPath	= rrstate.getRequest().getContPath() + path;
+    std::cout << "DIO : " << dirPath << std::endl;
 	files = DirectoryHandler::getDirectoryListing(dirPath);
 	content = DirectoryHandler::generateDirectoryPage(path, files);
 	rrstate.getResponse().setHttpVersion("HTTP/1.1");
