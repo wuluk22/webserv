@@ -1,10 +1,10 @@
 #ifndef LOGGER_HPP
-#define LOGGER_HPP
+# define LOGGER_HPP
 
-#include <ctime>
-#include <fstream>
-#include <string>
-#include <iostream>
+# include <ctime>
+# include <fstream>
+# include <string>
+# include <iostream>
 
 // COLORS MACRO
 #ifndef RESET
@@ -21,7 +21,8 @@
 #define ERROR		"[ERROR]"
 #define CRITICAL 	"[CRIT]" 
 
-class Logger {
+class Logger
+{
 	private:
 		std::string		_error_log_path;
 		std::string		_access_log_path;

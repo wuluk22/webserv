@@ -95,7 +95,6 @@ std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& d
             if (name != "." && name != "..")
             {
                 std::string full_path = dir_path + "/" + name;
-                //std::cout << "FUUUULLLL : " << full_path << std::endl;
                 struct stat st;
                 
                 if (stat(full_path.c_str(), &st) == 0)
@@ -117,7 +116,6 @@ std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& d
         }
         closedir(dir);
     }
-    
     std::sort(files.begin(), files.end(), compareFileInfo);
     return files;
 }
@@ -188,7 +186,6 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
     {
         const FileInfo& file = *it;
         html << "<tr>\n<td>";
-        
         if (file.isDirectory)
         {
             html << "<span class='folder'>[] </span>";
@@ -206,26 +203,20 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
 		else
 		{
             link_path = path + "/" + file.name;
-            //std::cout << "LINK PAAAAATH : " << link_path << std::endl;
         }
-        
         html << "<a href='" << link_path << "'>" << file.name << "</a></td>\n"
              << "<td>" << file.size << "</td>\n"
              << "<td>" << file.modified << "</td>\n"
              << "<td>\n";
-
         if (!file.isDirectory)
 		{
             html << "<button onclick=\"deleteFile(event, '" << link_path << "')\">Delete</button>\n";
         }
-
         html << "</td>\n</tr>\n";
     }
-
     html << "</table>\n</div>\n</body>\n</html>";
     return html.str();
 }
-
 
 bool DirectoryHandler::createDirectory(const std::string& path)
 {
