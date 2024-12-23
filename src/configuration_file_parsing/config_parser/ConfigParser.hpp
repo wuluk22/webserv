@@ -21,7 +21,7 @@
 #define FILE_EXT			".conf"
 
 // TOKENS
-#define S_BLOCK_TOKENS "server_name listen error_pages access_log error_log error_pages"
+#define S_BLOCK_TOKENS "server_name listen error_pages"
 #define L_BLOCK_TOKENS "cgi_path alias allowed_method return"
 #define C_TOKENS "root index auto_index client_max_body_size"
 #define L_NO_RPT_TOKENS "root cgi_path"
@@ -56,6 +56,7 @@ class ConfigParser {
 		static ConfigParser*				_instance;
 		std::map<size_t , ServerConfig *>	_servers_config;
 		PathValidator						_validator;
+		Logger								_logger;
 		
 		// Constructor
 		ConfigParser(const std::string init_path);
@@ -85,7 +86,8 @@ class ConfigParser {
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock *current_server, ServerConfig *server_config);
 		void finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string location_line, size_t current_line);
-		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig *server_config);
+		void finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf, size_t server_id);
+		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig *server_config, size_t server_id);
 
 		// Directive parsing
 		void processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, size_t current_line);
