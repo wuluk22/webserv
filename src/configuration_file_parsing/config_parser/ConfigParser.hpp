@@ -72,8 +72,6 @@ class ConfigParser {
 		bool						isStringDigit(std::string args);
 		bool						isValidServerName(std::string name);
 		std::string					returnSecondArgs(std::string args);
-		bool						checkPathLocationDirective(LocationBlock *location_block);
-		bool						checkPathServerDirective(ServerBlock *current_server_block);
 		std::string					removeExcessiveSlashes(const std::string& path);
 		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
 		bool						isPathAbsoulte(std::string path);
@@ -105,16 +103,13 @@ class ConfigParser {
 		void parseListeningPorts(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		bool checkErrorPagesAvailability(std::string path, size_t current_line);
 		void parseErrorPages(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
-		void checkLogFile(std::vector <std::string> args, ServerBlock *directive, bool (ServerBlock::*setter)(std::string), size_t current_line);
-		void parseErrorLogPath(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
-		void parseAccessLogPath(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
+
 	public:
 		~ConfigParser();
 		static ConfigParser*				getInstance(const std::string init_path);
 		ServerConfig*						getServerConfig(unsigned int id) const;
 		std::map <size_t, ServerConfig *>	getAllServerConfig(void) const;
 		void								setServerConfig(size_t server_id, ServerConfig *current_server);
-		bool								areAllPathAccessible(ServerConfig *current_server_config);
 };
 
 #endif

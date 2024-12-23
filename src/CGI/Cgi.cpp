@@ -28,7 +28,6 @@ std::string Cgi::getClientIP(RRState& rrstate) {
 
 int Cgi::getClientPort(RRState& rrstate) {
     struct sockaddr_in clientAddr;
-    socklen_t addr_len = sizeof(clientAddr);
 
     if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
         perror("getsockname");
@@ -82,8 +81,8 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
     stringEnv.push_back("REMOTE_ADDR=" + getClientIP(rrstate));
     stringEnv.push_back("REMOTE_PORT=" + toStrInt(getClientPort(rrstate)));
-    stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
-    // stringEnv.push_back("SERVER_NAME=" + rrstate.getServer().getServerName());
+    // stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
+    stringEnv.push_back("SERVER_NAME=" + rrstate.getServer().getServerName());
     for (size_t i = 0; i < stringEnv.size(); i++) {
         envp.push_back(strdup(stringEnv[i].c_str()));
     }

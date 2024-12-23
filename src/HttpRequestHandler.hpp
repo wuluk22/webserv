@@ -111,22 +111,16 @@ class HttpRequestHandler
 		std::map<std::string, std::vector<std::string> >								getLocInfoByUri(HttpRequestHandler request);
 		bool																			getIsValid() const;
 
-		std::vector<std::string>														getAllowedMethodsFromLoc(const std::string& uri) const;
 		std::vector<std::string>														getContentPathsFromLoc(RRState& rrstate, const std::string& uri) const;
 		std::string																		getRootDirectoryFromLoc(RRState& rrstate, const std::string& uri) const;
 		bool																			isAutoIndexEnabled(RRState& rrstate, const std::string& uri) const;
-		std::vector<std::string>														getIndexFilesFromLoc(const std::string& uri) const;
-		std::vector<std::string>														getConfigFieldFromLoc(const std::string& uri, const std::string& field) const;
 		std::string																		getFullPathFromLoc(RRState& rrstate, const std::string& relativePath) const;
 		unsigned int																	getMaxBodyFromLoc(RRState& rrstate, const std::string& uri) const;
 		void																			setContentPath(const std::string& path);
 		std::string																		getContPath();
 		std::string 																	getContentPath(const std::map<std::string, std::vector<std::string> >& config);
 
-		bool																			isMethodAllowedInLoc(const std::string& uri, const std::string& method) const;
-		bool																			isIndexFile(const std::string& uri, const std::string& fileName) const;
 		bool																			isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const;
-		bool																			isPathAllowedInLoc(RRState& rrstate, const std::string& uri, const std::string& path) const;
 		void																			reset();
 
 // --------------------------------									

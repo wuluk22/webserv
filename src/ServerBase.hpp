@@ -25,9 +25,9 @@ class	ServerBase
 		//METHODS
 		ServerBase();
 		~ServerBase();
-		fd_set&						getReadfds();
-		fd_set&						getWritefds();
-		std::vector<ServerHandler>	getServers();
+		fd_set&								getReadfds();
+		fd_set&								getWritefds();
+		std::vector<ServerHandler>			getServers();
 
 		void								processClientConnections();
 		void								acceptConnection(ServerHandler	Server);

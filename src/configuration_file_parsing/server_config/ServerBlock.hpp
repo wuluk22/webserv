@@ -39,16 +39,12 @@ class ServerBlock : public ADirective {
 		void setServerName(std::string server_names);
 		bool setListeningPort(std::set<unsigned int> listening_ports);
 		void setErrorPagesRecord(std::map<unsigned int, std::string> error_pages_record);
-		bool setAcessLogPath(std::string path);
-		bool setErrorLogPath(std::string path);
 
 		// Getter
 		std::string							getServerName(void) const;
 		std::set<unsigned int>				getListeningPort(void) const;
 		bool								wasListeningPortSet(void) const;
 		std::map<unsigned int, std::string>	getErrorPagesRecord(void) const;
-		std::string							getAccessLogPath(void) const;
-		std::string							getErrorLogPath(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock *server_params);

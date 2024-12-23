@@ -52,7 +52,6 @@ class HttpResponseHandler
 		
 		HttpResponseHandler					handlePath(RRState& rrstate);
 		void								handleResponse(RRState& rrstate);
-		void								sendError(int clientSock, int statusCode, const std::string& statusMsg, const std::string& body);
 		std::string							urlDecode(const std::string& url);
 		HttpResponseHandler					handleGet(RRState& rrstate);
 		bool								isCgiRequest(const std::string& path);

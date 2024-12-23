@@ -41,27 +41,6 @@ bool HttpResponseHandler::isCgiRequest(const std::string& path)
     return false;
 }
 
-void HttpResponseHandler::sendError(int clientSock, int statusCode, const std::string& statusMsg, const std::string& body)
-{
-    try
-    {
-        setHttpVersion("HTTP/1.1");
-        setStatusCode(statusCode);
-        setStatusMsg(statusMsg);
-        setHeader("Content-Type", "text/plain");
-        std::ostringstream oss;
-        oss << body.length();
-        setHeader("Content-Length", oss.str());
-        setBody(body);
-        std::string responseStr = getAll();
-        send(clientSock, responseStr.c_str(), responseStr.length(), 0);
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error sending error response: " << e.what() << std::endl;
-    }
-}
-
 std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
 {
 	out << "\n---------------------------RESPONSE---------------------------------\n";

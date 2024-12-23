@@ -45,7 +45,6 @@ class ServerHandler
 		void				listenSocket(int sock, int backlog);
 		void				setNonblocking(int sock);
 
-		void								setErrors(std::map<unsigned int, std::string> errorPages);
 		std::map<unsigned int, std::string>	getErrors() const;
 };
 

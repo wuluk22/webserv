@@ -21,20 +21,16 @@ ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){}
 ServerHandler::~ServerHandler() {}
 
 // GETTER //
-int&  ServerHandler::getSock() { return this->_sock; }
-int&  ServerHandler::getPort() { return this->_port; }
-struct sockaddr* ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
-struct sockaddr_in ServerHandler::getAdd() { return this->_address; } 
-socklen_t&	ServerHandler::getAddrlen() { return _addrlen; }
+int&                          ServerHandler::getSock() { return this->_sock; }
+int&                          ServerHandler::getPort() { return this->_port; }
+struct sockaddr*              ServerHandler::getAddress() { return reinterpret_cast<struct sockaddr*>(&_address); }
+struct sockaddr_in            ServerHandler::getAdd() { return this->_address; } 
+socklen_t&	                  ServerHandler::getAddrlen() { return _addrlen; }
 std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
-std::string   ServerHandler::getServerName(void) const { return this->_server_name; }
+std::string                   ServerHandler::getServerName(void) const { return this->_server_name; }
 
-void ServerHandler::setServerName(std::string server_name) {
-  this->_server_name = server_name;
-}
-
-void	ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
-
+void  ServerHandler::setServerName(std::string server_name) { this->_server_name = server_name; }
+void  ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
 {
@@ -91,5 +87,4 @@ void ServerHandler::setNonblocking(int sock)
 		throw ServerHandlerError("fcntl failed: unable to set non-blocking", __FUNCTION__, __LINE__);
 }
 
-void	ServerHandler::setErrors(std::map<unsigned int, std::string> errorPages) { _errorPagesRecord = errorPages; }
 std::map<unsigned int, std::string> ServerHandler::getErrors() const { return _errorPagesRecord; }

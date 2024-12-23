@@ -25,9 +25,8 @@ class ADirective {
 		s_common_params _common_params;
 	public:
 		ADirective(void);
-		virtual			~ADirective();
+		virtual					~ADirective();
 		virtual	std::ostream&	printAttributes(std::ostream& os) const;
-		bool					isValidFileName(std::string filename);
 		
 		// Setters
 		bool setRoot(std::string root_args);

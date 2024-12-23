@@ -139,9 +139,9 @@ std::string LocationBlock::getCgiPath(void) const {
 	return (this->_location_params._cgi_path);
 }
 
-std::string LocationBlock::getAlias(void) const {
-	return (this->_location_params._content_path);
-}
+// std::string LocationBlock::getAlias(void) const {
+// 	return (this->_location_params._content_path);
+// }
 
 std::string LocationBlock::getUri(void) const {
 	return (this->_location_params._uri);
@@ -155,9 +155,9 @@ s_return LocationBlock::getReturnArgs(void) const {
 	return (this->_location_params._return_args);
 }
 
-bool LocationBlock::isDirectiveCgi(void) const {
-	return (!this->_location_params._cgi_path.empty());
-}
+// bool LocationBlock::isDirectiveCgi(void) const {
+// 	return (!this->_location_params._cgi_path.empty());
+// }
 
 bool LocationBlock::isGetAllowed(void) const {
 	return ((_location_params._allowed_methods & GET) != 0);

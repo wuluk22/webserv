@@ -25,15 +25,6 @@ std::map<std::string, std::vector<std::string> > HttpRequestHandler::getLocInfoB
     return std::map<std::string, std::vector<std::string> >();
 }
 
-std::vector<std::string>    HttpRequestHandler::getAllowedMethodsFromLoc(const std::string& uri) const
-{
-    if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find("allowed_methods") != _locInfo.find(uri)->second.end())
-    {
-        return _locInfo.find(uri)->second.find("allowed_methods")->second;
-    }
-    return std::vector<std::string>();
-}
-
 std::vector<std::string> HttpRequestHandler::getContentPathsFromLoc(RRState& rrstate, const std::string& uri) const
 {
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
@@ -108,15 +99,6 @@ bool HttpRequestHandler::isAutoIndexEnabled(RRState& rrstate, const std::string&
     return false;
 }
 
-std::vector<std::string> HttpRequestHandler::getIndexFilesFromLoc(const std::string& uri) const
-{
-    if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find("index") != _locInfo.find(uri)->second.end())
-    {
-        return _locInfo.find(uri)->second.find("index")->second;
-    }
-    return std::vector<std::string>();
-}
-
 unsigned int HttpRequestHandler::getMaxBodyFromLoc(RRState& rrstate, const std::string& uri) const
 {
     std::map<std::string, std::map<std::string, std::vector<std::string> > >::const_iterator matchedLocation = _locInfo.end();
@@ -144,15 +126,6 @@ unsigned int HttpRequestHandler::getMaxBodyFromLoc(RRState& rrstate, const std::
     return 1;
 }
 
-std::vector<std::string> HttpRequestHandler::getConfigFieldFromLoc(const std::string& uri, const std::string& field) const
-{
-    if (_locInfo.find(uri) != _locInfo.end() && _locInfo.find(uri)->second.find(field) != _locInfo.find(uri)->second.end())
-    {
-        return _locInfo.find(uri)->second.find(field)->second;
-    }
-    return std::vector<std::string>();
-}
-
 std::string HttpRequestHandler::getFullPathFromLoc(RRState& rrstate, const std::string& relativePath) const
 {
     std::string rootDirectory = getRootDirectoryFromLoc(rrstate, relativePath);
@@ -163,48 +136,9 @@ std::string HttpRequestHandler::getFullPathFromLoc(RRState& rrstate, const std::
     return "";
 }
 
-bool HttpRequestHandler::isMethodAllowedInLoc(const std::string& uri, const std::string& method) const
-{
-    std::vector<std::string> allowedMethods = getAllowedMethodsFromLoc(uri);
-    for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
-    {
-        if (*it == method)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool HttpRequestHandler::isIndexFile(const std::string& uri, const std::string& fileName) const
-{
-    std::vector<std::string> indexFiles = getIndexFilesFromLoc(uri);
-    for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); ++it)
-    {
-        if (*it == fileName)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool HttpRequestHandler::isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const
 {
     return isAutoIndexEnabled(rrstate, uri);
-}
-
-bool HttpRequestHandler::isPathAllowedInLoc(RRState& rrstate, const std::string& uri, const std::string& path) const
-{
-    std::vector<std::string> contentPaths = getContentPathsFromLoc(rrstate, uri);
-    for (std::vector<std::string>::const_iterator it = contentPaths.begin(); it != contentPaths.end(); ++it)
-    {
-        if (*it == path)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 std::string HttpRequestHandler::getContentPath(const std::map<std::string, std::vector<std::string> >& config)

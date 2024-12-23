@@ -48,22 +48,6 @@ bool ServerBlock::checkDeclaredPathOccurence(std::string path) {
 	return (true);
 }
 
-bool ServerBlock::setAcessLogPath(std::string path) {
-	if (!checkDeclaredPathOccurence(path))
-		return (false);
-	this->_server_params._access_log_file_path = path;
-	this->_server_params._declared_path.push_back(path);
-	return (true);
-}
-
-bool ServerBlock::setErrorLogPath(std::string path) {
-	if (!checkDeclaredPathOccurence(path))
-		return (false);
-	this->_server_params._error_log_file_path = path;
-	this->_server_params._declared_path.push_back(path);
-	return (true);
-}
-
 std::string ServerBlock::getServerName(void) const {
 	return (this->_server_params._server_name);
 }
@@ -78,14 +62,6 @@ bool ServerBlock::wasListeningPortSet(void) const {
 
 std::map<unsigned int, std::string> ServerBlock::getErrorPagesRecord(void) const {
 	return (this->_server_params._error_pages_record);
-}
-
-std::string ServerBlock::getAccessLogPath(void) const {
-	return (this->_server_params._access_log_file_path);
-}
-
-std::string ServerBlock::getErrorLogPath(void) const {
-	return (this->_server_params._error_log_file_path);
 } 
 
 std::ostream& operator<<(std::ostream& os, const ServerBlock *params) {
