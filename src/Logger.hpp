@@ -23,19 +23,13 @@
 
 class Logger {
 	private:
-		std::string		_error_log_path;
-		std::string		_access_log_path;
-		std::ofstream	_error_log_output_stream;
-		std::ofstream	_access_log_output_stream;
 		std::string		outputTimestamp(void) ;
-		void			genericMessage(std::string color, std::string header, std::string msg, std::ostream &output_stream, std::ofstream& output_file_stream);
+		void			genericMessage(std::string color, std::string header, std::string msg, std::ostream &output_stream);
 	public:
 		Logger(void);
 		~Logger(void);
 		Logger(const Logger& copy);
 		Logger& operator=(const Logger& assign);
-		Logger(std::string access_log_path, std::string error_log_path);
-		void setPath(std::string access_log_path, std::string error_log_path);
 		void info(std::string msg);
 		void warn(std::string msg);
 		void error(std::string msg);
