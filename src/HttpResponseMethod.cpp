@@ -105,12 +105,52 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     unsigned int    max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     filePath = rrstate.getRequest().getContPath();
 	valid = rrstate.getRequest().getPath();
+    LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate.getServer().getLocations());
+    std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableIndex();
     /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
     {
         setErrorResponse(request, response, 404, "Path not allowed");
         std::cout << "\n--- ::" << valid << std::endl;
         return response;
     }*/
+    if (locationBlock->getAutoIndex() || isCgiRequest(rrstate.getRequest().getPath())) {
+
+        e_data_reach data;
+        data = locationBlock->isContentPathReachable();
+        switch (data) 
+        {
+            case DATA_OK: {
+                break;
+            }
+            case DATA_NOK: {
+                if (isCgiRequest(rrstate.getRequest().getPath()))
+                    break;
+                setErrorResponse(rrstate, 403, "Forbidden");
+                return rrstate.getResponse();
+            }
+            case NO_DATA: {
+                if (isCgiRequest(rrstate.getRequest().getPath()))
+                    break;
+                setErrorResponse(rrstate, 404, "Not Found");
+                return rrstate.getResponse();
+            }
+        }
+    } else {
+        switch (indexResult.second)
+        {
+            case DATA_OK: {
+                break;
+            }
+            case DATA_NOK: {
+                setErrorResponse(rrstate, 403, "Forbidden");
+                return rrstate.getResponse();
+            }
+            case NO_DATA: {
+                setErrorResponse(rrstate, 404, "Not Found");
+                return rrstate.getResponse();
+            }
+        }
+    }
     if (rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
 	{
         filePath = filePath + rrstate.getRequest().getPath();

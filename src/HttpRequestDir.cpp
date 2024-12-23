@@ -11,8 +11,8 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	std::vector<FileInfo>	files;
 
 	dirPath	= rrstate.getRequest().getContPath() + path;
-	files = DirectoryHandler::getDirectoryListing(dirPath);
-	content = DirectoryHandler::generateDirectoryPage(path, files);
+	files = _handler.getDirectoryListing(dirPath);
+	content = _handler.generateDirectoryPage(path, files);
 	rrstate.getResponse().setHttpVersion("HTTP/1.1");
 	rrstate.getResponse().setStatusCode(200);
 	rrstate.getResponse().setStatusMsg("OK");
@@ -95,9 +95,9 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     {
         uploadPath = rrstate.getRequest().getContPath() + "/Images/";
     }
-    if (!DirectoryHandler::isDirectory(uploadPath.c_str()))
+    if (!_handler.isDirectory(uploadPath.c_str()))
     {
-        if (!DirectoryHandler::createDirectory(uploadPath.c_str()))
+        if (!_handler.createDirectory(uploadPath.c_str()))
         {
             throw std::runtime_error("Failed to create upload directory");
         }

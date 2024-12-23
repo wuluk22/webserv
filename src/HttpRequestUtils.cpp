@@ -1,5 +1,27 @@
 # include "HttpRequestHandler.hpp"
 
+LocationBlock* HttpRequestHandler::getLocationBlock(std::vector<LocationBlock*> locationBlocks) const
+{
+    std::string requestPath = this->getPath();
+    LocationBlock* matchedBlock;
+    size_t longestMatch = 0;
+    for (std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
+         it != locationBlocks.end(); ++it)
+	{
+        LocationBlock* block = *it;
+        const std::string& locationUri = block->getLocationParams()._uri;
+        if (requestPath.find(locationUri) == 0)
+		{
+            size_t matchLength = locationUri.length();
+            if (matchLength > longestMatch) {
+                longestMatch = matchLength;
+                matchedBlock = block;
+            }
+        }
+    }
+    return matchedBlock;
+}
+
 std::string HttpRequestHandler::trim(const std::string& str)
 {
 	size_t	first;
@@ -57,6 +79,7 @@ std::string HttpRequestHandler::getMimeType(const std::string& path)
     if (endsWith(path, ".html")) return "text/html";
     if (endsWith(path, ".css")) return "text/css";
     if (endsWith(path, ".js")) return "application/javascript";
+	if (endsWith(path, ".json")) return "application/json";
     if (endsWith(path, ".png")) return "image/png";
     if (endsWith(path, ".jpg") || endsWith(path, ".jpeg")) return "image/jpeg";
     if (endsWith(path, ".gif")) return "image/gif";

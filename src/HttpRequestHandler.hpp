@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestHandler.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2024/12/20 14:47:31 by nechaara         ###   ########.fr       */
+/*   Updated: 2024/12/23 15:18:33 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,13 @@ class HttpRequestHandler
 		bool																		autoIndex;
 		std::string																	rootDirectory;
 		std::vector<std::string>													_CgiPath;
+		LocationBlock																_locationBlocks;
 		
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
 		bool																		isRequestComplete;
 		static std::string															extractBoundary(const std::string& contentType);
     	static std::string															generateErrorResponse(const std::string& message);
+		DirectoryHandler															_handler;
 	public:
 		HttpRequestHandler();
 		~HttpRequestHandler();
@@ -122,6 +124,7 @@ class HttpRequestHandler
 
 		bool																			isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const;
 		void																			reset();
+		LocationBlock*																	getLocationBlock(std::vector<LocationBlock*> locationBlocks) const;
 
 // --------------------------------									
 

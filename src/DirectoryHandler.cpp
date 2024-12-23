@@ -216,12 +216,44 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         html << "<td>" << file.size << "</td>\n"
              << "<td>" << file.modified << "</td>\n"
              << "<td>\n";
-
+        
         if (!file.isDirectory)
         {
-            html << "<button onclick=\"deleteFile(event, '" << link_path << "')\">Delete</button>\n";
+            link_path = "." + link_path;
+            _validator.setPath(link_path);
+            std::cout << link_path << std::endl;
+            bool isValid = _validator.exists() && _validator.isFile() && _validator.isWritable();
+            html << "<script>";
+            html << "   function deleteElement(filePath) {";
+            html << "       fetch(filePath, {";
+            html << "           method: 'DELETE',";
+            html << "           headers: {";
+            html << "               'Content-Type': 'application/json'";
+            html << "           },";
+            html << "           body: JSON.stringify({ filePath: filePath })"; // Proper body formatting
+            html << "       })";
+            html << "       .then(response => {";
+            html << "           if (response.ok) {";
+            html << "               alert('File deleted successfully.');";
+            html << "               window.location.reload();"; // Reload the page
+            html << "           } else {";
+            html << "               alert('Failed to delete the file.');";
+            html << "           }";
+            html << "       })";
+            html << "       .catch(error => {";
+            html << "           console.error('Error:', error);";
+            html << "           alert('An error occurred while deleting the file.');";
+            html << "       });";
+            html << "   }";
+            html << "   function noPermission() {";
+            html << "       alert('No permission >:).');";
+            html << "   }";
+            html << "</script>";
+            if (!isValid)
+                html << "<button onclick=\"noPermission()\">Delete File</button>";
+            else
+                html << "<button onclick=\"deleteElement('" << link_path << "')\">Delete File</button>";
         }
-
         html << "</td>\n</tr>\n";
     }
     html << "</table>\n</div>\n</body>\n</html>";
