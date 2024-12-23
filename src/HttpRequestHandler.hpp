@@ -50,6 +50,7 @@ class HttpRequestHandler
 		bool																		autoIndex;
 		std::string																	rootDirectory;
 		std::vector<std::string>													_CgiPath;
+		LocationBlock																_locationBlocks;
 		
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
 		bool																		isRequestComplete;
@@ -128,6 +129,7 @@ class HttpRequestHandler
 		bool																			isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const;
 		bool																			isPathAllowedInLoc(RRState& rrstate, const std::string& uri, const std::string& path) const;
 		void																			reset();
+		LocationBlock*																	getLocationBlock(std::vector<LocationBlock*> locationBlocks) const;
 
 // --------------------------------									
 
