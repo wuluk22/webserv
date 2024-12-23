@@ -27,11 +27,3 @@ void ServerConfig::setServerHeader(ServerBlock *server_header) {
 ServerBlock* ServerConfig::getServerHeader(void) const {
 	return (this->_server_header);
 }
-
-void ServerConfig::setLogger(void) {
-	_logger.setPath(this->_server_header->getAccessLogPath(), this->_server_header->getErrorLogPath());
-}
-
-Logger ServerConfig::getLogger(void) {
-	return (this->_logger);
-}

@@ -1,10 +1,6 @@
 #include "ServerBlock.hpp"
 
 ServerBlock::ServerBlock(void) {
-	if (IS_LINUX)
-		this->_server_params._listen.insert(1024);
-	else
-		this->_server_params._listen.insert(8080);
 	_listening_ports_set = false;
 }
 
@@ -74,6 +70,10 @@ std::string ServerBlock::getServerName(void) const {
 
 std::set <unsigned int> ServerBlock::getListeningPort(void) const {
 	return (this->_server_params._listen);
+}
+
+bool ServerBlock::wasListeningPortSet(void) const {
+	return (this->_listening_ports_set);
 }
 
 std::map<unsigned int, std::string> ServerBlock::getErrorPagesRecord(void) const {

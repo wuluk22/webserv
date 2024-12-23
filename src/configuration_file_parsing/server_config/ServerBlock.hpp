@@ -45,6 +45,7 @@ class ServerBlock : public ADirective {
 		// Getter
 		std::string							getServerName(void) const;
 		std::set<unsigned int>				getListeningPort(void) const;
+		bool								wasListeningPortSet(void) const;
 		std::map<unsigned int, std::string>	getErrorPagesRecord(void) const;
 		std::string							getAccessLogPath(void) const;
 		std::string							getErrorLogPath(void) const;
