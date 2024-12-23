@@ -27,12 +27,7 @@ struct sockaddr* ServerHandler::getAddress() { return reinterpret_cast<struct so
 struct sockaddr_in ServerHandler::getAdd() { return this->_address; } 
 socklen_t&	ServerHandler::getAddrlen() { return _addrlen; }
 std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
-Logger				ServerHandler::getLogger(void) { return this->_logger; }
 std::string   ServerHandler::getServerName(void) const { return this->_server_name; }
-
-void  ServerHandler::setLogger(Logger logger) {
-  this->_logger = logger;
-}
 
 void ServerHandler::setServerName(std::string server_name) {
   this->_server_name = server_name;

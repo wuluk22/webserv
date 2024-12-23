@@ -21,7 +21,6 @@ class ServerHandler
 		int								_sock;
 		int								_port;
 		std::vector<LocationBlock *>	_locations;
-		Logger							_logger;
 		std::string						_server_name;
 
 	public:
@@ -36,8 +35,6 @@ class ServerHandler
 		std::vector<LocationBlock *>&	getLocations();
 
 		void				setLocations(std::vector<LocationBlock *>& locations);
-		void				setLogger(Logger logger);
-		Logger				getLogger(void);
 		void				setServerName(std::string server_name);
 		std::string			getServerName(void) const;
 		void				InitializeServerSocket(int port, const int backlog);

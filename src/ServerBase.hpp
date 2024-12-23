@@ -19,6 +19,7 @@ class	ServerBase
 		std::map<int, RRState>		ClientSockets;
 		std::vector<ServerHandler>	Servers;
 		fd_set 						readfds, writefds;
+		Logger						logger;
 
 	public:
 		//METHODS
