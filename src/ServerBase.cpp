@@ -59,7 +59,7 @@ void	ServerBase::acceptConnection(ServerHandler Server)
 	{
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	}
-	std::cout << "New accepted connection : " << newSocket << std::endl;
+	// std::cout << "New accepted connection : " << newSocket << std::endl;
 	FD_SET(newSocket, &readfds);
 	RRState NewConnectionState;
 	NewConnectionState.setServer(Server);
