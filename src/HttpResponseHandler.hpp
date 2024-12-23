@@ -56,6 +56,7 @@ class HttpResponseHandler
 		std::string							urlDecode(const std::string& url);
 		HttpResponseHandler					handleGet(RRState& rrstate);
 		bool								isCgiRequest(const std::string& path);
+
 		std::string							httpVersion;
 		int									code;
 		std::string							status;
