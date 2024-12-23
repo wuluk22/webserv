@@ -57,6 +57,7 @@ std::string HttpRequestHandler::getMimeType(const std::string& path)
     if (endsWith(path, ".html")) return "text/html";
     if (endsWith(path, ".css")) return "text/css";
     if (endsWith(path, ".js")) return "application/javascript";
+	if (endsWith(path, ".json")) return "application/json";
     if (endsWith(path, ".png")) return "image/png";
     if (endsWith(path, ".jpg") || endsWith(path, ".jpeg")) return "image/jpeg";
     if (endsWith(path, ".gif")) return "image/gif";
