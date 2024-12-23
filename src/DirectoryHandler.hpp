@@ -16,8 +16,8 @@ struct FileInfo
 {
     std::string name;
     std::string size;
-    std::string     modified;
-    bool            isDirectory;
+    std::string modified;
+    bool        isDirectory;
     
     FileInfo(const std::string& n, const std::string& s, const std::string& m, bool d);
 };
