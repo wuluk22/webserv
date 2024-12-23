@@ -82,6 +82,11 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         ind = (*it)->accessibleIndex();
         if (!ind.empty())
             locInfo[locationUri]["index"] = ind;
+        /*if (!(*it)->checkAvailableIndex().first.empty())
+        {
+            std::cout << "\n\navailable index: " << (*it)->checkAvailableIndex().second << std::endl;
+        }*/
+        
     }
 
 
