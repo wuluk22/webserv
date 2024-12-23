@@ -27,8 +27,10 @@ ConfigParser::ConfigParser(const std::string init_path) {
 }
 
 ConfigParser::~ConfigParser() {
-	for (int i = 0; i < _servers_config.size(); i++)
+	for (int i = 0; i < _servers_config.size(); i++) {
+		_logger.info("Removing server " + toStrInt(i) + ".");
 		delete _servers_config[i];
+	}
 	delete this->_instance;
 }
 
@@ -56,7 +58,18 @@ void ConfigParser::setServerConfig(size_t server_id, ServerConfig *current_serve
 	this->_servers_config.insert(std::make_pair(server_id, current_server));
 }
 
-// TODO : REFACTOR THIS MONSTROSITY P1
+void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf , size_t server_id) {
+	_logger.info("Finalizing server " + toStrInt(server_id + 1) + " parsing");
+	if (!directive->wasListeningPortSet())
+		throw ConfigParserError(PORT_NOT_SET, __FUNCTION__, __LINE__, line);
+	if (directive->getServerName().empty())
+		throw ConfigParserError(SERVER_NAME_NOT_SET, __FUNCTION__, __LINE__, line);
+	if (directive->getRoot().empty())
+		_logger.warn("Relying on root definition for each location directive - not recommanded");
+	if (serv_conf->getDirectives().empty())
+		_logger.warn("No directive set up for the current server");
+	
+}
 
 void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
 	std::string server_root = server_config->getRoot();
@@ -66,7 +79,7 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 
 	if (location_root.empty() && server_root.empty())
 		throw ConfigParserError(NO_ROOT_DEFINITION, __FUNCTION__, __LINE__, line);
-	else if (!server_root.empty() && location_root.empty())
+	if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
 	if (!directive->setContentPath(removeExcessiveSlashes(root + uri)))
@@ -158,7 +171,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	token_counter.exitBlock();
 }
 
-void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config) {
+void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config, size_t server_id) {
 	std::vector<std::string> splitted_line;
 	std::streampos last_position;
 	TokenCounter token_counter;
@@ -187,6 +200,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 		} else
 			throw ConfigParserError(INVALID_TOKEN, __FUNCTION__, __LINE__, current_line);
 	}
+	finalizeServerBlock(s_directive, current_line, server_config, server_id);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
 }
@@ -206,15 +220,12 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 		working_line_splitted = split(working_line, ' ');
 		if (working_line_splitted[0] == B_SERVER && working_line.size()) {
 			server_config = new ServerConfig();
-			processServerBlock(config_file, working_line, current_line, server_config);
+			processServerBlock(config_file, working_line, current_line, server_config, server_id);
 		} else {
 			delete server_config;
 			throw ConfigParserError(TOKEN_POSITION_MISMATCH, __FUNCTION__, __LINE__, current_line);
 		}
 		setServerConfig(server_id, server_config);
-		server_config->setLogger();
-		current_logger = server_config->getLogger();
-		current_logger.info("Server config " + toStrInt(server_id + 1) + " is OK, proceeding...");
 		server_id++;
 	}
 }
