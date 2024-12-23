@@ -89,11 +89,14 @@ void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *
 	if (args.size() != 2)
 		throw ConfigParserError(SERVER_NAME_ONE_NAME, __FUNCTION__, __LINE__, current_line);
 	std::string current_server = args[1];
+	if (!isValidServerName(current_server))
+		throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
 	std::set<std::string>::iterator it = _server_names.find(current_server);
 	if (it == _server_names.end())
 		_server_names.insert(current_server);
 	else
 		throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
+	
 	directive->setServerName(current_server);
 }
 
@@ -179,29 +182,6 @@ void ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *di
 	}
 }
 
-void ConfigParser::checkLogFile(std::vector <std::string> args, ServerBlock *directive, bool (ServerBlock::*setter)(std::string), size_t current_line) {
-	std::size_t arg_size = args.size();
-	std::string path;
-
-	if (args.empty() || arg_size != 2)
-		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	args.erase(args.begin());
-	path = args[0];
-	_validator.setPath(path);
-	if (!(_validator.exists() && _validator.isFile() && _validator.isWritable()))
-		throw ConfigParserError(BAD_ACCESS, __FUNCTION__, __LINE__, current_line);
-	if (!(directive->*setter)(path))
-		throw ConfigParserError(PATH_ALREADY_DEFINED, __FUNCTION__, __LINE__, current_line);
-}
-
-void ConfigParser::parseErrorLogPath(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
-	return (checkLogFile(args, directive, &ServerBlock::setErrorLogPath, current_line));
-}
-
-void ConfigParser::parseAccessLogPath(std::vector <std::string> args, ServerBlock *directive, size_t current_line) {
-	return (checkLogFile(args, directive, &ServerBlock::setAcessLogPath, current_line));
-}
-
 void ConfigParser::processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	if (args[0] == "root")
 		parseRoot(working_line, directive, current_line);
@@ -233,8 +213,4 @@ void ConfigParser::processDirectiveServ(ServerBlock *directive, std::string work
 		parseListeningPorts(args, directive, current_line);
 	else if (args[0] == "error_pages")
 		parseErrorPages(args, directive, current_line);
-	else if (args[0] == "error_log")
-		parseErrorLogPath(args, directive, current_line);
-	else if (args[0] == "access_log")
-		parseAccessLogPath(args, directive, current_line);
 }
