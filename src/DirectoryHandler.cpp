@@ -197,21 +197,31 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         
         std::string link_path;
         if (path == "/")
-		{
+        {
             link_path = path + file.name;
         }
-		else
-		{
+        else
+        {
             link_path = path + "/" + file.name;
         }
-        html << "<a href='" << link_path << "'>" << file.name << "</a></td>\n"
-             << "<td>" << file.size << "</td>\n"
+        if (file.isDirectory)
+        {
+            html << "<a href='" << link_path << "/'>" << file.name << "</a></td>\n";
+        }
+        else
+        {
+            html << "<a href='" << link_path << "' download>" << file.name << "</a></td>\n";
+        }
+        
+        html << "<td>" << file.size << "</td>\n"
              << "<td>" << file.modified << "</td>\n"
              << "<td>\n";
+
         if (!file.isDirectory)
-		{
+        {
             html << "<button onclick=\"deleteFile(event, '" << link_path << "')\">Delete</button>\n";
         }
+
         html << "</td>\n</tr>\n";
     }
     html << "</table>\n</div>\n</body>\n</html>";
