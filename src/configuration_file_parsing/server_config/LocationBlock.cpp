@@ -92,6 +92,38 @@ e_data_reach LocationBlock::isCgiPathReachable(void){
 	return (DATA_NOK);
 }
 
+std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
+	std::string full_file_path;
+	std::pair <std::string, e_data_reach> result;
+	bool hasEntered = false;
+	std::string uri = this->_location_params._uri;
+
+	std::set<std::string>::iterator it = this->_common_params._index.begin();
+	for (; it != this->_common_params._index.end(); it++) {
+		if (uri[uri.size() - 1] == '/')
+			full_file_path = this->_location_params._content_path + (*it);
+		else
+			full_file_path = this->_location_params._content_path + "/" + (*it);
+		_validator.setPath(full_file_path);
+		if (_validator.exists() && _validator.isFile()) {
+			hasEntered = true;
+			if (_validator.isReadable()) {
+				result.first = full_file_path;
+				result.second = DATA_OK;
+			} else {
+				result.first = full_file_path;
+				result.second = DATA_NOK;
+			}
+		} else
+			continue;
+	}
+	if (!hasEntered) {
+		result.first = full_file_path;
+		result.second = NO_DATA;
+	}
+	return (result);
+}
+
 // **************************************************************************************
 
 void LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
