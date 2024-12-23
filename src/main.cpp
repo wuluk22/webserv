@@ -5,18 +5,22 @@
 
 void handle_signal(int sig) {
     if (sig == SIGINT) {
-        std::cerr << "\n Caught signal SIGINT (Ctrl+C). Exiting gracefully..." << std::endl;
-        exit(1);
+        std::cerr << YELLOW << "\nCaught signal SIGINT (Ctrl+C). Exiting gracefully..." << RESET << std::endl;
+		exit(1);
 	}
 }
 
-int main()
+int main(int ac, char **argv)
 {
+	if (ac != 2) {
+		std::cerr << RED << "Uncorrect ammount of arguments , try ./webserv [path_of_config_file]" << RESET << std::endl; 
+		return (1);
+	}
 	ConfigParser	*config;
 	ServerBase		ServerBase;
 	signal(SIGINT, handle_signal);
 	try {
-		config = ConfigParser::getInstance("test.conf");
+		config = ConfigParser::getInstance(argv[1]);
 		ServerConfig* c = config->getServerConfig(0);
 		ServerBlock* server_header = c->getServerHeader();
 		ServerBase.addPortAndServers(config->getAllServerConfig());
