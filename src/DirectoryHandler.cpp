@@ -116,7 +116,6 @@ std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& d
         }
         closedir(dir);
     }
-    
     std::sort(files.begin(), files.end(), compareFileInfo);
     return files;
 }
@@ -187,7 +186,6 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
     {
         const FileInfo& file = *it;
         html << "<tr>\n<td>";
-        
         if (file.isDirectory)
         {
             html << "<span class='folder'>[] </span>";
@@ -206,24 +204,19 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
 		{
             link_path = path + "/" + file.name;
         }
-        
         html << "<a href='" << link_path << "'>" << file.name << "</a></td>\n"
              << "<td>" << file.size << "</td>\n"
              << "<td>" << file.modified << "</td>\n"
              << "<td>\n";
-
         if (!file.isDirectory)
 		{
             html << "<button onclick=\"deleteFile(event, '" << link_path << "')\">Delete</button>\n";
         }
-
         html << "</td>\n</tr>\n";
     }
-
     html << "</table>\n</div>\n</body>\n</html>";
     return html.str();
 }
-
 
 bool DirectoryHandler::createDirectory(const std::string& path)
 {

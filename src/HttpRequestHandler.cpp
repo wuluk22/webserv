@@ -2,6 +2,8 @@
 # include "RequestResponseState.hpp"
 # include <stdlib.h>
 
+// TO CLEAN
+
 HttpRequestHandler::HttpRequestHandler()
 {}
 
@@ -10,35 +12,24 @@ HttpRequestHandler::~HttpRequestHandler()
 
 void HttpRequestHandler::reset()
 {
-	// std::cerr << "\n--------cleaner------" << std::endl;
-
     this->allowedPaths.clear();
-	for (std::vector<std::string>::iterator it = this->allowedMethods.begin(); it != this->allowedMethods.end(); ++it)
-	{
-		// std::cerr << "method cleaner: " << *it << std::endl;
-	}
     this->allowedMethods.clear();
 	this->allowedPath.clear();
     
-
     /*this->rootDirectory.clear();
     this->path.clear();
     this->method.clear();
     this->httpVersion.clear();
     this->body.clear();
     
-
     this->headers.clear();
     this->statusCode = 0;
     this->cgiEnabled = false;*/
-	// std::cerr << "\n--------cleaner------" << std::endl;
 }
 
 HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock)
 {
-	//request.reset();
 	HttpRequestHandler tmpRequest(request);
-    //tmpRequest.reset();
 	std::map<std::string, std::map<std::string, std::vector<std::string> > > locInfo;
 
 	std::string					root;
@@ -46,8 +37,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     unsigned int                maxBody;
     bool                        autoIndex;
 
-	root = "public";
-
+	root = request.getPath();
     for (std::vector<LocationBlock*>::const_iterator it = locationsBlock.begin(); it != locationsBlock.end(); ++it)
     {
         const std::string& locationUri = (*it)->getUri();
@@ -56,7 +46,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         {
             locInfo[locationUri] = std::map<std::string, std::vector<std::string> >();
         }
-
         if ((*it)->isGetAllowed() && std::find(locInfo[locationUri]["allowed_methods"].begin(), locInfo[locationUri]["allowed_methods"].end(), "GET") == locInfo[locationUri]["allowed_methods"].end())
         {
             locInfo[locationUri]["allowed_methods"].push_back("GET");
@@ -82,11 +71,10 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         {
             locInfo[locationUri]["max_body"].push_back(request.toString((*it)->getClientMaxBodySize()));
             maxBody = (*it)->getClientMaxBodySize();
-            // std::cout << "\n!!!!!!!!!!!!!!\n" << (*it)->getClientMaxBodySize() << std::endl;
         }
-        if (!(*it)->getContentPath().empty())
+        if (!(*it)->getRoot().empty())
         {
-            locInfo[locationUri]["content_path"].push_back((*it)->getContentPath());
+            locInfo[locationUri]["content_path"].push_back((*it)->getRoot());
         }
 
         std::vector<std::string> ind;
@@ -99,7 +87,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
     if (locInfo.empty())
     {
-        // std::cout << "\n------meowwww-----" << std::endl;
         std::vector<std::string> emptyMethods;
         tmpRequest.setAllowedMethods(emptyMethods);
         tmpRequest.setRootDirectory(root);
@@ -130,7 +117,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     tmpRequest.setLocInfo(locInfo);
     tmpRequest.setAutoIndex(autoIndex);
     tmpRequest.setMaxBody(maxBody);
-    // std::cout << "\n????????????\n" << tmpRequest.getMaxBody() << " " << maxBody << std::endl;
     return tmpRequest;
 }
 
@@ -138,17 +124,16 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
 HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rrstate)
 {
-    const size_t bufferSize = 1024;
-    char buffer[bufferSize];
-    std::string requestData;
-    HttpRequestHandler request;
-    bool headersComplete = false;
-    unsigned int contentLength = 0;
-    unsigned int bodyLength = 0;
+    const size_t        bufferSize = 1024;
+    char                buffer[bufferSize];
+    std::string         requestData;
+    HttpRequestHandler  request;
+    bool                headersComplete = false;
+    unsigned int        contentLength = 0;
+    unsigned int        bodyLength = 0;
 
 	request.reset();
 	request.setIsValid(false);
-	
 	request = request.handleConfig(request, rrstate.getServer().getLocations());
 	request.setClientSocket(clientSock);
     while (true)
@@ -160,10 +145,8 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
             request.setFd(bytesRead);
             return request;
         }
-        
         buffer[bytesRead] = '\0';
         requestData.append(buffer, bytesRead);
-        
         if (!headersComplete)
 		{
             std::string::size_type headerEnd = requestData.find("\r\n\r\n");
@@ -171,27 +154,21 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
             if (headerEnd != std::string::npos)
 			{
                 headersComplete = true;
-                
                 std::string headersPart = requestData.substr(0, headerEnd);
                 HttpRequestHandler tempRequest = httpParsing(headersPart);
                 std::string contentLengthStr = tempRequest.getHeader("Content-Length");
-                
                 if (!contentLengthStr.empty())
 				{
                     std::istringstream iss(contentLengthStr);
                     iss >> contentLength;
                 }
-                
                 bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
-                
                 if (contentLength == 0)
 				{
                     request = httpParsing(requestData);
                     request.setFd(1);
 					request.setIsComplete(true);
 					request = request.handleConfig(request, rrstate.getServer().getLocations());
-					//std::cout << " a! " << request.getIsComplete() << " a! " << std::endl;
-					//std::cout << " \na! " << request << " a! " << std::endl;
                     return request;
                 }
             }
@@ -221,8 +198,6 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
             request.setFd(1);
 			request.setIsComplete(isRequestComplete);
 			request = request.handleConfig(request, rrstate.getServer().getLocations());
-			//std::cout << " b! " << request.getIsComplete() << " b! " << std::endl;
-			//std::cout << " \nb! " << request << " b! " << std::endl;
             return request;
         }
         if (static_cast<unsigned int>(bytesRead) < bufferSize - 1 && !headersComplete)
@@ -230,11 +205,9 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
             break;
         }
     }
-    
     request = httpParsing(requestData);
     request.setFd(1);
 	request.setIsComplete(isRequestComplete);
 	request = request.handleConfig(request, rrstate.getServer().getLocations());
-	//std::cout << " \nc! " << request.getIsComplete() << " c! " << std::endl;
     return request;
 }

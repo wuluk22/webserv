@@ -6,10 +6,6 @@ import cgitb
 
 cgitb.enable()
 
-PHRASES_FILE = "/home/nechaara/42-Cursus/webserv/public/phrases.txt"
-IMAGES_DIR = "/home/nechaara/42-Cursus/webserv/public/Images/"
-
-
 def get_random_phrase(file_path):
     try:
         with open(file_path, "r") as file:
@@ -41,13 +37,16 @@ def main():
     form = cgi.FieldStorage()
     method = os.environ.get("REQUEST_METHOD", "GET").upper()
     query = os.environ.get("QUERY_STRING", "")
+    path = os.environ.get("PATH", "")
+
+    PHRASES_FILE = path + "/phrases.txt"
+    IMAGES_DIR = path + "/Images"
 
     if method == "POST":
         file_item = form["image"]
         if file_item.filename:
-            # Nom de fichier sécurisé
             filename = os.path.basename(file_item.filename)
-            upload_path = os.path.join(UPLOAD_DIR, filename)
+            upload_path = os.path.join(IMAGES_DIR, filename)
         else:
             message = "No selected file to upload."
         
@@ -201,7 +200,7 @@ def main():
                 <h1>KitshGI</h1>
 
                 <div class="section" {image_section_style}>
-                    <h2>Choose you favorite one or ... </h2>
+                    <h2>Choose your favorite one or ... </h2>
                     <form id="image-form" action="/cgi-bin/random_quote.py" method="GET">
                         <input type="hidden" id="selected-image" name="image" value="">
 

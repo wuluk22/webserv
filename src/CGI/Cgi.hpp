@@ -24,13 +24,13 @@ class Cgi
         Cgi();
         ~Cgi();
         std::string         getQuery(std::string path);
-        std::string         handleCGI(RRState& rrstate);
+        void                handleCGI(RRState& rrstate, std::string path);
         std::string         getClientIP(RRState& rrstate);
         int                 getClientPort(RRState& rrstate);
         void                handleCgiResponse(std::string output, RRState& rrstate);
         std::string         findAccept(std::map<std::string, std::string> headers);
         std::string         readDatasFromScript(int pipefd);
-        std::vector<char *> homeMadeSetEnv(RRState& rrstate, std::string scriptPath);
+        std::vector<char *> homeMadeSetEnv(RRState& rrstate, std::string scriptPath, std::string path);
 };
 
 #endif

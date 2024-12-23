@@ -16,12 +16,13 @@ class ErrorHandler;
 class ServerHandler
 {
 	private:
-		struct sockaddr_in				_address;
-		socklen_t						_addrlen;
-		int								_sock;
-		int								_port;
-		std::vector<LocationBlock *>	_locations;
+		struct sockaddr_in					_address;
+		socklen_t							_addrlen;
+		int									_sock;
+		int									_port;
+		std::vector<LocationBlock *>		_locations;
 		std::string						_server_name;
+		std::map<unsigned int, std::string>	_errorPagesRecord;
 
 	public:
 		// METHODS
@@ -43,6 +44,9 @@ class ServerHandler
 		void				bindSocket(int port);
 		void				listenSocket(int sock, int backlog);
 		void				setNonblocking(int sock);
+
+		void								setErrors(std::map<unsigned int, std::string> errorPages);
+		std::map<unsigned int, std::string>	getErrors() const;
 };
 
 void						printFdSet(const fd_set& fdset, std::string functionName);

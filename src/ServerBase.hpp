@@ -29,9 +29,9 @@ class	ServerBase
 		fd_set&						getWritefds();
 		std::vector<ServerHandler>	getServers();
 
-		void						processClientConnections();
-		void						acceptConnection(ServerHandler	Server);
-		void						addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
+		void								processClientConnections();
+		void								acceptConnection(ServerHandler	Server);
+		void								addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig);
 };
 
 #endif

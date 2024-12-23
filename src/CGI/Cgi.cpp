@@ -9,7 +9,7 @@
 Cgi::Cgi() {}
 Cgi::~Cgi() {}
 
-void        ft_free(std::vector<char*> vec)
+void        ftFree(std::vector<char*> vec)
 {
     for (size_t i = 0; i < vec.size(); i++) {
         free(vec[i]);
@@ -27,8 +27,8 @@ std::string Cgi::getClientIP(RRState& rrstate) {
 }
 
 int Cgi::getClientPort(RRState& rrstate) {
-    struct sockaddr_in client_addr;
-    socklen_t addr_len = sizeof(client_addr);
+    struct sockaddr_in clientAddr;
+    socklen_t addr_len = sizeof(clientAddr);
 
     if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
         perror("getsockname");
@@ -61,13 +61,14 @@ std::string         Cgi::findAccept(std::map<std::string, std::string> headers)
     return result;
 }
 
-std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath)
+std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath, std::string path)
 {
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
 
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
+    stringEnv.push_back("PATH=" + path);
     if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
         if (!getQuery(rrstate.getRequest().getPath()).empty())
@@ -79,10 +80,10 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     }
     stringEnv.push_back("SERVER_PROTOCOL=" + rrstate.getRequest().getHttpVersion());
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
-    stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
     stringEnv.push_back("REMOTE_ADDR=" + getClientIP(rrstate));
     stringEnv.push_back("REMOTE_PORT=" + toStrInt(getClientPort(rrstate)));
-    // stringEnv.push_back("SERVER_NAME=" + request.getServerName());
+    stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
+    // stringEnv.push_back("SERVER_NAME=" + rrstate.getServer().getServerName());
     for (size_t i = 0; i < stringEnv.size(); i++) {
         envp.push_back(strdup(stringEnv[i].c_str()));
     }
@@ -113,11 +114,6 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         {
             std::string headers = output.substr(0, headerEnd);
             std::string body = output.substr(headerEnd + 4);
-            
-            std::clog << "HEADERS : " << headers << std::endl;
-            std::clog << "BODY : " << body << std::endl;
-
-            // Analyser et ajouter les en-têtes
             std::istringstream headerStream(headers);
             std::string headerLine;
             while (std::getline(headerStream, headerLine))
@@ -135,13 +131,14 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
                 }
             }
             rrstate.getResponse().setBody(body);
-            rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html")); // not good
+            // CAREFULL
+            rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(body.length()));
         } 
         else
         {
-            // Si aucun en-tête n'est trouvé, tout est traité comme le corps
             rrstate.getResponse().setBody(output);
+            // CARREFULL
             rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(output.length()));
         }
@@ -154,7 +151,7 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-std::string    Cgi::handleCGI(RRState& rrstate)
+void    Cgi::handleCGI(RRState& rrstate, std::string path)
 {
     int pid;
     int pipefd[2];
@@ -167,10 +164,8 @@ std::string    Cgi::handleCGI(RRState& rrstate)
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        //std::cout << "path : " << it->c_str() << "\n";
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            // std::clog << "selectedScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
@@ -188,32 +183,25 @@ std::string    Cgi::handleCGI(RRState& rrstate)
         close(pipefd[1]);
 
         std::vector<char*> argv;
-        std::vector<char *> envp = homeMadeSetEnv(rrstate, selectedScriptPath);
+        std::vector<char *> envp = homeMadeSetEnv(rrstate, selectedScriptPath, path);
 
         argv.push_back(strdup(cgiPath.c_str()));
         argv.push_back(strdup(selectedScriptPath.c_str()));
         argv.push_back(NULL);
-        // for (std::vector<char *>::iterator it = argv.begin(); it != argv.end(); it++) {
-        //     std::clog << "ARGV : " << *it << std::endl;
-        // }
-        // for (std::vector<char *>::iterator it = envp.begin(); it != envp.end(); it++) {
-        //     std::clog << "ENVP : " << *it << std::endl;
-        // }
         if (access(cgiPath.c_str(), X_OK) == 0)
         {
             
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
-            ft_free(argv);
-            ft_free(envp);
+            ftFree(argv);
+            ftFree(envp);
             exit(1);
         }
-        ft_free(argv);
-        ft_free(envp);
+        ftFree(argv);
+        ftFree(envp);
     }
     else 
     {
-        // Processus parent : impose un timeout
         int status;
         int timeout = 15; // Timeout en secondes
 
@@ -221,15 +209,13 @@ std::string    Cgi::handleCGI(RRState& rrstate)
         while (timeout > 0) {
             // sleep(1);
             timeout--;
-
-            // Vérifiez si le processus enfant est terminé
             if (waitpid(pid, &status, 0) != 0) {
                 break;
             }
         }
         if (timeout == 0) {
             kill(pid, SIGKILL);
-            waitpid(pid, &status, 0); // Nettoyez le processus zombie
+            waitpid(pid, &status, 0);
             setErrorResponse(rrstate, 500, "Internal Server Error - CGI Timeout");
         } else {
             Cgi cgi;
@@ -243,6 +229,4 @@ std::string    Cgi::handleCGI(RRState& rrstate)
             }
         }
     }
-    std::cout << "OUTPUT : " << std::endl << output << std::endl;
-    return output;
 }
