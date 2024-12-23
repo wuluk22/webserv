@@ -95,6 +95,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {
+    rrstate.getRequest().setPath(rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()));
     std::string     staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
     std::string     filePath;
     std::string     valid;
