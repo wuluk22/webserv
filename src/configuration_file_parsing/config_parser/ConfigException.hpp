@@ -46,8 +46,9 @@
 #define PORT_SCOPE_LINUX ERROR_HEADER "Port scope is limited to 1024 - 65.535 for linux," AB RESET
 #define PORT_SCOPE_GENERAL ERROR_HEADER "Port scope is limited to 0 - 65.535 for your system," AB RESET 
 #define PORT_DUPE ERROR_HEADER "Port already declared in other server configuration," AB RESET
+#define PORT_NOT_SET ERROR_HEADER "Port was not set in a server config," AB RESET
 #define WRONG_ERROR_PAGES_SCOPE ERROR_HEADER "Wrong error pages scope," AB RESET
-
+#define SERVER_NAME_NOT_SET ERROR_HEADER "Server name not set," AB RESET
 
 // LOCATION RELATED ERROR MESSAGES
 #define NO_URI_LOCATION ERROR_HEADER "Location token contain no URI," AB RESET
