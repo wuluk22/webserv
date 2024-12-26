@@ -24,7 +24,7 @@
 #define S_BLOCK_TOKENS "server_name listen error_pages"
 #define L_BLOCK_TOKENS "cgi_path alias allowed_method return"
 #define C_TOKENS "root index auto_index client_max_body_size"
-#define L_NO_RPT_TOKENS "root cgi_path"
+#define L_NO_RPT_TOKENS "root cgi_path alias"
 #define S_NO_RPT_TOKENS "root"
 
 #ifndef IS_LINUX
@@ -74,7 +74,6 @@ class ConfigParser {
 		std::string					returnSecondArgs(std::string args);
 		std::string					removeExcessiveSlashes(const std::string& path);
 		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
-		bool						isPathAbsoulte(std::string path);
 		std::string					simplifyPath(const std::string& path);
 		std::string 				toStrInt(int value);
 
