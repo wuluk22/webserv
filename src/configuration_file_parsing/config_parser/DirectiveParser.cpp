@@ -7,10 +7,8 @@ void ConfigParser::parseRoot(std::string working_line, ADirective *directive, si
 	path = returnSecondArgs(working_line);
 	if (path.empty())
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	else if (!directive->setRoot(simplifyPath(path)))
+	if (!directive->setRoot(simplifyPath(path)))
 		throw ConfigParserError(PATH_NOT_RECOGNIZED, __FUNCTION__, __LINE__, current_line);
-	else if (!isPathAbsoulte(path))
-		throw ConfigParserError(ABSOULTE_ROOT, __FUNCTION__, __LINE__, current_line);
 }
 
 void ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective *directive, size_t current_line) {
