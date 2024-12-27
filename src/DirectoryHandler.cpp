@@ -221,7 +221,6 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         {
             link_path = "." + link_path;
             _validator.setPath(link_path);
-            std::cout << link_path << std::endl;
             bool isValid = _validator.exists() && _validator.isFile() && _validator.isWritable();
             html << "<script>";
             html << "   function deleteElement(filePath) {";
@@ -230,12 +229,12 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
             html << "           headers: {";
             html << "               'Content-Type': 'application/json'";
             html << "           },";
-            html << "           body: JSON.stringify({ filePath: filePath })"; // Proper body formatting
+            html << "           body: JSON.stringify({ filePath: filePath })";
             html << "       })";
             html << "       .then(response => {";
             html << "           if (response.ok) {";
             html << "               alert('File deleted successfully.');";
-            html << "               window.location.reload();"; // Reload the page
+            html << "               window.location.reload();";
             html << "           } else {";
             html << "               alert('Failed to delete the file.');";
             html << "           }";
