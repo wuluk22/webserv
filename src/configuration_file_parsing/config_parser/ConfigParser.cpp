@@ -68,7 +68,6 @@ void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, Serv
 		_logger.warn("Relying on root definition for each location directive - not recommanded");
 	if (serv_conf->getDirectives().empty())
 		_logger.warn("No directive set up for the current server");
-	
 }
 
 void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
@@ -86,6 +85,8 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
 	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root)))
 		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
+	if (uri.find("..") != std::string::npos)
+        throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
  	if (directive->getIndex().empty() && !server_config->getIndex().empty())
 		directive->setIndex(server_config->getIndex());
 	if (!directive->hasAutoIndexModified())
@@ -231,12 +232,19 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 }
 
 bool ConfigParser::distinctUri(std::string current_uri, ServerConfig *current_server) {
-	std::vector <LocationBlock *> all_directives = current_server->getDirectives();
-	if (current_uri.empty())
-		return (false);
-	for (std::vector<LocationBlock *>::iterator it = all_directives.begin(); it != all_directives.end(); it++) {
-		if ((*it)->getUri() == current_uri)
-			return (false);
+    if (!current_uri.empty() && current_uri[current_uri.size() - 1] == '/' && current_uri.size() != 1)
+        current_uri = current_uri.substr(0, current_uri.size() - 1);
+    std::vector<LocationBlock *> all_directives = current_server->getDirectives();
+    if (current_uri.empty())
+        return false;
+    for (std::vector<LocationBlock *>::iterator it = all_directives.begin(); it != all_directives.end(); ++it) {
+        std::string existing_uri = (*it)->getUri();
+        if (!existing_uri.empty() && existing_uri[existing_uri.size() - 1] == '/')
+            existing_uri = existing_uri.substr(0, existing_uri.size() - 1);
+        if (current_uri == "/" && existing_uri == "/")
+            return false;
+        if (existing_uri == current_uri)
+            return false; 
 	}
-	return (true);
+    return true;
 }
