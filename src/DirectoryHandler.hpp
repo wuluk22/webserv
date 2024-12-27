@@ -29,11 +29,11 @@ class DirectoryHandler
         std::string				formatTime(time_t time);
         static bool				compareFileInfo(const FileInfo& a, const FileInfo& b);
         std::string				generateBreadcrumbs(const std::string& path);
-        std::string				getMimeType(const std::string& path);
         PathValidator            _validator;
     public:
         DirectoryHandler();
         ~DirectoryHandler();
+        std::string				getMimeType(const std::string& path);
         std::vector<FileInfo>	getDirectoryListing(const std::string& dir_path);
         std::string				generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files);
         bool						createDirectory(const std::string& path);
