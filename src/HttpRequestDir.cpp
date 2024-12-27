@@ -45,39 +45,45 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
         std::string boundary = extractBoundary(contentType);
         if (boundary.empty())
         {
-            throw std::runtime_error("Missing or invalid boundary in multipart form data");
+            setErrorResponse(rrstate, 400, "Bad Request - Missing or invalid boundary in multipart form data");
+            return;
         }
 
         std::string::size_type pos = requestData.find(boundary);
         if (pos == std::string::npos)
         {
-            throw std::runtime_error("Invalid multipart form data");
+            setErrorResponse(rrstate, 400, "Bad Request - Missing or invalid boundary in multipart form data");
+            return;
         }
 
         pos = requestData.find("filename=\"", pos);
         if (pos == std::string::npos)
         {
-            throw std::runtime_error("No filename found in upload");
+            setErrorResponse(rrstate, 400, "Bad Request - Missing filename field from data");
+            return;
         }
 
         pos += 10;
         std::string::size_type endPos = requestData.find("\"", pos);
         if (endPos == std::string::npos)
         {
-            throw std::runtime_error("Invalid filename format");
+            setErrorResponse(rrstate, 400, "Bad Request - Wrong filename from data");
+            return;
         }
 
         filename = requestData.substr(pos, endPos - pos);
         pos = requestData.find("\r\n\r\n", endPos);
         if (pos == std::string::npos)
         {
-            throw std::runtime_error("Invalid file content format");
+            setErrorResponse(rrstate, 400, "Bad Request - Invalid filename format from data");
+            return;
         }
         pos += 4;
         std::string::size_type contentEnd = requestData.find(boundary, pos);
         if (contentEnd == std::string::npos)
         {
-            throw std::runtime_error("Invalid file content ending");
+            setErrorResponse(rrstate, 400, "Bad Request - Invalid file content ending from data");
+            return;
         }
 
         contentEnd -= 2;
@@ -85,7 +91,8 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     }
     else
     {
-        throw std::runtime_error("Unsupported Content-Type: " + contentType);
+        setErrorResponse(rrstate, 400, "Bad Request - Unsupported Content-Type: " + contentType);
+            return;
     }
 
     uploadPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
@@ -97,7 +104,8 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     {
         if (!_handler.createDirectory(uploadPath.c_str()))
         {
-            throw std::runtime_error("Failed to create upload directory");
+            setErrorResponse(rrstate, 403, "Forbidden - Folder cannot be uploaded");
+            return;
         }
     }
 
@@ -105,7 +113,8 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     std::ofstream file(fullPath.c_str(), std::ios::binary);
     if (!file)
     {
-        throw std::runtime_error("Failed to create output file");
+        setErrorResponse(rrstate, 403, "Forbidden - File cannot be uploaded");
+        return;
     }
 
     file.write(fileContent.c_str(), fileContent.length());

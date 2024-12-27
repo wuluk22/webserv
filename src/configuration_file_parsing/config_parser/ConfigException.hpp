@@ -38,6 +38,7 @@
 #define AMBIGUOUS_URI_DEFINITION ERROR_HEADER "Root and alias cannot be declared inside the same location block," AB RESET
 #define DOUBLE_LOCATION_URI ERROR_HEADER "Repeated URI," AB RESET
 #define SERVER_NAME_ONE_NAME ERROR_HEADER "The directive server_name takes one and only one server name," AB RESET
+#define DEPENDS_ON_NO_MATCH ERROR_HEADER "No match found depends on directive." AB RESET
 
 // SERVER HEADER ERROR MESSAGES
 #define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET

@@ -22,9 +22,9 @@
 
 // TOKENS
 #define S_BLOCK_TOKENS "server_name listen error_pages"
-#define L_BLOCK_TOKENS "cgi_path alias allowed_method return"
+#define L_BLOCK_TOKENS "cgi_path alias allowed_method depends_on return"
 #define C_TOKENS "root index auto_index client_max_body_size"
-#define L_NO_RPT_TOKENS "root cgi_path alias"
+#define L_NO_RPT_TOKENS "root cgi_path alias depends_on"
 #define S_NO_RPT_TOKENS "root"
 
 #ifndef IS_LINUX
@@ -76,6 +76,7 @@ class ConfigParser {
 		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
 		std::string					simplifyPath(const std::string& path);
 		std::string 				toStrInt(int value);
+		bool						checkDependsOn(ServerConfig *current_config);
 
 		// Config File parsing
 		bool handleDirectiveTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *location_directive, TokenCounter &token_counter, s_parser_flags &flag, size_t current_line);
@@ -102,6 +103,7 @@ class ConfigParser {
 		void parseListeningPorts(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		bool checkErrorPagesAvailability(std::string path, size_t current_line);
 		void parseErrorPages(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
+		void parseDependsOn(std::vector <std::string> args, LocationBlock *directive, size_t current_line);
 
 	public:
 		~ConfigParser();

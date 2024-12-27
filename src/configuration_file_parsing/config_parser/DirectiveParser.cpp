@@ -1,5 +1,6 @@
 #include "ConfigException.hpp"
 #include "ConfigParser.hpp"
+#include "../server_config/LocationBlock.hpp"
 
 void ConfigParser::parseRoot(std::string working_line, ADirective *directive, size_t current_line) {
 	std::string path;
@@ -179,6 +180,15 @@ void ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *di
 	}
 }
 
+void ConfigParser::parseDependsOn(std::vector <std::string> args, LocationBlock *directive, size_t current_line) {
+	std::size_t arg_size = args.size();
+
+	if (arg_size != 2)
+		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
+	args.erase(args.begin());
+	directive->setUriDependance(args[0]);
+}
+
 void ConfigParser::processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	if (args[0] == "root")
 		parseRoot(working_line, directive, current_line);
@@ -200,6 +210,8 @@ void ConfigParser::processDirectiveLoc(LocationBlock *directive, std::string wor
 		parseAllowedMethhod(args, directive, current_line);
 	else if (args[0] == "return")
 		parseReturn(args, directive, current_line);
+	else if (args[0] == "depends_on")
+		parseDependsOn(args, directive, current_line);
 }
 
 void ConfigParser::processDirectiveServ(ServerBlock *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
