@@ -94,7 +94,6 @@ void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *
 		_server_names.insert(current_server);
 	else
 		throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
-	
 	directive->setServerName(current_server);
 }
 
