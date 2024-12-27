@@ -78,7 +78,7 @@ def main():
     else:
         if query:
             selected_image = form.getvalue("image", "No selected image")
-            random_phrase = get_random_phrase(sentences)
+            random_phrase = get_random_sentence(sentences)
 
             image_path = os.path.join(IMAGES_DIR, selected_image)
             if not os.path.isfile(image_path):
