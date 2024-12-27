@@ -64,11 +64,10 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
 {
     std::vector<std::string> stringEnv;
     std::vector<char *> envp;
-
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
     stringEnv.push_back("PATH=" + path);
-    stringEnv.push_back("IMAGESPATH=" + );
+    stringEnv.push_back("IMAGESPATH=" + rrstate.getServer().getImagesPathCgi());
     if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
         if (!getQuery(rrstate.getRequest().getPath()).empty())

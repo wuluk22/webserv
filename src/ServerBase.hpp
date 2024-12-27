@@ -4,6 +4,7 @@
 #include "RequestResponseState.hpp"
 #include "ServerHandler.hpp"
 #include "configuration_file_parsing/server_config/ServerConfig.hpp"
+#include "configuration_file_parsing/server_config/LocationBlock.hpp"
 
 #include <iostream>
 #include <sys/select.h>

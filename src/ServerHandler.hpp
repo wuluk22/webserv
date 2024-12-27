@@ -21,8 +21,9 @@ class ServerHandler
 		int									_sock;
 		int									_port;
 		std::vector<LocationBlock *>		_locations;
-		std::string						_server_name;
+		std::string							_server_name;
 		std::map<unsigned int, std::string>	_errorPagesRecord;
+		std::string							_imagesPath;
 
 	public:
 		// METHODS
@@ -34,10 +35,14 @@ class ServerHandler
 		struct sockaddr_in				getAdd();
 		socklen_t&						getAddrlen();
 		std::vector<LocationBlock *>&	getLocations();
+		std::string						getServerName(void) const;
+		std::string						getImagesPathCgi(void);
 
 		void				setLocations(std::vector<LocationBlock *>& locations);
 		void				setServerName(std::string server_name);
-		std::string			getServerName(void) const;
+		void				setImagesPathCgi(std::string ImagesPath);
+
+
 		void				InitializeServerSocket(int port, const int backlog);
 		int					createSocket();
 		void				setSocketOptions(int sock);

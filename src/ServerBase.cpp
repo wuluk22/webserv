@@ -32,16 +32,25 @@ std::vector<ServerHandler>	ServerBase::getServers() { return Servers; }
 ////////// PUBLIC /////////////
 void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig)
 {
+	std::string ImagesPath;
 	for (std::map<size_t, ServerConfig *>::iterator it = AllServersConfig.begin(); it != AllServersConfig.end(); it++)
 	{
 		s_server_params server_params = it->second->getServerHeader()->getServerParams();
 		std::vector<LocationBlock *> directives = it->second->getDirectives();
+		for (std::vector<LocationBlock *>::iterator it = directives.begin(); it != directives.end(); it++) {
+			ImagesPath = (*it)->getUriDependance();
+			if (!ImagesPath.empty())
+				break;
+		}
+		
 		std::string	server_name = it->second->getServerHeader()->getServerName();
 		for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++)
 		{
 			ServerHandler NewServer;
 			NewServer.setLocations(directives);
 			NewServer.setServerName(server_name);
+			NewServer.setImagesPathCgi(ImagesPath);
+			std::cout << "PATHIMAGES ::" << NewServer.getImagesPathCgi() << std::endl;
 			NewServer.InitializeServerSocket(*it, 3);
 			logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
 			FD_SET(NewServer.getSock(), &getReadfds());

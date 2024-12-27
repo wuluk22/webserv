@@ -14,9 +14,11 @@ struct sockaddr_in            ServerHandler::getAdd() { return this->_address; }
 socklen_t&	                  ServerHandler::getAddrlen() { return _addrlen; }
 std::vector<LocationBlock *>&	ServerHandler::getLocations() { return this->_locations; }
 std::string                   ServerHandler::getServerName(void) const { return this->_server_name; }
+std::string						        ServerHandler::getImagesPathCgi(void) { return this->_imagesPath; }
 
 void  ServerHandler::setServerName(std::string server_name) { this->_server_name = server_name; }
 void  ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
+void  ServerHandler::setImagesPathCgi(std::string imagesPath)  {this->_imagesPath = imagesPath;}
 
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
 {

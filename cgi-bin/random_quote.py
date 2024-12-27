@@ -55,9 +55,7 @@ def main():
     method = os.environ.get("REQUEST_METHOD", "GET").upper()
     query = os.environ.get("QUERY_STRING", "")
     path = os.environ.get("PATH", "")
-    imagesPath = os.environ.get("IMAGESPATH", "")
-
-    IMAGES_DIR = imagesPath
+    IMAGES_DIR = os.environ.get("IMAGESPATH", "")
 
     if method == "POST":
         file_item = form["image"]
