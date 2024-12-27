@@ -44,9 +44,9 @@ def get_available_images(directory):
     except Exception as e:
         return []
 
-def generate_image_html(images):
+def generate_image_html(images, IMAGES_DIR):
     return "\n".join(
-        f'<img src="/Images/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
+        f'<img src="{IMAGES_DIR}/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
         for image in images
     )
 
@@ -153,7 +153,7 @@ def main():
             """
         else:
             available_images = get_available_images(IMAGES_DIR)
-            image_html = generate_image_html(available_images)
+            image_html = generate_image_html(available_images, IMAGES_DIR)
             image_section_style = "" if image_html else 'style="display:none;"'
 
             html_content = f"""
