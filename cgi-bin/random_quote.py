@@ -6,18 +6,35 @@ import cgitb
 
 cgitb.enable()
 
-def get_random_phrase(file_path):
-    try:
-        with open(file_path, "r") as file:
-            phrases = file.readlines()
-        if phrases:
-            return random.choice(phrases).strip()
-        else:
-            return "No phrase available in the file."
-    except FileNotFoundError:
-        return "'phrases.txt' file is not found."
-    except Exception as e:
-        return f"Erreur : {e}"
+sentences = {
+    1: "Le courage est la première des qualités humaines.",
+    2: "La persévérance est un raccourci vers le succès.",
+    3: "Rien ne se perd, rien ne se cree, tout se transforme.",
+    4: "Chaque jour est une nouvelle opportunité.",
+    5: "Le succès est la somme de petits efforts répétés jour après jour.",
+    6: "L'amour a ses raisons que la raison ignore",
+    7: "Ve rossi vie macral",
+    8: "Ik weet het niet",
+    9: "Le savoir, c'est le pouvoir",
+    10: "Un peu d'eau fraiche et de verdure, que nous prodigue la nature et vous serez un ours bien leché.",
+    11: "Savoir donner, c'est savoir recevoir",
+    12: "La sagesse n'a pas d'âge",
+    13: "Garde la peche",
+    14: "Ce n'est que dos au mur qu'on se rend compte qu'il faut avancer",
+    15: "J'ai plus de reseau, j'passe sous un train",
+    16: "Plus le pas est lent, moins tu avances"
+}
+
+def get_random_sentence(sentences_dict): 
+    try: 
+        if not isinstance(sentences_dict, dict): 
+            raise ValueError("Input must be a dictionary.") 
+        if not sentences_dict: 
+            raise ValueError("Dictionary is empty.") 
+        key = random.choice(list(sentences_dict.keys())) 
+        return sentences_dict[key] 
+    except ValueError as ve: 
+        return f"Error: {ve}"
 
 def get_available_images(directory):
     try:
@@ -38,9 +55,9 @@ def main():
     method = os.environ.get("REQUEST_METHOD", "GET").upper()
     query = os.environ.get("QUERY_STRING", "")
     path = os.environ.get("PATH", "")
+    imagesPath = os.environ.get("IMAGESPATH", "")
 
-    PHRASES_FILE = path + "/phrases.txt"
-    IMAGES_DIR = path + "/Images"
+    IMAGES_DIR = imagesPath
 
     if method == "POST":
         file_item = form["image"]
@@ -63,7 +80,7 @@ def main():
     else:
         if query:
             selected_image = form.getvalue("image", "No selected image")
-            random_phrase = get_random_phrase(PHRASES_FILE)
+            random_phrase = get_random_phrase(sentences)
 
             image_path = os.path.join(IMAGES_DIR, selected_image)
             if not os.path.isfile(image_path):

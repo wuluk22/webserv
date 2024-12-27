@@ -68,6 +68,7 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     stringEnv.push_back("REQUEST_METHOD=" + rrstate.getRequest().getMethod());
     stringEnv.push_back("SCRIPT_NAME=" + scriptPath);
     stringEnv.push_back("PATH=" + path);
+    stringEnv.push_back("IMAGESPATH=" + );
     if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
         if (!getQuery(rrstate.getRequest().getPath()).empty())
@@ -81,7 +82,6 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     stringEnv.push_back("SERVER_SOFTWARE=WebServ/1.0");
     stringEnv.push_back("REMOTE_ADDR=" + getClientIP(rrstate));
     stringEnv.push_back("REMOTE_PORT=" + toStrInt(getClientPort(rrstate)));
-    // stringEnv.push_back("SERVER_NAME=localhost"); // not the final one
     stringEnv.push_back("SERVER_NAME=" + rrstate.getServer().getServerName());
     for (size_t i = 0; i < stringEnv.size(); i++) {
         envp.push_back(strdup(stringEnv[i].c_str()));
