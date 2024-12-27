@@ -2,20 +2,6 @@
 #include "ErrorHandler.hpp"
 #include "Logger.hpp"
 
-// DEBUG // DON'T FORGET TO DELETE
-void printFdSet(const fd_set& fdset, std::string functionName)
-{
-    std::cout << "Current fds in " << functionName << " : ";
-    for (int i = 0; i < FD_SETSIZE; i++)
-	{
-        if (FD_ISSET(i, &fdset))
-		{
-            std::cout << i << " ";
-        }
-    }
-    std::cout << std::endl;
-}
-
 // METHODS //
 ServerHandler::ServerHandler() : _addrlen(sizeof(_address)){}
 ServerHandler::~ServerHandler() {}

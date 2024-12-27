@@ -130,21 +130,18 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
                 }
             }
             rrstate.getResponse().setBody(body);
-            // CAREFULL
             rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(body.length()));
         } 
         else
         {
             rrstate.getResponse().setBody(output);
-            // CARREFULL
             rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(".html"));
             rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(output.length()));
         }
         rrstate.getResponse().setStatusCode(200);
         rrstate.getResponse().setStatusMsg("OK");
         rrstate.getResponse().setHttpVersion("HTTP/1.1");
-        // add connexion keep alive !
         rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
         rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");

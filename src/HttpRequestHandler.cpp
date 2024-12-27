@@ -15,16 +15,6 @@ void HttpRequestHandler::reset()
     this->allowedPaths.clear();
     this->allowedMethods.clear();
 	this->allowedPath.clear();
-    
-    /*this->rootDirectory.clear();
-    this->path.clear();
-    this->method.clear();
-    this->httpVersion.clear();
-    this->body.clear();
-    
-    this->headers.clear();
-    this->statusCode = 0;
-    this->cgiEnabled = false;*/
 }
 
 HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock)
@@ -82,11 +72,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         ind = (*it)->accessibleIndex();
         if (!ind.empty())
             locInfo[locationUri]["index"] = ind;
-        /*if (!(*it)->checkAvailableIndex().first.empty())
-        {
-            std::cout << "\n\navailable index: " << (*it)->checkAvailableIndex().second << std::endl;
-        }*/
-        
     }
 
 
@@ -103,21 +88,6 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
     {
         it->second["root_directory"].push_back(root);
     }
-
-    // std::cerr << "LocInfo Map Contents (Including Index Files):" << std::endl;
-    // for (std::map<std::string, std::map<std::string, std::vector<std::string> > >::iterator it = locInfo.begin(); it != locInfo.end(); ++it)
-    // {
-    //     std::cerr << "URI: " << it->first << std::endl;
-    //     for (std::map<std::string, std::vector<std::string> >::iterator innerIt = it->second.begin(); innerIt != it->second.end(); ++innerIt)
-    //     {
-    //         std::cerr << "  " << innerIt->first << ": ";
-    //         for (std::vector<std::string>::iterator vecIt = innerIt->second.begin(); vecIt != innerIt->second.end(); ++vecIt)
-    //         {
-    //             std::cerr << *vecIt << " ";
-    //         }
-    //         std::cerr << std::endl;
-    //     }
-    // }
     tmpRequest.setCgiPath(cgiPath);
     tmpRequest.setLocInfo(locInfo);
     tmpRequest.setAutoIndex(autoIndex);

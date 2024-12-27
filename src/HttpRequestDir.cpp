@@ -2,8 +2,6 @@
 #include "HttpResponseHandler.hpp"
 #include "RequestResponseState.hpp"
 
-// TO CLEAN
-
 void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::string& path, HttpResponseHandler& response)
 {
 	std::string				dirPath;
@@ -82,7 +80,7 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
             throw std::runtime_error("Invalid file content ending");
         }
 
-        contentEnd -= 2; // -4 before check if its ok
+        contentEnd -= 2;
         fileContent = requestData.substr(pos, contentEnd - pos);
     }
     else

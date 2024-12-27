@@ -6,7 +6,6 @@
 #include "HttpRequestHandler.hpp"
 #include "ErrorHandler.hpp"
 
-
 //METHODS
 ServerBase::ServerBase() : maxSock(0)
 {
@@ -59,7 +58,6 @@ void	ServerBase::acceptConnection(ServerHandler Server)
 	{
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	}
-	// std::cout << "New accepted connection : " << newSocket << std::endl;
 	FD_SET(newSocket, &readfds);
 	RRState NewConnectionState;
 	NewConnectionState.setServer(Server);
@@ -72,10 +70,6 @@ void	ServerBase::processClientConnections()
 {
 	fd_set	cpyReadFds, cpyWriteFds;
 	HttpRequestHandler	request;
-	// struct timeval timeout;
-
-	// timeout.tv_sec = 0;
-	// timeout.tv_usec = 5;
 	while (true)
     {
 		cpyReadFds = readfds;
@@ -105,8 +99,7 @@ void	ServerBase::processClientConnections()
 				request = request.handleRequest(client_sock, it->second);
 				it->second.setRequest(request);
 				if (request.getFd() <= 0)
-				{ 
-					// Client Disconnected
+				{
 					close(client_sock);
 					FD_CLR(client_sock, &readfds);
 					FD_CLR(client_sock, &writefds);

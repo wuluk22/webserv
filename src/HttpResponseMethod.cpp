@@ -3,19 +3,6 @@
 #include "RequestResponseState.hpp"
 #include "CGI/Cgi.hpp"
 
-// TO CLEAN
-
-/*std::cerr << "\nConfiguration for URI: " << rrstate.getRequest().getPath() << std::endl;
-for (std::map<std::string, std::vector<std::string> >::iterator it = config.begin(); it != config.end(); ++it)
-{
-    std::cerr << it->first << ": ";
-    for (std::vector<std::string>::iterator vecIt = it->second.begin(); vecIt != it->second.end(); ++vecIt)
-    {
-        std::cerr << *vecIt << " ";
-    }
-    std::cerr << std::endl;
-}*/
-
 HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 {
     std::string                                         filePath;
@@ -207,17 +194,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 403, "Forbidden");
         return rrstate.getResponse();
     }
-    // if (rrstate.getRequest().getPath().find("/Images") != std::string::npos) {
-    //     std::string tmp = rrstate.getRequest().getPath();
-    //     std::string toRemove = "/Images";
-    //     std::string::size_type pos = tmp.find(toRemove);
-    //     if (pos != std::string::npos) {
-    //         tmp.erase(pos, toRemove.length());
-    //     }
-    //     rrstate.getRequest().setPath(tmp);
-    // }
     bool fileExists = rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath());
-    //std::cout << "Does file exist? " << (fileExists ? "Yes" : "No") << " - " << filePath + rrstate.getRequest().getPath() << std::endl;
     if (!rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath()) && !isCgiRequest(rrstate.getRequest().getPath()))
     {
         setErrorResponse(rrstate, 404, "Not Found meow");
