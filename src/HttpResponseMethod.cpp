@@ -96,12 +96,13 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {
     rrstate.getRequest().setPath(rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()));
-    std::string     staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
-    std::string     filePath;
-    std::string     valid;
-    struct stat     pathStat;
-    std::string     errorPage;
-    std::string     content;
+    std::string         staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
+    std::string         filePath;
+    std::string         valid;
+    struct stat         pathStat;
+    std::string         errorPage;
+    std::string         content;
+    DirectoryHandler    hdl;
     unsigned int    max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     filePath = rrstate.getRequest().getContPath();
 	valid = rrstate.getRequest().getPath();
@@ -113,8 +114,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         std::cout << "\n--- ::" << valid << std::endl;
         return response;
     }*/
-    if (locationBlock->getAutoIndex() || isCgiRequest(rrstate.getRequest().getPath())) {
-
+    std::string test = hdl.getMimeType(rrstate.getRequest().getPath());
+    if ((isCgiRequest(rrstate.getRequest().getPath())) || test != "text/html") {
         e_data_reach data;
         data = locationBlock->isContentPathReachable();
         switch (data) 
@@ -165,7 +166,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     }
     if (rrstate.getRequest().getPath() == "/")
     {
-        filePath = "index.html";
+        filePath = indexResult.first;
         content = rrstate.getRequest().readFile(filePath);
         if (content.length() > max)
         {
@@ -228,6 +229,19 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         Cgi                                     cgi;
         std::string                             path;
         std::vector<std::string>                uris = rrstate.getRequest().getContentPathsFromLoc(rrstate, rrstate.getRequest().getPath());
+        switch(locationBlock->isContentPathReachable())
+        {
+            case DATA_OK:
+                break;
+            case DATA_NOK: {
+                setErrorResponse(rrstate, 403, "Forbidden");
+                return rrstate.getResponse();
+            }
+            case NO_DATA: {
+                setErrorResponse(rrstate, 404, "Not Found");
+                return rrstate.getResponse();
+            }
+        }
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++) {
             path = *it;
         }
