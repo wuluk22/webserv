@@ -124,11 +124,19 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
 	return (result);
 }
 
-// **************************************************************************************
-
 void LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
 	this->_location_params._return_args._status_code = status_code;
 	this->_location_params._return_args._redirection_url = redirection_url;
+}
+
+void LocationBlock::setUriDependance(std::string uri) {
+	this->_location_params._uri_dependance = uri;
+}
+
+// **************************************************************************************
+
+std::string LocationBlock::getUriDependance(void) const {
+	return (this->_location_params._uri_dependance);
 }
 
 bool LocationBlock::isCgiAllowed(void) const {
@@ -188,7 +196,8 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	}
 	os	<< "URI: " << params->getUri() << "\n"
 		<< "Content Path: " << params->getContentPath() << "\n"
-		<< "Allowed Methods: " << "\n";
+		<< "Allowed Methods: " << "\n"
+		<< "URI Dependance: " << params->getUriDependance() << "\n";
 	if (params->getReturnArgs()._status_code != NO_RETURN)
 		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
 	if (!params->getReturnArgs()._redirection_url.empty())
