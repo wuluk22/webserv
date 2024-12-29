@@ -62,10 +62,15 @@ bool ConfigParser::checkDependsOn(ServerConfig *current_config) {
 	std::vector <LocationBlock *> all_directives = current_config->getDirectives();
 	std::vector <LocationBlock *>::iterator main_it;
 	std::vector <LocationBlock *>::iterator second_it;
-	bool									found_match = false;
+	bool found_match = false;
+	
 	main_it = all_directives.begin();
 	for (;main_it != all_directives.end(); main_it++) {
-		if ((*main_it)->getUriDependance().empty())
+		if ((*main_it)->getUriDependance() == (*main_it)->getUri()) {
+			_logger.critical("URI cannot depend on itself");
+			return (false);
+		}
+		else if ((*main_it)->getUriDependance().empty())
 			continue;
 		else {
 			second_it = all_directives.begin();
@@ -84,6 +89,38 @@ bool ConfigParser::checkDependsOn(ServerConfig *current_config) {
 	return (true);
 }
 
+bool ConfigParser::checkAlias(ServerConfig *current_config) {
+	std::vector <LocationBlock *> all_directives = current_config->getDirectives();
+	std::vector <LocationBlock *>::iterator main_it;
+	std::vector <LocationBlock *>::iterator second_it;
+	bool found_match = false;
+	
+	main_it = all_directives.begin();
+	for (;main_it != all_directives.end(); main_it++) {
+		if ((*main_it)->getAlias() == (*main_it)->getUri()) {
+			_logger.critical("Alias cannot be redirected to itself");
+			return (false);
+		}
+		else if ((*main_it)->getAlias().empty())
+			continue;
+		else {
+			second_it = all_directives.begin();
+			for (;second_it != all_directives.end(); second_it++) {
+				if (main_it == second_it)
+					continue;
+				else if ((*main_it)->getAlias() == (*second_it)->getUri()) {
+					found_match = true;
+					(*main_it)->setContentPath((*second_it)->getContentPath());
+					(*main_it)->setIndex((*second_it)->getIndex());
+				}
+			}
+			if (!found_match)
+				return (false);
+		}
+	}
+	return (true);
+}
+
 void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf , size_t server_id) {
 	_logger.info("Finalizing server " + toStrInt(server_id + 1) + " parsing");
 	if (!directive->wasListeningPortSet())
@@ -92,6 +129,8 @@ void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, Serv
 		throw ConfigParserError(SERVER_NAME_NOT_SET, __FUNCTION__, __LINE__, line);
 	if (!checkDependsOn(serv_conf))
 		throw ConfigParserError(DEPENDS_ON_NO_MATCH, __FUNCTION__, __LINE__, line);
+	if (!checkAlias(serv_conf))
+		throw ConfigParserError(ALIAS_NO_MATCH, __FUNCTION__, __LINE__, line);
 	if (directive->getRoot().empty())
 		_logger.warn("Relying on root definition for each location directive - not recommanded");
 	if (serv_conf->getDirectives().empty())
@@ -110,8 +149,10 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 	if (!server_root.empty() && location_root.empty())
 		directive->setRoot(server_root);
 	root = directive->getRoot();
-	if (!directive->setContentPath(removeExcessiveSlashes(root + uri)))
-		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
+	if (!directive->isContentPathModified()) {
+		if (!directive->setContentPath(removeExcessiveSlashes(root + uri)))
+			throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
+	}
 	if (!directive->setUri(removeExcessiveSlashes(uri), removeExcessiveSlashes(root)))
 		throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
 	if (uri.find("..") != std::string::npos)
@@ -199,6 +240,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	finalizeLocationBlock(l_directive, current_server, uri, uri_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
+	std::cout << l_directive << std::endl;
 }
 
 void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config, size_t server_id) {
