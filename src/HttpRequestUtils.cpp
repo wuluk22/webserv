@@ -3,23 +3,14 @@
 LocationBlock* HttpRequestHandler::getLocationBlock(std::vector<LocationBlock*> locationBlocks) const
 {
     std::string requestPath = this->getPath();
-    LocationBlock* matchedBlock;
-    size_t longestMatch = 0;
-    for (std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
-         it != locationBlocks.end(); ++it)
-	{
+    std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
+    for (;it != locationBlocks.end(); it++) {
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
-        if (requestPath.find(locationUri) == 0)
-		{
-            size_t matchLength = locationUri.length();
-            if (matchLength > longestMatch) {
-                longestMatch = matchLength;
-                matchedBlock = block;
-            }
-        }
+        if (requestPath == locationUri)
+            return (block);
     }
-    return matchedBlock;
+    return (NULL);
 }
 
 std::string HttpRequestHandler::trim(const std::string& str)
