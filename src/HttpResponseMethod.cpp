@@ -17,6 +17,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
         return rrstate.getResponse();
     }
     std::string alles = rrstate.getRequest().getContentPath(config);
+    std::cout << "Path Handler : " << alles << std::endl;
     rrstate.getRequest().setContentPath(alles);
     std::map<std::string, std::vector<std::string> >::const_iterator it = config.find("allowed_methods");
     if (it != config.end())
@@ -80,8 +81,11 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     return rrstate.getResponse();
 }
 
+// REFACTOR INCOMING
+
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
-{
+{   
+    std::cout << "Computed path : " << rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()) << "\n";
     rrstate.getRequest().setPath(rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()));
     std::string         staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
     std::string         filePath;
@@ -94,6 +98,11 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     filePath = rrstate.getRequest().getContPath();
 	valid = rrstate.getRequest().getPath();
     LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate.getServer().getLocations());
+    if (!locationBlock) {
+        setErrorResponse(rrstate, 404, "Not Found");
+        return rrstate.getResponse();
+    }
+    std::cout << "Fetched URI" << locationBlock->getUri() << std::endl;
     std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableIndex();
     /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
     {
@@ -101,8 +110,13 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         std::cout << "\n--- ::" << valid << std::endl;
         return response;
     }*/
-    std::string test = hdl.getMimeType(rrstate.getRequest().getPath());
+    std::string test = hdl.getMimeType(indexResult.first);
+    std::cout << "Path of request : " << rrstate.getRequest().getPath() << "\n";
+    std::cout << "IS CGI REQUEST : " << (isCgiRequest(rrstate.getRequest().getPath())) << "\n";
+    std::cout << test << "\n";
+
     if ((isCgiRequest(rrstate.getRequest().getPath())) || test != "text/html") {
+        std::cout << "ici" << std::endl;
         e_data_reach data;
         data = locationBlock->isContentPathReachable();
         switch (data) 
@@ -171,25 +185,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
         return rrstate.getResponse();
     }
-    if (rrstate.getRequest().getPath() == "/favicon.ico")
-    {
-        std::string faviconPath = staticDir + "/favicon.ico";
-        if (rrstate.getRequest().fileExists(faviconPath))
-        {
-            std::string content = rrstate.getRequest().readFile(faviconPath);
-            rrstate.getResponse().setStatusCode(200);
-            rrstate.getResponse().setStatusMsg("OK");
-            rrstate.getResponse().setBody(content);
-            rrstate.getResponse().setHeader("Content-Type", "image/x-icon");
-            rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
-            return rrstate.getResponse();
-        }
-        else
-        {
-            setErrorResponse(rrstate, 404, "Favicon Not Found");
-            return rrstate.getResponse();
-        }
-    }
     if (filePath.find("..") != std::string::npos)
     {
         setErrorResponse(rrstate, 403, "Forbidden");
@@ -225,7 +220,10 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         cgi.handleCGI(rrstate, path);
         return rrstate.getResponse();
     }
-    filePath = filePath + rrstate.getRequest().getPath();
+    // Fautif
+    indexResult = locationBlock->checkAvailableIndex();
+    filePath = indexResult.first;
+    std::cout << "Given file path: "<< filePath << std::endl;
     content = rrstate.getRequest().readFile(filePath);
     if (content.length() > max)
     {
