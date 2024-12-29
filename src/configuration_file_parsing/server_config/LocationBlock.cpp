@@ -3,6 +3,7 @@
 LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_client_max_body_size = false;
 	this->_location_params._allowed_methods = 0;
+	this->_location_params._modified_content_path = false;
 	this->_location_params._return_args._status_code = NO_RETURN;
 }
 
@@ -40,8 +41,8 @@ bool LocationBlock::setUri(std::string uri_args, std::string root_args) {
 	return (false);
 }
 
-bool LocationBlock::setAlias(std::string alias_path) {
-	return (setContentPath(alias_path));
+void LocationBlock::setAlias(std::string alias_uri) {
+	this->_location_params._alias_uri = alias_uri;
 }
 
 bool LocationBlock::setAllowedMethods(unsigned char allowed_method) {
@@ -72,6 +73,10 @@ std::vector <std::string> LocationBlock::accessibleIndex(void) {
 		}
 	}
 	return (list_of_indices);
+}
+
+std::string LocationBlock::getAlias(void) const {
+	return (this->_location_params._alias_uri);
 }
 
 e_data_reach LocationBlock::isContentPathReachable(void) {
@@ -143,13 +148,13 @@ bool LocationBlock::isCgiAllowed(void) const {
 	return (!this->_location_params._cgi_path.empty());
 }
 
+bool LocationBlock::isContentPathModified(void) const {
+	return (this->_location_params._modified_content_path);
+}
+
 std::string LocationBlock::getCgiPath(void) const {
 	return (this->_location_params._cgi_path);
 }
-
-// std::string LocationBlock::getAlias(void) const {
-// 	return (this->_location_params._content_path);
-// }
 
 std::string LocationBlock::getUri(void) const {
 	return (this->_location_params._uri);
@@ -162,10 +167,6 @@ std::string LocationBlock::getContentPath(void) const {
 s_return LocationBlock::getReturnArgs(void) const {
 	return (this->_location_params._return_args);
 }
-
-// bool LocationBlock::isDirectiveCgi(void) const {
-// 	return (!this->_location_params._cgi_path.empty());
-// }
 
 bool LocationBlock::isGetAllowed(void) const {
 	return ((_location_params._allowed_methods & GET) != 0);
@@ -196,8 +197,8 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	}
 	os	<< "URI: " << params->getUri() << "\n"
 		<< "Content Path: " << params->getContentPath() << "\n"
-		<< "Allowed Methods: " << "\n"
-		<< "URI Dependance: " << params->getUriDependance() << "\n";
+		<< "URI Dependance: " << params->getUriDependance() << "\n"
+		<< "Allowed Methods: " << "\n";
 	if (params->getReturnArgs()._status_code != NO_RETURN)
 		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
 	if (!params->getReturnArgs()._redirection_url.empty())
