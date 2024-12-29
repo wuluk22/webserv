@@ -19,7 +19,9 @@ struct s_loc_params {
 	std::string		_uri;
 	std::string		_content_path;
 	std::string		_uri_dependance;
+	std::string		_alias_uri;
 	unsigned char	_allowed_methods;
+	bool			_modified_content_path;
 	bool			_modified_client_max_body_size;
 	bool			_modified_auto_index;
 };
@@ -40,7 +42,6 @@ class LocationBlock : public ADirective {
 		s_loc_params	getLocationParams(void) const;
 
 		// Data reachability
-
 		e_data_reach 							isContentPathReachable(void);
 		e_data_reach 							isCgiPathReachable(void);
 		std::pair<std::string, e_data_reach>	checkAvailableIndex(void);
@@ -51,20 +52,20 @@ class LocationBlock : public ADirective {
 		void autoIndexModified(void);
 		bool setCgiPath(std::string path_args);
 		bool setUri(std::string uri_args, std::string root);
-		bool setAlias(std::string alias_path);
+		void setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
 		bool setContentPath(std::string content_path);
 		void setReturnArgs(std::size_t status_code, std::string redirection_url);
 		
         // Getter
 		std::string					getCgiPath(void) const;
-		// std::string				getAlias(void) const;
 		std::string					getUri(void) const;
 		std::string					getContentPath(void) const;
 		s_return					getReturnArgs(void) const;
 		std::vector<std::string>	accessibleIndex(void);
+		std::string					getAlias(void) const;
 		bool						isCgiAllowed(void) const;
-		// bool						isDirectiveCgi(void) const;
+		bool						isContentPathModified(void) const;
 		bool						isGetAllowed(void) const;
 		bool						isPostAllowed(void) const;
 		bool						isDeleteAllowed(void) const;
