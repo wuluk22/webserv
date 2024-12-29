@@ -56,13 +56,12 @@ void ConfigParser::parseCgiPath(std::string working_line, LocationBlock *directi
 }
 
 void ConfigParser::parseAlias(std::string working_line, LocationBlock *directive, size_t current_line) {
-	std::string path;
+	std::string uri;
 
-	path = returnSecondArgs(working_line);
-	if (path.empty())
+	uri = returnSecondArgs(working_line);
+	if (uri.empty())
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	if (!directive->setAlias(removeExcessiveSlashes(path)))
-		throw ConfigParserError(PATH_NOT_RECOGNIZED, __FUNCTION__, __LINE__, current_line);
+	directive->setAlias(uri);
 }
 
 void ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationBlock *directive, size_t current_line) {
