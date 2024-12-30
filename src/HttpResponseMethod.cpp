@@ -89,34 +89,21 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     rrstate.getRequest().setPath(rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()));
     std::string         staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
     std::string         filePath;
-    std::string         valid;
     struct stat         pathStat;
     std::string         errorPage;
     std::string         content;
     DirectoryHandler    hdl;
     unsigned int    max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     filePath = rrstate.getRequest().getContPath();
-	valid = rrstate.getRequest().getPath();
     LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate.getServer().getLocations());
     if (!locationBlock) {
         setErrorResponse(rrstate, 404, "Not Found");
         return rrstate.getResponse();
     }
-    std::cout << "Fetched URI" << locationBlock->getUri() << std::endl;
     std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableIndex();
-    /*if (!request.isPathAllowed(request, valid) && request.getPath() != "/")
-    {
-        setErrorResponse(request, response, 404, "Path not allowed");
-        std::cout << "\n--- ::" << valid << std::endl;
-        return response;
-    }*/
     std::string test = hdl.getMimeType(indexResult.first);
-    std::cout << "Path of request : " << rrstate.getRequest().getPath() << "\n";
-    std::cout << "IS CGI REQUEST : " << (isCgiRequest(rrstate.getRequest().getPath())) << "\n";
-    std::cout << test << "\n";
-
-    if ((isCgiRequest(rrstate.getRequest().getPath())) || test != "text/html") {
-        std::cout << "ici" << std::endl;
+    std::cout << test << std::endl;
+    if (((isCgiRequest(rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
         e_data_reach data;
         data = locationBlock->isContentPathReachable();
         switch (data) 
