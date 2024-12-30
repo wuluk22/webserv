@@ -58,6 +58,25 @@ void ConfigParser::setServerConfig(size_t server_id, ServerConfig *current_serve
 	this->_servers_config.insert(std::make_pair(server_id, current_server));
 }
 
+bool ConfigParser::CgiPathChecker(LocationBlock *l_block) {
+	std::string full_path;
+	std::string root_path;
+	std::string partial_cgi_path;
+
+	partial_cgi_path = l_block->getCgiPath();
+	root_path = l_block->getContentPath();
+	if (root_path[root_path.size() - 1] == '/')
+		full_path = root_path + partial_cgi_path;
+	else
+		full_path = root_path + '/' + partial_cgi_path;
+	_validator.setPath(full_path);
+	if (_validator.exists() && _validator.isFile() && _validator.isExecutable() && _validator.isReadable()) {
+		l_block->setCgiPath(full_path);
+		return (true);
+	}
+	return (false);
+}
+
 bool ConfigParser::checkDependsOn(ServerConfig *current_config) {
 	std::vector <LocationBlock *> all_directives = current_config->getDirectives();
 	std::vector <LocationBlock *>::iterator main_it;
@@ -160,6 +179,11 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
         throw ConfigParserError(BAD_URI, __FUNCTION__, __LINE__, line);
  	if (directive->getIndex().empty() && !server_config->getIndex().empty())
 		directive->setIndex(server_config->getIndex());
+	if (!directive->getCgiPath().empty()) {
+		if (!CgiPathChecker(directive))
+			throw ConfigParserError(BAD_CGI_PATH, __FUNCTION__, __LINE__, line);
+	}
+
 	if (!directive->hasAutoIndexModified())
 		directive->setAutoIndex(server_config->getAutoIndex());
 	if (!directive->hasClientMaxBodySizeModified())
