@@ -46,13 +46,12 @@ void ConfigParser::parseClientMaxBodySize(std::vector <std::string> args, ADirec
 }
 
 void ConfigParser::parseCgiPath(std::string working_line, LocationBlock *directive, size_t current_line) {
-	std::string path;
+	std::string relative_path;
 
-	path = returnSecondArgs(working_line);
-	if (path.empty())
+	relative_path = returnSecondArgs(working_line);
+	if (relative_path.empty())
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	if (!directive->setCgiPath(path))
-		throw ConfigParserError(PATH_NOT_RECOGNIZED, __FUNCTION__, __LINE__, current_line);
+	directive->setCgiPath(relative_path);
 }
 
 void ConfigParser::parseAlias(std::string working_line, LocationBlock *directive, size_t current_line) {
