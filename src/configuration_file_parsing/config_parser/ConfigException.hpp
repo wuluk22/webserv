@@ -40,6 +40,7 @@
 #define SERVER_NAME_ONE_NAME ERROR_HEADER "The directive server_name takes one and only one server name," AB RESET
 #define DEPENDS_ON_NO_MATCH ERROR_HEADER "No match found for depends on directive," AB RESET
 #define ALIAS_NO_MATCH ERROR_HEADER "No match found for alias directive," AB RESET
+#define BAD_CGI_PATH ERROR_HEADER "No corresponding path for the CGI," AB RESET
 
 // SERVER HEADER ERROR MESSAGES
 #define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET
