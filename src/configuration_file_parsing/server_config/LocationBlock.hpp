@@ -50,7 +50,7 @@ class LocationBlock : public ADirective {
 		void setUriDependance(std::string uri);
 		void clientMaxBodySizeModified(void);
 		void autoIndexModified(void);
-		bool setCgiPath(std::string path_args);
+		void setCgiPath(std::string path_args);
 		bool setUri(std::string uri_args, std::string root);
 		void setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);

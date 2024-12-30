@@ -21,13 +21,8 @@ void LocationBlock::autoIndexModified(void) {
 	this->_location_params._modified_auto_index = true;
 }
 
-bool LocationBlock::setCgiPath(std::string path_args) {
-	_validator.setPath(path_args);
-	if (_validator.exists() && _validator.isFile() && _validator.isExecutable() && _validator.isReadable()) {
-		_location_params._cgi_path = path_args;
-		return (true);
-	}
-	return (false);
+void LocationBlock::setCgiPath(std::string path_args) {
+	this->_location_params._cgi_path = path_args;
 }
 
 bool LocationBlock::setUri(std::string uri_args, std::string root_args) {
