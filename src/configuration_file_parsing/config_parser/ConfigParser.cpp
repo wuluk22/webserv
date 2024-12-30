@@ -111,6 +111,7 @@ bool ConfigParser::checkAlias(ServerConfig *current_config) {
 				else if ((*main_it)->getAlias() == (*second_it)->getUri()) {
 					found_match = true;
 					(*main_it)->setContentPath((*second_it)->getContentPath());
+					(*main_it)->getIndex().clear();
 					(*main_it)->setIndex((*second_it)->getIndex());
 				}
 			}
