@@ -5,7 +5,7 @@ ADirective::ADirective(void) {
 	this->_common_params._index.insert("index.html");
 	this->_common_params._is_index_files_init = false;
 	this->_common_params._auto_index = false;
-	this->_common_params._client_max_body_size = 1;
+	this->_common_params._client_max_body_size = 1048576;
 }
 
 ADirective::~ADirective() {}
