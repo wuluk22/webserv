@@ -104,6 +104,12 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
 			full_file_path = this->_location_params._content_path + (*it);
 		else
 			full_file_path = this->_location_params._content_path + "/" + (*it);
+		_validator.setPath(this->_location_params._content_path);
+		if (_validator.exists() && !_validator.isReadable()) {
+			result.first = full_file_path;
+			result.second = DATA_NOK;
+			return (result);
+		}
 		_validator.setPath(full_file_path);
 		if (_validator.exists() && _validator.isFile()) {
 			hasEntered = true;
@@ -121,6 +127,8 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
 		result.first = full_file_path;
 		result.second = NO_DATA;
 	}
+	std::cout << "DATA PATH : "<< result.first << "\n";
+	std::cout << "DATA REACH : " << result.second << "\n";
 	return (result);
 }
 
