@@ -124,7 +124,7 @@ class HttpRequestHandler
 
 		bool																			isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const;
 		void																			reset();
-		LocationBlock*																	getLocationBlock(std::vector<LocationBlock*> locationBlocks) const;
+		LocationBlock*																	getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const;
 
 // --------------------------------									
 
@@ -134,6 +134,8 @@ class HttpRequestHandler
     	void																			handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 		HttpRequestHandler																handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
 		HttpRequestHandler																initRequest(const HttpRequestHandler& request);
+		std::string																		extractDir(std::string& requestPath);
+
 };
 std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i);
 

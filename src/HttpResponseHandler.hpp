@@ -49,12 +49,13 @@ class HttpResponseHandler
 		std::string							getBody() const;
 		std::string							getAll() const;
 		std::string							getQuery() const;
+		std::string							getPathOfFile(RRState& rrstate);
 		
 		HttpResponseHandler					handlePath(RRState& rrstate);
 		void								handleResponse(RRState& rrstate);
 		std::string							urlDecode(const std::string& url);
 		HttpResponseHandler					handleGet(RRState& rrstate);
-		bool								isCgiRequest(const std::string& path);
+		bool								isCgiRequest(RRState& rrstate, const std::string& path);
 
 		std::string							httpVersion;
 		int									code;

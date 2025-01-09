@@ -1,4 +1,30 @@
 #include "HttpResponseHandler.hpp"
+#include "RequestResponseState.hpp"
+
+std::string HttpResponseHandler::getPathOfFile(RRState& rrstate)
+{
+	std::string	filePath;
+	std::string uri;
+	std::string root;
+	
+	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
+    uri = rrstate.getRequest().getPath();
+	filePath = root + uri;
+
+	struct stat info;
+	if (stat(filePath.c_str(), &info) == 0 && S_ISDIR(info.st_mode))
+	{ 
+		return "";
+	}
+	else if (stat(filePath.c_str(), &info) == 0 && S_ISREG(info.st_mode))
+	{
+		return filePath;
+	}
+	std::cout << "-------LOC ROOT: " << root << std::endl;
+    std::cout << "-------REQ PATH: " << uri << std::endl;
+	std::cout << "-------FILE PATH: " << filePath << std::endl;
+	return filePath;
+}
 
 std::string HttpResponseHandler::urlDecode(const std::string& url)
 {
@@ -29,12 +55,14 @@ std::string HttpResponseHandler::urlDecode(const std::string& url)
     return decoded;
 }
 
-bool HttpResponseHandler::isCgiRequest(const std::string& path)
+bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path)
 {
     const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
     const std::string cgiDirectory = "/cgi-bin";
-    if (path.find(cgiDirectory) == 0)
+	//std::cout << "cgi paaath : " << rrstate.getServer().getImagesPathCgi() << std::endl;
+	//std::cout << "paaaath : " << path << std::endl;
+    if (path.find(cgiDirectory) == 0 || rrstate.getServer().getImagesPathCgi().find(path))
 	{
         return true;
     }

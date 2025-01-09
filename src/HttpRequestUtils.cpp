@@ -1,16 +1,54 @@
 # include "HttpRequestHandler.hpp"
+# include "RequestResponseState.hpp"
 
-LocationBlock* HttpRequestHandler::getLocationBlock(std::vector<LocationBlock*> locationBlocks) const
+LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const
 {
+
+
+
     std::string requestPath = this->getPath();
-    std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
-    for (;it != locationBlocks.end(); it++) {
+    LocationBlock* matchedBlock = NULL;
+    size_t longestMatch = 0;
+	std::string alles;
+    for (std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
+         it != locationBlocks.end(); ++it)
+	{
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
+		//std::cout << "req:" << requestPath << std::endl;
+		//std::cout << "loc:" << locationUri << std::endl;
+		if (locationUri == "/" && requestPath.length() > locationUri.length() && it != locationBlocks.end() && it == locationBlocks.begin())
+			continue;
+		//std::cout << "yo" << std::endl;
+		if (!block->isCgiAllowed())
+		{
+			alles = rrstate.getRequest().extractDir(requestPath);
+			//std::cout << "1-?-" << alles << "-?-" << std::endl;
+
+		}
+		else
+		{
+			alles = locationUri;
+			//std::cout << "2-?-" << alles << "-?-" << std::endl;
+		}
+		//std::cout << "-?-" << alles << "-?-" << std::endl;
+		if (alles == locationUri)
+			requestPath = alles;
+		//std::cout << "2req:" << requestPath << std::endl;
+		//std::cout << "2loc:" << locationUri << "\n\n" << std::endl;
+		//std::cout << "root " << rrstate.getRequest().getFullPathFromLoc(rrstate, ) << std::endl;
         if (requestPath == locationUri)
-            return (block);
+		{
+			//std::cout << "ya" << std::endl;
+            size_t matchLength = locationUri.length();
+            if (matchLength > longestMatch) {
+                longestMatch = matchLength;
+                matchedBlock = block;
+				break;
+            }
+        }
     }
-    return (NULL);
+    return matchedBlock;
 }
 
 std::string HttpRequestHandler::trim(const std::string& str)
@@ -199,3 +237,31 @@ const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	
 bool																			HttpRequestHandler::getIsValid() const { return valid; }
 bool																			HttpRequestHandler::getAutoIndex() const { return autoIndex; }
 const unsigned int&																HttpRequestHandler::getMaxBody() const { return maxBodySize; }
+
+std::string HttpRequestHandler::extractDir(std::string& requestPath) {
+    if (requestPath.empty()) {
+        return "";
+    }
+
+    size_t pos = requestPath.find('/');
+
+    if (pos == std::string::npos) {
+        return "";
+    }
+
+    size_t dirStartPos = requestPath.find('/', pos + 1);
+
+    if (dirStartPos == std::string::npos) {
+        return "";
+    }
+
+    size_t dirEndPos = requestPath.find('/', dirStartPos + 1);
+    
+    if (dirEndPos != std::string::npos) {
+
+        return requestPath.substr(dirStartPos, dirEndPos - dirStartPos);
+    }
+
+
+    return requestPath.substr(dirStartPos);
+}

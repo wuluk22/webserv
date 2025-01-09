@@ -1,4 +1,5 @@
 #include "LocationBlock.hpp"
+#include "../../RequestResponseState.hpp"
 
 LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_client_max_body_size = false;
@@ -92,18 +93,39 @@ e_data_reach LocationBlock::isCgiPathReachable(void){
 	return (DATA_NOK);
 }
 
-std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
+std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(RRState& rrstate) {
 	std::string full_file_path;
 	std::pair <std::string, e_data_reach> result;
 	bool hasEntered = false;
 	std::string uri = this->_location_params._uri;
-
+	//std::cout << "uri : " << uri << std::endl;
+	//std::cout << "cgi : " << rrstate.getServer().getImagesPathCgi() << std::endl;
+	std::string alles = rrstate.getServer().getImagesPathCgi();
+	//std::cout << "depends : " << rrstate.getServer().getImagesPathCgi() << std::endl;
 	std::set<std::string>::iterator it = this->_common_params._index.begin();
+	std::cout << this << std::endl;
+	//if (rrstate.getServer().getImagesPathCgi() && )
 	for (; it != this->_common_params._index.end(); it++) {
-		if (uri[uri.size() - 1] == '/')
+		if (uri[uri.size() - 1] == '/' && !(uri == rrstate.getServer().getImagesPathCgi()))
+		{
 			full_file_path = this->_location_params._content_path + (*it);
+			//std::cout << "1" << std::endl;
+		}
+		else if (uri == rrstate.getRequest().extractDir(alles) && !this->isCgiAllowed())
+		{
+			full_file_path = rrstate.getServer().getImagesPathCgi();
+			//std::cout << "2" << std::endl;
+		}
+		else if (this->isCgiAllowed())
+		{
+			full_file_path = uri;
+		}
 		else
+		{
 			full_file_path = this->_location_params._content_path + "/" + (*it);
+			//std::cout << "3" << std::endl;
+
+		}
 		_validator.setPath(this->_location_params._content_path);
 		if (_validator.exists() && !_validator.isReadable()) {
 			result.first = full_file_path;
@@ -111,6 +133,7 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
 			return (result);
 		}
 		_validator.setPath(full_file_path);
+		//std::cout << "path : " << full_file_path << std::endl;
 		if (_validator.exists() && _validator.isFile()) {
 			hasEntered = true;
 			if (_validator.isReadable()) {
@@ -120,15 +143,21 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
 				result.first = full_file_path;
 				result.second = DATA_NOK;
 			}
-		} else
+		}
+		else if (_validator.exists() && _validator.isDirectory()) {
+			hasEntered = true;
+			result.first = full_file_path;
+			result.second = DATA_OK;
+		}
+		else
 			continue;
 	}
 	if (!hasEntered) {
 		result.first = full_file_path;
 		result.second = NO_DATA;
 	}
-	std::cout << "DATA PATH : "<< result.first << "\n";
-	std::cout << "DATA REACH : " << result.second << "\n";
+	//std::cout << "DATA PATH : "<< result.first << "\n";
+	//std::cout << "DATA REACH : " << result.second << "\n";
 	return (result);
 }
 

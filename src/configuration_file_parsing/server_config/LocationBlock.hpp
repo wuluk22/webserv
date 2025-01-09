@@ -31,6 +31,7 @@ enum e_allowed_methods {
 	POST = 1 << 1,
 	DELETE = 1 << 2
 };
+class RRState;
 
 class LocationBlock : public ADirective {
 	private:
@@ -44,7 +45,7 @@ class LocationBlock : public ADirective {
 		// Data reachability
 		e_data_reach 							isContentPathReachable(void);
 		e_data_reach 							isCgiPathReachable(void);
-		std::pair<std::string, e_data_reach>	checkAvailableIndex(void);
+		std::pair<std::string, e_data_reach>	checkAvailableIndex(RRState& rrstate);
 
 		// Setter
 		void setUriDependance(std::string uri);
