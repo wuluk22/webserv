@@ -1,4 +1,5 @@
 #include "LocationBlock.hpp"
+#include "../../RequestResponseState.hpp"
 
 LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_client_max_body_size = false;

@@ -126,6 +126,7 @@ void	ServerBase::processClientConnections()
 				HttpResponseHandler response = it->second.getResponse();
                 response.handleResponse(it->second);
 				it->second.setResponse(response);
+				//std::cout << it->second.getResponse() << std::endl;
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);
             }

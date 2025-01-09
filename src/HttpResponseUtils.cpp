@@ -55,7 +55,7 @@ std::string HttpResponseHandler::urlDecode(const std::string& url)
     return decoded;
 }
 
-bool HttpResponseHandler::isCgiRequest(const std::string& path)
+bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path)
 {
     const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));

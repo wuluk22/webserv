@@ -96,7 +96,7 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     }
 
     uploadPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
-    if (rrstate.getResponse().isCgiRequest(rrstate.getRequest().getPath()))
+    if (rrstate.getResponse().isCgiRequest(rrstate, rrstate.getRequest().getPath()))
     {
         uploadPath = rrstate.getRequest().getContPath() + "/Images/";
     }

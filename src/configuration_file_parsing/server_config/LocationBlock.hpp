@@ -31,6 +31,7 @@ enum e_allowed_methods {
 	POST = 1 << 1,
 	DELETE = 1 << 2
 };
+class RRState;
 
 class LocationBlock : public ADirective {
 	private:

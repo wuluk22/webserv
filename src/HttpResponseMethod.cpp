@@ -12,6 +12,9 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 	std::string                                         content;
     std::map<std::string, std::vector<std::string> >    config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int                                        max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
+
+    std::cout << "------PATH OF FILE: \n" << rrstate.getResponse().getPathOfFile(rrstate) << std::endl;
+
     if (config.empty())
     {
         setErrorResponse(rrstate, 404, "Not FFFound");
@@ -73,7 +76,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
         else
         {
         	rrstate.getResponse().setStatusCode(404);
-        	rrstate.getResponse().setStatusMsg("Not Found");
+        	rrstate.getResponse().setStatusMsg("Noot Found");
         	rrstate.getResponse().setBody("Resource not found.");
 		}
         return rrstate.getResponse();
@@ -137,12 +140,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     filePath = rrstate.getRequest().getContPath();
     LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations());
     if (!locationBlock) {
-        setErrorResponse(rrstate, 404, "Not Found");
+        setErrorResponse(rrstate, 404, "Not Founnd");
         return rrstate.getResponse();
     }
-    std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableIndex(empty);
+    std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableRessource(empty);
     std::string test = hdl.getMimeType(indexResult.first);
-    if (((isCgiRequest(rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
+    if (((isCgiRequest(rrstate, rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
         e_data_reach data;
         data = locationBlock->isContentPathReachable();
         switch (data) 
@@ -155,7 +158,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
                 return rrstate.getResponse();
             }
             case NO_DATA: {
-                setErrorResponse(rrstate, 404, "Not Found");
+                setErrorResponse(rrstate, 404, "Not Foundd");
                 return rrstate.getResponse();
             }
         }
@@ -170,7 +173,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
                 return rrstate.getResponse();
             }
             case NO_DATA: {
-                setErrorResponse(rrstate, 404, "Not Found");
+                setErrorResponse(rrstate, 404, "NNot Found");
                 return rrstate.getResponse();
             }
         }
@@ -213,12 +216,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         return rrstate.getResponse();
     }
     bool fileExists = rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath());
-    if (!rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath()) && !isCgiRequest(rrstate.getRequest().getPath()))
+    if (!rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath()) && !isCgiRequest(rrstate, rrstate.getRequest().getPath()))
     {
         setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
-    if (isCgiRequest(rrstate.getRequest().getPath()))
+    if (isCgiRequest(rrstate, rrstate.getRequest().getPath()))
     {
         Cgi                                     cgi;
         std::string                             path;
@@ -232,7 +235,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
                 return rrstate.getResponse();
             }
             case NO_DATA: {
-                setErrorResponse(rrstate, 404, "Not Found");
+                setErrorResponse(rrstate, 404, "Nooot Found");
                 return rrstate.getResponse();
             }
         }
@@ -261,6 +264,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
     rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
     rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
+    //std::cout << "yoo : " << rrstate.getRequest() << std::endl;
+
     return rrstate.getResponse();
 }
 

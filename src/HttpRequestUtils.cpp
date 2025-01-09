@@ -31,6 +31,9 @@ std::string HttpRequestHandler::extractDir(std::string& requestPath) {
 
 LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const
 {
+
+
+
     std::string requestPath = this->getPath();
     LocationBlock* matchedBlock = NULL;
     size_t longestMatch = 0;
