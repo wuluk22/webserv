@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponseHandler.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2024/12/20 14:47:51 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/09 18:05:36 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,12 @@ class HttpResponseHandler
 		std::string							getBody() const;
 		std::string							getAll() const;
 		std::string							getQuery() const;
+		std::string							getPathOfFile(RRState& rrstate);
 		
 		HttpResponseHandler					handlePath(RRState& rrstate);
 		void								handleResponse(RRState& rrstate);
 		std::string							urlDecode(const std::string& url);
+		HttpResponseHandler					errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
 		HttpResponseHandler					handleGet(RRState& rrstate);
 		bool								isCgiRequest(const std::string& path);
 

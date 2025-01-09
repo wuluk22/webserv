@@ -3,6 +3,7 @@
 #include "RequestResponseState.hpp"
 #include "CGI/Cgi.hpp"
 
+
 HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 {
     std::string                                         filePath;
@@ -81,11 +82,50 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     return rrstate.getResponse();
 }
 
+// HttpResponseHandler HttpResponseHandler::errorHandler(RRState &rrstate, unsigned int error_code, std::string message) {
+//     setErrorResponse(rrstate, error_code, message);
+//     return rrstate.getResponse();
+// }
+
+// HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
+//     HttpRequestHandler request = rrstate.getRequest();
+//     HttpResponseHandler response = rrstate.getResponse();
+//     ServerHandler server = rrstate.getServer();
+//     LocationBlock* l_block;
+//     DirectoryHandler dir_handler;
+//     std::pair<std::string, e_data_reach> content_file_reach;
+//     std::string content_file = response.getPathOfFile(rrstate);
+//     std::string content_file_mime_type;
+//     e_data_reach data_reach;
+
+//     l_block = request.getLocationBlock(rrstate, server.getLocations());
+//     if (!l_block)
+//         return errorHandler(rrstate, 404, "Not Found");
+//     content_file_reach = l_block->checkAvailableRessource(content_file);
+//     if (content_file.empty())
+//         content_file = content_file_reach.first;
+//     content_file_mime_type = dir_handler.getMimeType(content_file);
+//     if ((l_block->isCgiAllowed()) ^ (content_file_mime_type != "text/html" || l_block->getAutoIndex()))
+//         data_reach = l_block->isContentPathReachable();
+//     else
+//         data_reach = content_file_reach.second;
+//     switch(data_reach) {
+//         case DATA_OK:
+//             break;
+//         case DATA_NOK:
+//             errorHandler(rrstate, 403, "Forbidden");
+//         case NO_DATA:
+//             errorHandler(rrstate, 404, "Not found");
+//     }
+// }
+
+
 // REFACTOR INCOMING
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 {   
     //std::cout << "Computed path : " << rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()) << "\n";
+    std::string empty;
     rrstate.getRequest().setPath(rrstate.getResponse().urlDecode(rrstate.getRequest().getPath()));
     std::string         staticDir = rrstate.getRequest().getRootDirectoryFromLoc(rrstate, rrstate.getRequest().getPath());
     std::string         filePath;
@@ -95,12 +135,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     DirectoryHandler    hdl;
     unsigned int    max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     filePath = rrstate.getRequest().getContPath();
-    LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate.getServer().getLocations());
+    LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations());
     if (!locationBlock) {
         setErrorResponse(rrstate, 404, "Not Found");
         return rrstate.getResponse();
     }
-    std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableIndex();
+    std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableIndex(empty);
     std::string test = hdl.getMimeType(indexResult.first);
     if (((isCgiRequest(rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
         e_data_reach data;
@@ -203,7 +243,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         return rrstate.getResponse();
     }
     // Fautif
-    indexResult = locationBlock->checkAvailableIndex();
+    indexResult = locationBlock->checkAvailableRessource(empty);
     filePath = indexResult.first;
     //std::cout << "Given file path: "<< filePath << std::endl;
     content = rrstate.getRequest().readFile(filePath);

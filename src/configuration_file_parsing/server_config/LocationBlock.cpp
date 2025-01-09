@@ -92,43 +92,58 @@ e_data_reach LocationBlock::isCgiPathReachable(void){
 	return (DATA_NOK);
 }
 
-std::pair<std::string, e_data_reach> LocationBlock::checkAvailableIndex(void) {
+std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string& file_path) {
 	std::string full_file_path;
 	std::pair <std::string, e_data_reach> result;
 	bool hasEntered = false;
 	std::string uri = this->_location_params._uri;
 
-	std::set<std::string>::iterator it = this->_common_params._index.begin();
-	for (; it != this->_common_params._index.end(); it++) {
-		if (uri[uri.size() - 1] == '/')
-			full_file_path = this->_location_params._content_path + (*it);
-		else
-			full_file_path = this->_location_params._content_path + "/" + (*it);
-		_validator.setPath(this->_location_params._content_path);
-		if (_validator.exists() && !_validator.isReadable()) {
-			result.first = full_file_path;
-			result.second = DATA_NOK;
-			return (result);
-		}
-		_validator.setPath(full_file_path);
-		if (_validator.exists() && _validator.isFile()) {
-			hasEntered = true;
-			if (_validator.isReadable()) {
-				result.first = full_file_path;
-				result.second = DATA_OK;
-			} else {
+	if (file_path.empty()) {
+		std::set<std::string>::iterator it = this->_common_params._index.begin();
+		for (; it != this->_common_params._index.end(); it++) {
+			if (uri[uri.size() - 1] == '/')
+				full_file_path = this->_location_params._content_path + (*it);
+			else
+				full_file_path = this->_location_params._content_path + "/" + (*it);
+			_validator.setPath(this->_location_params._content_path);
+			if (_validator.exists() && !_validator.isReadable()) {
 				result.first = full_file_path;
 				result.second = DATA_NOK;
+				return (result);
 			}
-		} else
-			continue;
+			_validator.setPath(full_file_path);
+			if (_validator.exists() && _validator.isFile()) {
+				hasEntered = true;
+				if (_validator.isReadable()) {
+					result.first = full_file_path;
+					result.second = DATA_OK;
+				} else {
+					result.first = full_file_path;
+					result.second = DATA_NOK;
+				}
+			} else
+				continue;
+		}
+	} else {
+		full_file_path = file_path;
+		_validator.setPath(full_file_path);
+		if (_validator.exists() && _validator.isFile()) {
+				hasEntered = true;
+				if (_validator.isReadable()) {
+					result.first = full_file_path;
+					result.second = DATA_OK;
+				} else {
+					result.first = full_file_path;
+					result.second = DATA_NOK;
+				}
+		}
 	}
 	if (!hasEntered) {
 		result.first = full_file_path;
 		result.second = NO_DATA;
 	}
-	std::cout << "DATA PATH : "<< result.first << "\n";
-	std::cout << "DATA REACH : " << result.second << "\n";
+	//std::cout << "DATA PATH : "<< result.first << "\n";
+	//std::cout << "DATA REACH : " << result.second << "\n";
 	return (result);
 }
 
