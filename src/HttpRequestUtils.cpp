@@ -189,13 +189,16 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
     return out;
 }
 
-std::string HttpRequestHandler::readFile(const std::string& path)
+std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& path)
 {
 	std::string newPath;
-	std::cout << "IN READFILE path : " << path << std::endl;
+	std::string root;
+	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
+
+	//std::cout << "IN READFILE path : " << path << std::endl;
 	if (path.compare("/Images") >= 0) {
-		std::cout << " ICIIIII ? " << std::endl;
-		newPath = "./rscs" + path;
+		//std::cout << " ICIIIII ? " << std::endl;
+		newPath = root + path;
 	}
 	else
 		newPath = path;

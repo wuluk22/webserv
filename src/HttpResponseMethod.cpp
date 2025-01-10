@@ -193,7 +193,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (rrstate.getRequest().getPath() == "/")
     {
         filePath = indexResult.first;
-        content = rrstate.getRequest().readFile(filePath);
+        content = rrstate.getRequest().readFile(rrstate, filePath);
         if (content.length() > max)
         {
             setErrorResponse(rrstate, 413, "response too big");
@@ -254,7 +254,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         filePath = rrstate.getRequest().getPath();
         std::cout << "** getPath FILEPATH: "<< filePath << std::endl;
     }
-    content = rrstate.getRequest().readFile(filePath);
+    content = rrstate.getRequest().readFile(rrstate, filePath);
     if (content.length() > max)
     {
         setErrorResponse(rrstate, 413, "response too big");

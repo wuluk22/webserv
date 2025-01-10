@@ -66,7 +66,7 @@ class HttpRequestHandler
 		std::string																		getMimeType(const std::string& path);
 		std::string																		createErrorPage(int statusCode, const std::string& message);
 		std::string																		toString(size_t value);
-		static std::string																readFile(const std::string& path);
+		static std::string																readFile(RRState& rrstate, const std::string& path);
 		static bool																		fileExists(const std::string& path);
 		bool																			isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const;
 		bool																			isPathAllowed(const HttpRequestHandler& request, const std::string& path) const;
