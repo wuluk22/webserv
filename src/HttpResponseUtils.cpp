@@ -60,7 +60,7 @@ bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path
     const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
     std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
     const std::string cgiDirectory = "/cgi-bin";
-    std::cout << "current path" << path << std::endl;
+    std::cout << "current path : " << path << std::endl;
 	if (path.find(cgiDirectory) == 0)
 	{
         return true;

@@ -193,7 +193,7 @@ std::string HttpRequestHandler::readFile(const std::string& path)
 {
 	std::string newPath;
 	std::cout << "IN READFILE path : " << path << std::endl;
-	if (path.compare("Images") >= 0) {
+	if (path.compare("/Images") >= 0) {
 		std::cout << " ICIIIII ? " << std::endl;
 		newPath = "./rscs" + path;
 	}
