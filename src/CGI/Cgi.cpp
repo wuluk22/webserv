@@ -115,7 +115,6 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         {
             std::string headers = output.substr(0, headerEnd);
             std::string body = output.substr(headerEnd + 4);
-            std::cout << "BODY CGY : " << body << std::endl;
             std::istringstream headerStream(headers);
             std::string headerLine;
             while (std::getline(headerStream, headerLine))

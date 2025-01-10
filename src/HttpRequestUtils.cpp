@@ -189,7 +189,7 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
     return out;
 }
 
-std::string HttpRequestHandler::readFile(const std::string& path)
+std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& path)
 {
 	std::string newPath;
 	std::cout << "IN READFILE path : " << path << std::endl;

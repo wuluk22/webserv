@@ -50,6 +50,7 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 			NewServer.setLocations(directives);
 			NewServer.setServerName(server_name);
 			NewServer.setImagesPathCgi(ImagesPath);
+			std::cout << "++++++++++++ ImagesPath : " << ImagesPath << std::endl;
 			std::cout << "PATHIMAGES ::" << NewServer.getImagesPathCgi() << std::endl;
 			NewServer.InitializeServerSocket(*it, 3);
 			logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
