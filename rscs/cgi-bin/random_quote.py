@@ -46,7 +46,7 @@ def get_available_images(directory):
 
 def generate_image_html(images, IMAGES_DIR):
     return "\n".join(
-        f'<img src="{IMAGES_DIR}/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
+        f'<img src="{clean_image}/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
         for image in images
     )
 
@@ -56,6 +56,9 @@ def main():
     query = os.environ.get("QUERY_STRING", "")
     path = os.environ.get("PATH", "")
     IMAGES_DIR = os.environ.get("IMAGESPATH", "")
+    clean_image = IMAGES_DIR.replace(path, "")
+    SCRIPTPATH = os.environ.get("SCRIPT_NAME", "")
+    clean_path = SCRIPTPATH.replace(path, "")
 
     if method == "POST":
         file_item = form["image"]
@@ -216,7 +219,7 @@ def main():
 
                 <div class="section" {image_section_style}>
                     <h2>Choose your favorite one or ... </h2>
-                    <form id="image-form" action="/cgi-bin/random_quote.py" method="GET">
+                    <form id="image-form" action="" method="GET">
                         <input type="hidden" id="selected-image" name="image" value="">
 
                         <!-- Aperçu des images disponibles -->
@@ -230,7 +233,7 @@ def main():
 
                 <div class="section">
                     <h2>Upload a New Image</h2>
-                    <form action="/cgi-bin/random_quote.py" method="POST" enctype="multipart/form-data">
+                    <form action="{clean_path}" method="POST" enctype="multipart/form-data">
                         <label for="image">Choose an image to upload:</label><br>
                         <input type="file" id="image" name="image" accept="image/*"><br>
                         <button type="submit" id="upload-button" disabled>Upload</button>
