@@ -191,7 +191,16 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 
 std::string HttpRequestHandler::readFile(const std::string& path)
 {
-    std::ifstream		file(path.c_str(), std::ios::binary);
+	std::string newPath;
+	std::cout << "IN READFILE path : " << path << std::endl;
+	if (path.compare("Images") >= 0) {
+		std::cout << " ICIIIII ? " << std::endl;
+		newPath = "./rscs" + path;
+	}
+	else
+		newPath = path;
+    std::ifstream		file(newPath.c_str(), std::ios::binary);
+	
 	size_t				size;
     if (!file) return "";
     file.seekg(0, std::ios::end);

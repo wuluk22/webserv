@@ -145,39 +145,39 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     }
     std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableRessource(empty);
     std::string test = hdl.getMimeType(indexResult.first);
-    if (((isCgiRequest(rrstate, rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
-        e_data_reach data;
-        data = locationBlock->isContentPathReachable();
-        switch (data) 
-        {
-            case DATA_OK: {
-                break;
-            }
-            case DATA_NOK: {
-                setErrorResponse(rrstate, 403, "Forbidden");
-                return rrstate.getResponse();
-            }
-            case NO_DATA: {
-                setErrorResponse(rrstate, 404, "Not Foundd");
-                return rrstate.getResponse();
-            }
-        }
-    } else {
-        switch (indexResult.second)
-        {
-            case DATA_OK: {
-                break;
-            }
-            case DATA_NOK: {
-                setErrorResponse(rrstate, 403, "Forbidden");
-                return rrstate.getResponse();
-            }
-            case NO_DATA: {
-                setErrorResponse(rrstate, 404, "NNot Found");
-                return rrstate.getResponse();
-            }
-        }
-    }
+    // if (((isCgiRequest(rrstate, rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
+    //     e_data_reach data;
+    //     data = locationBlock->isContentPathReachable();
+    //     switch (data) 
+    //     {
+    //         case DATA_OK: {
+    //             break;
+    //         }
+    //         case DATA_NOK: {
+    //             setErrorResponse(rrstate, 403, "Forbidden");
+    //             return rrstate.getResponse();
+    //         }
+    //         case NO_DATA: {
+    //             setErrorResponse(rrstate, 404, "Not Foundd");
+    //             return rrstate.getResponse();
+    //         }
+    //     }
+    // } else {
+    //     switch (indexResult.second)
+    //     {
+    //         case DATA_OK: {
+    //             break;
+    //         }
+    //         case DATA_NOK: {
+    //             setErrorResponse(rrstate, 403, "Forbidden");
+    //             return rrstate.getResponse();
+    //         }
+    //         case NO_DATA: {
+    //             setErrorResponse(rrstate, 404, "NNot Found");
+    //             return rrstate.getResponse();
+    //         }
+    //     }
+    // }
     if (rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
 	{
         filePath = filePath + rrstate.getRequest().getPath();
@@ -247,8 +247,13 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     }
     // Fautif
     indexResult = locationBlock->checkAvailableRessource(empty);
-    filePath = indexResult.first;
-    //std::cout << "Given file path: "<< filePath << std::endl;
+    if (locationBlock->getCgiPath().empty()) {
+        filePath = indexResult.first;
+        std::cout << "** indexResult FILEPATH: "<< filePath << std::endl;
+    } else {
+        filePath = rrstate.getRequest().getPath();
+        std::cout << "** getPath FILEPATH: "<< filePath << std::endl;
+    }
     content = rrstate.getRequest().readFile(filePath);
     if (content.length() > max)
     {
