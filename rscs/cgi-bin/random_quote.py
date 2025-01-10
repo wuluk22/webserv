@@ -46,7 +46,7 @@ def get_available_images(directory):
 
 def generate_image_html(images, IMAGES_DIR):
     return "\n".join(
-        f'<img src="{clean_image}/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
+        f'<img src="{IMAGES_DIR}/{image}" alt="{image}" onclick="selectImage(\'{image}\')" title="{image}">'
         for image in images
     )
 
@@ -56,7 +56,7 @@ def main():
     query = os.environ.get("QUERY_STRING", "")
     path = os.environ.get("PATH", "")
     IMAGES_DIR = os.environ.get("IMAGESPATH", "")
-    clean_image = IMAGES_DIR.replace(path, "")
+    #clean_image = IMAGES_DIR.replace(path, "")
     SCRIPTPATH = os.environ.get("SCRIPT_NAME", "")
     clean_path = SCRIPTPATH.replace(path, "")
 
@@ -219,7 +219,7 @@ def main():
 
                 <div class="section" {image_section_style}>
                     <h2>Choose your favorite one or ... </h2>
-                    <form id="image-form" action="" method="GET">
+                    <form id="image-form" action="{clean_path}" method="GET">
                         <input type="hidden" id="selected-image" name="image" value="">
 
                         <!-- Aperçu des images disponibles -->
