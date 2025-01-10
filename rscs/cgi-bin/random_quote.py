@@ -56,7 +56,7 @@ def main():
     query = os.environ.get("QUERY_STRING", "")
     path = os.environ.get("PATH", "")
     IMAGES_DIR = os.environ.get("IMAGESPATH", "")
-    #clean_image = IMAGES_DIR.replace(path, "")
+    clean_image = IMAGES_DIR.replace(path, "")
     SCRIPTPATH = os.environ.get("SCRIPT_NAME", "")
     clean_path = SCRIPTPATH.replace(path, "")
 
@@ -146,7 +146,7 @@ def main():
 
                 <!-- Conteneur de l'image et du texte -->
                 <div class="image-container">
-                    {"<img src='/Images/" + selected_image + "' alt='Selected Image'>" if selected_image else "<p>No selected image</p>"}
+                    {"<img src='" + clean_path + selected_image + "' alt='Selected Image'>" if selected_image else "<p>No selected image</p>"}
                     <div class="caption">{random_phrase}</div>
                 </div>
 
@@ -156,7 +156,7 @@ def main():
             """
         else:
             available_images = get_available_images(IMAGES_DIR)
-            image_html = generate_image_html(available_images, IMAGES_DIR)
+            image_html = generate_image_html(available_images, clean_image)
             image_section_style = "" if image_html else 'style="display:none;"'
 
             html_content = f"""
