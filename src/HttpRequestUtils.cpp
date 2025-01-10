@@ -189,13 +189,28 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
     return out;
 }
 
+std::string removeRoot(const std::string& str, const std::string& root) {
+    std::string result = str;
+    size_t pos = result.find(root);
+    if (pos != std::string::npos) {
+        result.erase(pos, root.length());
+    }
+    return result;
+}
+
 std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& path)
 {
 	std::string newPath;
-	std::cout << "IN READFILE path : " << path << std::endl;
-	if (path.compare("/Images") >= 0) {
-		std::cout << " ICIIIII ? " << std::endl;
-		newPath = "./rscs" + path;
+	std::string root;
+	std::string ImagesPathCgi;
+	std::string imagesFolderPath;
+
+	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
+	ImagesPathCgi = rrstate.getServer().getImagesPathCgi();
+	imagesFolderPath = removeRoot(ImagesPathCgi, root);
+
+	if (path.compare(imagesFolderPath) >= 0) {
+		newPath = root + path;
 	}
 	else
 		newPath = path;
