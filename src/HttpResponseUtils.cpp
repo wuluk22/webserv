@@ -10,7 +10,6 @@ std::string HttpResponseHandler::getPathOfFile(RRState& rrstate)
 	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
     uri = rrstate.getRequest().getPath();
 	filePath = root + uri;
-
 	struct stat info;
 	if (stat(filePath.c_str(), &info) == 0 && S_ISDIR(info.st_mode))
 	{ 
@@ -20,9 +19,6 @@ std::string HttpResponseHandler::getPathOfFile(RRState& rrstate)
 	{
 		return filePath;
 	}
-	std::cout << "-------LOC ROOT: " << root << std::endl;
-    std::cout << "-------REQ PATH: " << uri << std::endl;
-	std::cout << "-------FILE PATH: " << filePath << std::endl;
 	return filePath;
 }
 
@@ -57,10 +53,7 @@ std::string HttpResponseHandler::urlDecode(const std::string& url)
 
 bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path)
 {
-    const char* cgiExtensionsArray[] = {".cgi", ".pl", ".py"};
-    std::vector<std::string> cgiExtensions(cgiExtensionsArray, cgiExtensionsArray + sizeof(cgiExtensionsArray) / sizeof(cgiExtensionsArray[0]));
     const std::string cgiDirectory = "/cgi-bin";
-    std::cout << "current path : " << path << std::endl;
 	if (path.find(cgiDirectory) == 0)
 	{
         return true;
