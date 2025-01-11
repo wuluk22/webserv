@@ -35,9 +35,9 @@ class DirectoryHandler
         ~DirectoryHandler();
         std::string				getMimeType(const std::string& path);
         std::vector<FileInfo>	getDirectoryListing(const std::string& dir_path);
-        std::string				generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files);
-        bool						createDirectory(const std::string& path);
-        bool						isDirectory(const std::string& path);
+        std::string				generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files, const std::string &file_path);
+        bool					createDirectory(const std::string& path);
+        bool					isDirectory(const std::string& path);
 };
 
 #endif

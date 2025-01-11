@@ -120,7 +120,7 @@ std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& d
     return files;
 }
 
-std::string DirectoryHandler::generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files) {
+std::string DirectoryHandler::generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files, const std::string &file_path) {
     std::ostringstream html;
     
     html << "<!DOCTYPE html>\n"
@@ -168,9 +168,7 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
          << "</script>\n"
          << "</head>\n<body>\n"
          << "<div class='container'>\n";
-
     html << generateBreadcrumbs(path);
-
     html << "<div class='upload-form'>\n"
          << "<h3>Upload File</h3>\n"
          << "<form action='" << path << "' method='POST' enctype='multipart/form-data'>\n"
@@ -194,15 +192,17 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         {
             html << "<span class='file'>|| </span>";
         }
-        
         std::string link_path;
+        std::string actual_path;
         if (path == "/")
         {
             link_path = path + file.name;
+            actual_path = file_path + file.name;
         }
         else
         {
-            link_path = path + "/" + file.name;
+            link_path = path + '/' + file.name;
+            actual_path = file_path + '/' + file.name;
         }
         if (file.isDirectory)
         {
@@ -216,11 +216,9 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         html << "<td>" << file.size << "</td>\n"
              << "<td>" << file.modified << "</td>\n"
              << "<td>\n";
-        
         if (!file.isDirectory)
         {
-            link_path = "." + link_path;
-            _validator.setPath(link_path);
+            _validator.setPath(actual_path);
             bool isValid = _validator.exists() && _validator.isFile() && _validator.isWritable();
             html << "<script>";
             html << "   function deleteElement(filePath) {";
@@ -266,10 +264,6 @@ bool DirectoryHandler::createDirectory(const std::string& path)
 
 bool DirectoryHandler::isDirectory(const std::string& path)
 {
-    struct stat path_stat;
-    if (stat(path.c_str(), &path_stat) == 0)
-    {
-        return S_ISDIR(path_stat.st_mode);
-    }
-    return false;
+    _validator.setPath(path);
+    return _validator.isDirectory();
 }
