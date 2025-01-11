@@ -85,10 +85,10 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     return rrstate.getResponse();
 }
 
-// HttpResponseHandler HttpResponseHandler::errorHandler(RRState &rrstate, unsigned int error_code, std::string message) {
-//     setErrorResponse(rrstate, error_code, message);
-//     return rrstate.getResponse();
-// }
+HttpResponseHandler HttpResponseHandler::errorHandler(RRState &rrstate, unsigned int error_code, std::string message) {
+    setErrorResponse(rrstate, error_code, message);
+    return rrstate.getResponse();
+}
 
 // HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
 //     HttpRequestHandler request = rrstate.getRequest();
@@ -122,7 +122,6 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 //     }
 // }
 
-
 // REFACTOR INCOMING
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
@@ -136,6 +135,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     std::string         errorPage;
     std::string         content;
     DirectoryHandler    hdl;
+    std::pair<std::string, e_data_reach>    indexResult;
     unsigned int    max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
     filePath = rrstate.getRequest().getContPath();
     LocationBlock* locationBlock = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations());
@@ -143,41 +143,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 404, "Not Founnd");
         return rrstate.getResponse();
     }
-    std::pair<std::string, e_data_reach>    indexResult = locationBlock->checkAvailableRessource(empty);
-    std::string test = hdl.getMimeType(indexResult.first);
-    // if (((isCgiRequest(rrstate, rrstate.getRequest().getPath())) ^ (test != "text/html" || locationBlock->getAutoIndex()) )) {
-    //     e_data_reach data;
-    //     data = locationBlock->isContentPathReachable();
-    //     switch (data) 
-    //     {
-    //         case DATA_OK: {
-    //             break;
-    //         }
-    //         case DATA_NOK: {
-    //             setErrorResponse(rrstate, 403, "Forbidden");
-    //             return rrstate.getResponse();
-    //         }
-    //         case NO_DATA: {
-    //             setErrorResponse(rrstate, 404, "Not Foundd");
-    //             return rrstate.getResponse();
-    //         }
-    //     }
-    // } else {
-    //     switch (indexResult.second)
-    //     {
-    //         case DATA_OK: {
-    //             break;
-    //         }
-    //         case DATA_NOK: {
-    //             setErrorResponse(rrstate, 403, "Forbidden");
-    //             return rrstate.getResponse();
-    //         }
-    //         case NO_DATA: {
-    //             setErrorResponse(rrstate, 404, "NNot Found");
-    //             return rrstate.getResponse();
-    //         }
-    //     }
-    // }
     if (rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
 	{
         filePath = filePath + rrstate.getRequest().getPath();
@@ -190,35 +155,9 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
 	    	}
 	    }
     }
-    if (rrstate.getRequest().getPath() == "/")
-    {
-        filePath = indexResult.first;
-        content = rrstate.getRequest().readFile(rrstate, filePath);
-        if (content.length() > max)
-        {
-            setErrorResponse(rrstate, 413, "response too big");
-            return rrstate.getResponse();
-        }
-        rrstate.getResponse().setStatusCode(200);
-        rrstate.getResponse().setStatusMsg("OK");
-        rrstate.getResponse().setBody(content);
-        rrstate.getResponse().setHeader("Content-Type", rrstate.getRequest().getMimeType(filePath));
-        rrstate.getResponse().setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
-        rrstate.getResponse().setHttpVersion("HTTP/1.1");
-        rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
-        rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
-        rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
-        return rrstate.getResponse();
-    }
     if (filePath.find("..") != std::string::npos)
     {
         setErrorResponse(rrstate, 403, "Forbidden");
-        return rrstate.getResponse();
-    }
-    bool fileExists = rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath());
-    if (!rrstate.getRequest().fileExists(filePath + rrstate.getRequest().getPath()) && !isCgiRequest(rrstate, rrstate.getRequest().getPath()))
-    {
-        setErrorResponse(rrstate, 404, "Not Found meow");
         return rrstate.getResponse();
     }
     if (isCgiRequest(rrstate, rrstate.getRequest().getPath()))
@@ -245,7 +184,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         cgi.handleCGI(rrstate, path);
         return rrstate.getResponse();
     }
-    // Fautif
     indexResult = locationBlock->checkAvailableRessource(empty);
     if (locationBlock->getCgiPath().empty()) {
         filePath = indexResult.first;
@@ -260,6 +198,17 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         setErrorResponse(rrstate, 413, "response too big");
         return rrstate.getResponse();
     }
+    std::string test = rrstate.getResponse().getPathOfFile(rrstate);
+    e_data_reach data = locationBlock->checkAvailableRessource(test).second;
+    std::cout << "BEFORE DATA REACH  : " << locationBlock->checkAvailableRessource(filePath).first << "\n";
+    switch(data) {
+        case DATA_OK:
+            break;
+        case DATA_NOK:
+            return errorHandler(rrstate, 403, "Forbidden");
+        case NO_DATA:
+            return errorHandler(rrstate, 404, "Not found");
+    }
     rrstate.getResponse().setStatusCode(200);
     rrstate.getResponse().setStatusMsg("OK");
     rrstate.getResponse().setBody(content);
@@ -269,8 +218,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     rrstate.getResponse().setHeader("X-Content-Type-Options", "nosniff");
     rrstate.getResponse().setHeader("X-Frame-Options", "SAMEORIGIN");
     rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
-    //std::cout << "yoo : " << rrstate.getRequest() << std::endl;
-
     return rrstate.getResponse();
 }
 

@@ -93,8 +93,29 @@ e_data_reach LocationBlock::isCgiPathReachable(void){
 	return (DATA_NOK);
 }
 
+std::string removeExcessiveSlashes(const std::string& path) {
+	std::string result;
+	bool was_last_slash = false;
+
+	for (std::string::size_type i = 0; i < path.size(); ++i) {
+		char c = path[i];
+
+		if (c == '/') {
+			if (!was_last_slash) {
+				result += c;
+				was_last_slash = true;
+			}
+		} else {
+			result += c;
+			was_last_slash = false;
+		}
+	}
+    return (result);
+}
+
 std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string& file_path) {
 	std::string full_file_path;
+	std::string directory_path;
 	std::pair <std::string, e_data_reach> result;
 	bool hasEntered = false;
 	std::string uri = this->_location_params._uri;
@@ -126,7 +147,15 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std:
 				continue;
 		}
 	} else {
-		full_file_path = file_path;
+		full_file_path = removeExcessiveSlashes(file_path);
+		directory_path = full_file_path.substr(0, full_file_path.find_last_of('/'));
+		_validator.setPath(directory_path);
+		std::cout << "DIRECTORY PATH BEFORE HIHI : " << directory_path << "\n";
+		if (_validator.exists() && _validator.isDirectory() && !_validator.isReadable()) {
+				result.first = full_file_path;
+				result.second = DATA_NOK;
+				return (result);
+			}
 		_validator.setPath(full_file_path);
 		if (_validator.exists() && _validator.isFile()) {
 				hasEntered = true;
@@ -143,8 +172,6 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std:
 		result.first = full_file_path;
 		result.second = NO_DATA;
 	}
-	//std::cout << "DATA PATH : "<< result.first << "\n";
-	//std::cout << "DATA REACH : " << result.second << "\n";
 	return (result);
 }
 

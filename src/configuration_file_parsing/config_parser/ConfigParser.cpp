@@ -183,7 +183,6 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 		if (!CgiPathChecker(directive))
 			throw ConfigParserError(BAD_CGI_PATH, __FUNCTION__, __LINE__, line);
 	}
-
 	if (!directive->hasAutoIndexModified())
 		directive->setAutoIndex(server_config->getAutoIndex());
 	if (!directive->hasClientMaxBodySizeModified())

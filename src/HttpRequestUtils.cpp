@@ -5,35 +5,43 @@ std::string HttpRequestHandler::extractDir(std::string& requestPath) {
     if (requestPath.empty()) {
         return "";
     }
-
     size_t pos = requestPath.find('/');
-
     if (pos == std::string::npos) {
         return "";
     }
-
     size_t dirStartPos = requestPath.find('/', pos + 1);
-
     if (dirStartPos == std::string::npos) {
         return "";
     }
-
     size_t dirEndPos = requestPath.find('/', dirStartPos + 1);
-    
     if (dirEndPos != std::string::npos) {
-
         return requestPath.substr(dirStartPos, dirEndPos - dirStartPos);
     }
-
-
     return requestPath.substr(dirStartPos);
+}
+
+std::string HttpRequestHandler::removeExcessiveSlashes(std::string& path) {
+	std::string result;
+	bool was_last_slash = false;
+
+	for (std::string::size_type i = 0; i < path.size(); ++i) {
+		char c = path[i];
+
+		if (c == '/') {
+			if (!was_last_slash) {
+				result += c;
+				was_last_slash = true;
+			}
+		} else {
+			result += c;
+			was_last_slash = false;
+		}
+	}
+    return (result);
 }
 
 LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const
 {
-
-
-
     std::string requestPath = this->getPath();
     LocationBlock* matchedBlock = NULL;
     size_t longestMatch = 0;
@@ -43,31 +51,20 @@ LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vecto
 	{
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
-		//std::cout << "req:" << requestPath << std::endl;
-		//std::cout << "loc:" << locationUri << std::endl;
 		if (locationUri == "/" && requestPath.length() > locationUri.length() && it != locationBlocks.end() && it == locationBlocks.begin())
 			continue;
-		//std::cout << "yo" << std::endl;
 		if (!block->isCgiAllowed())
 		{
 			alles = rrstate.getRequest().extractDir(requestPath);
-			//std::cout << "1-?-" << alles << "-?-" << std::endl;
-
 		}
 		else
 		{
 			alles = locationUri;
-			//std::cout << "2-?-" << alles << "-?-" << std::endl;
 		}
-		//std::cout << "-?-" << alles << "-?-" << std::endl;
 		if (alles == locationUri)
 			requestPath = alles;
-		//std::cout << "2req:" << requestPath << std::endl;
-		//std::cout << "2loc:" << locationUri << "\n\n" << std::endl;
-		//std::cout << "root " << rrstate.getRequest().getFullPathFromLoc(rrstate, ) << std::endl;
         if (requestPath == locationUri)
 		{
-			//std::cout << "ya" << std::endl;
             size_t matchLength = locationUri.length();
             if (matchLength > longestMatch) {
                 longestMatch = matchLength;
@@ -100,28 +97,28 @@ bool HttpRequestHandler::endsWith(const std::string& str, const std::string& suf
 
 bool HttpRequestHandler::isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const
 {
-		std::vector<std::string> alwdMet = request.getAllowedMethods();
-		for (size_t i = 0; i < alwdMet.size(); i++)
-		{
-				if (alwdMet[i] == method)
-				{
-						return true;
-				}
-		}
-		return false;
+	std::vector<std::string> alwdMet = request.getAllowedMethods();
+	for (size_t i = 0; i < alwdMet.size(); i++)
+	{
+			if (alwdMet[i] == method)
+			{
+					return true;
+			}
+	}
+	return false;
 }
 
 bool HttpRequestHandler::isPathAllowed(const HttpRequestHandler& request, const std::string& path) const
 {
-		std::vector<std::string> alwdPat = request.getAllowedPaths();
-		for (size_t i = 0; i < alwdPat.size(); i++)
-		{
-				if (alwdPat[i] == path)
-				{
-						return true;
-				}
-		}
-		return false;
+	std::vector<std::string> alwdPat = request.getAllowedPaths();
+	for (size_t i = 0; i < alwdPat.size(); i++)
+	{
+			if (alwdPat[i] == path)
+			{
+					return true;
+			}
+	}
+	return false;
 }
 
 std::string HttpRequestHandler::toString(size_t value)
@@ -194,10 +191,8 @@ std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& pa
 	std::string newPath;
 	std::string root;
 	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
-
-	//std::cout << "IN READFILE path : " << path << std::endl;
+	// hardcode again....
 	if (path.compare("/Images") >= 0) {
-		//std::cout << " ICIIIII ? " << std::endl;
 		newPath = root + path;
 	}
 	else

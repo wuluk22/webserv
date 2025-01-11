@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponseHandler.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nechaara <nechaara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/09 18:05:36 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/11 15:46:32 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # include <sys/stat.h>
 # include <sys/wait.h>
 # include <unistd.h>
+# include "configuration_file_parsing/server_config/ADirective.hpp"
 
 class RRState;
 
@@ -51,12 +52,13 @@ class HttpResponseHandler
 		std::string							getQuery() const;
 		std::string							getPathOfFile(RRState& rrstate);
 		
-		HttpResponseHandler					handlePath(RRState& rrstate);
-		void								handleResponse(RRState& rrstate);
-		std::string							urlDecode(const std::string& url);
-		HttpResponseHandler					errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
-		HttpResponseHandler					handleGet(RRState& rrstate);
-		bool								isCgiRequest(RRState& rrstate, const std::string& path);
+		HttpResponseHandler						handlePath(RRState& rrstate);
+		void									handleResponse(RRState& rrstate);
+		std::string								urlDecode(const std::string& url);
+		HttpResponseHandler						errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
+		std::pair<std::string, e_data_reach>	checkAvailableRessource(std::string& file_path);
+		HttpResponseHandler						handleGet(RRState& rrstate);
+		bool									isCgiRequest(RRState& rrstate, const std::string& path);
 
 		std::string							httpVersion;
 		int									code;
