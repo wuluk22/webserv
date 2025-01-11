@@ -264,7 +264,6 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	finalizeLocationBlock(l_directive, current_server, uri, uri_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
-	std::cout << l_directive << std::endl;
 }
 
 void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config, size_t server_id) {

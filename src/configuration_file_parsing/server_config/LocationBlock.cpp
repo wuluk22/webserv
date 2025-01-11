@@ -113,7 +113,7 @@ std::string removeExcessiveSlashes(const std::string& path) {
     return (result);
 }
 
-std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string& file_path) {
+std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string file_path) {
 	std::string full_file_path;
 	std::string directory_path;
 	std::pair <std::string, e_data_reach> result;
@@ -150,7 +150,6 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std:
 		full_file_path = removeExcessiveSlashes(file_path);
 		directory_path = full_file_path.substr(0, full_file_path.find_last_of('/'));
 		_validator.setPath(directory_path);
-		std::cout << "DIRECTORY PATH BEFORE HIHI : " << directory_path << "\n";
 		if (_validator.exists() && _validator.isDirectory() && !_validator.isReadable()) {
 				result.first = full_file_path;
 				result.second = DATA_NOK;
