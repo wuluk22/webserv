@@ -107,7 +107,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
         if (validator.exists() && validator.isDirectory()) {
             request.handleDirectoryRequest(rrstate, request.getPath(), response);
             return rrstate.getResponse();
-        }
+        } else 
+            return errorHandler(rrstate, 404, "Not Found");
     }
     else if (isCgiRequest(rrstate, request.getPath())) {
         // Hardcode for is cgiRequest....
