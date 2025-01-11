@@ -10,11 +10,11 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 
 	dirPath	= rrstate.getRequest().getContPath() + path;
 	files = _handler.getDirectoryListing(dirPath);
-	content = _handler.generateDirectoryPage(path, files);
-	rrstate.getResponse().setHttpVersion("HTTP/1.1");
+	content = _handler.generateDirectoryPage(path, files, dirPath);
 	rrstate.getResponse().setStatusCode(200);
 	rrstate.getResponse().setStatusMsg("OK");
 	rrstate.getResponse().setHeader("Content-Type", "text/html");
+	rrstate.getResponse().setHttpVersion("HTTP/1.1");
 	rrstate.getResponse().setHeader("Content-Length", toString(content.length()));
 	rrstate.getResponse().setBody(content);
 }
@@ -48,14 +48,12 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
             setErrorResponse(rrstate, 400, "Bad Request - Missing or invalid boundary in multipart form data");
             return;
         }
-
         std::string::size_type pos = requestData.find(boundary);
         if (pos == std::string::npos)
         {
             setErrorResponse(rrstate, 400, "Bad Request - Missing or invalid boundary in multipart form data");
             return;
         }
-
         pos = requestData.find("filename=\"", pos);
         if (pos == std::string::npos)
         {
@@ -70,7 +68,6 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
             setErrorResponse(rrstate, 400, "Bad Request - Wrong filename from data");
             return;
         }
-
         filename = requestData.substr(pos, endPos - pos);
         pos = requestData.find("\r\n\r\n", endPos);
         if (pos == std::string::npos)
@@ -94,7 +91,6 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
         setErrorResponse(rrstate, 400, "Bad Request - Unsupported Content-Type: " + contentType);
             return;
     }
-
     uploadPath = rrstate.getRequest().getContPath() + rrstate.getRequest().getPath();
     if (rrstate.getResponse().isCgiRequest(rrstate, rrstate.getRequest().getPath()))
     {
@@ -108,7 +104,6 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
             return;
         }
     }
-
     fullPath = uploadPath + "/" + rrstate.getResponse().urlDecode(filename);
     std::ofstream file(fullPath.c_str(), std::ios::binary);
     if (!file)
@@ -116,14 +111,12 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
         setErrorResponse(rrstate, 403, "Forbidden - File cannot be uploaded");
         return;
     }
-
     file.write(fileContent.c_str(), fileContent.length());
     file.close();
-
-    rrstate.getResponse().setHttpVersion("HTTP/1.1");
     rrstate.getResponse().setStatusCode(303);
     rrstate.getResponse().setStatusMsg("Created");
     rrstate.getResponse().setHeader("Location", rrstate.getRequest().getPath());
     rrstate.getResponse().setHeader("Content-Type", "text/plain");
+    rrstate.getResponse().setHttpVersion("HTTP/1.1");
     rrstate.getResponse().setHeader("Content-Length", "0");
 }
