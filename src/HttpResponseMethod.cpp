@@ -14,7 +14,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
     if (config.empty())
     {
-        setErrorResponse(rrstate, 404, "Not FFFound");
+        setErrorResponse(rrstate, 404, "Not Found");
         return rrstate.getResponse();
     }
     std::string alles = rrstate.getRequest().getContentPath(config);
@@ -96,6 +96,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     std::string content;
     unsigned int max;
 
+    rrstate.getRequest().setPath(response.urlDecode(request.getPath()));
     content_file = request.getContPath();
     l_block = request.getLocationBlock(rrstate, server.getLocations());
     if (!l_block)
@@ -127,15 +128,15 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
         }
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++)
             path = *it;
-        cgi.handleCGI(rrstate, path);
+        cgi.handleCGI(rrstate, urlDecode(path));
         return (rrstate.getResponse());
     }
     content_file_reach =  l_block->checkAvailableRessource();
     if (l_block->getCgiPath().empty())
-        content_file = content_file_reach.first;
+        content_file = urlDecode(content_file_reach.first);
     else
         content_file = rrstate.getRequest().getPath();
-    content = rrstate.getRequest().readFile(rrstate, content_file);
+    content = rrstate.getRequest().readFile(rrstate, urlDecode(content_file));
     content_file_reach = l_block->checkAvailableRessource(response.getPathOfFile(rrstate));
     switch(content_file_reach.second) {
         case DATA_OK:
@@ -178,7 +179,6 @@ void setErrorResponse(RRState& rrstate, int statusCode, const std::string& statu
             rrstate.getResponse().setBody(errorPageContent);
             rrstate.getResponse().setHeader("Content-Type", "text/html");
             rrstate.getResponse().setHttpVersion("HTTP/1.1");
-
             std::ostringstream lengthStream;
             lengthStream << errorPageContent.length();
             rrstate.getResponse().setHeader("Content-Length", lengthStream.str());
@@ -192,7 +192,6 @@ void setErrorResponse(RRState& rrstate, int statusCode, const std::string& statu
     rrstate.getResponse().setBody(errorPage);
     rrstate.getResponse().setHeader("Content-Type", "text/html");
     rrstate.getResponse().setHttpVersion("HTTP/1.1");
-
     std::ostringstream lengthStream;
     lengthStream << errorPage.length();
     rrstate.getResponse().setHeader("Content-Length", lengthStream.str());
