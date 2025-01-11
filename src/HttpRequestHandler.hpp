@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestHandler.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nechaara <nechaara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/09 17:56:21 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/11 01:41:20 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,7 @@ class HttpRequestHandler
 		HttpRequestHandler																handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
 		HttpRequestHandler																initRequest(const HttpRequestHandler& request);
 		std::string																		extractDir(std::string& requestPath);
+		std::string																		removeExcessiveSlashes(std::string& path);
 
 };
 std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i);
