@@ -50,7 +50,6 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 			NewServer.setLocations(directives);
 			NewServer.setServerName(server_name);
 			NewServer.setImagesPathCgi(ImagesPath);
-			std::cout << "PATHIMAGES ::" << NewServer.getImagesPathCgi() << std::endl;
 			NewServer.InitializeServerSocket(*it, 3);
 			logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
 			FD_SET(NewServer.getSock(), &getReadfds());
@@ -126,7 +125,6 @@ void	ServerBase::processClientConnections()
 				HttpResponseHandler response = it->second.getResponse();
                 response.handleResponse(it->second);
 				it->second.setResponse(response);
-				//std::cout << it->second.getResponse() << std::endl;
 				close(client_sock);
 				FD_CLR(client_sock, &writefds);
             }
