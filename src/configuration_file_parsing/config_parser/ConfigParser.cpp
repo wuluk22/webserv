@@ -28,10 +28,9 @@ ConfigParser::ConfigParser(const std::string init_path) {
 
 ConfigParser::~ConfigParser() {
 	for (int i = 0; i < _servers_config.size(); i++) {
-		_logger.info("Removing server " + toStrInt(i) + ".");
+		_logger.critical("Disabling server " + toStrInt(i) + ".");
 		delete _servers_config[i];
 	}
-	delete this->_instance;
 }
 
 ConfigParser* ConfigParser::getInstance(const std::string init_path = "") {

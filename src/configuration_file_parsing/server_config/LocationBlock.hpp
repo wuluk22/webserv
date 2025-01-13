@@ -5,16 +5,7 @@
 #include <iostream>
 #include "ADirective.hpp"
 
-// ERROR STATUS CODE DEFAULT VALUE
-#define NO_RETURN 999
-
-struct s_return {
-	std::size_t	_status_code;
-	std::string _redirection_url;
-};
-
 struct s_loc_params {
-	s_return		_return_args;
 	std::string		_cgi_path;
 	std::string		_uri;
 	std::string		_content_path;
@@ -56,13 +47,11 @@ class LocationBlock : public ADirective {
 		void setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
 		bool setContentPath(std::string content_path);
-		void setReturnArgs(std::size_t status_code, std::string redirection_url);
 		
         // Getter
 		std::string					getCgiPath(void) const;
 		std::string					getUri(void) const;
 		std::string					getContentPath(void) const;
-		s_return					getReturnArgs(void) const;
 		std::vector<std::string>	accessibleIndex(void);
 		std::string					getAlias(void) const;
 		bool						isCgiAllowed(void) const;

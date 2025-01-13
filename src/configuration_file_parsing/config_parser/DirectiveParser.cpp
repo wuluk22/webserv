@@ -88,9 +88,9 @@ void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *
 	std::string current_server = args[1];
 	if (!isValidServerName(current_server))
 		throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
-	std::set<std::string>::iterator it = _server_names.find(current_server);
-	if (it == _server_names.end())
-		_server_names.insert(current_server);
+	std::set<std::string>::iterator it = _server_name.find(current_server);
+	if (it == _server_name.end())
+		_server_name.insert(current_server);
 	else
 		throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
 	directive->setServerName(current_server);
@@ -157,27 +157,6 @@ void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *
 	directive->setErrorPagesRecord(error_pages_record);
 }
 
-void ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *directive, size_t current_line) {
-	std::size_t arg_size = args.size();
-	std::size_t status_code;
-	std::string redirection_url;
-
-	if (args.empty() || arg_size < 2|| arg_size > 3)
-		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	args.erase(args.begin());
-	if (!isStringDigit(args[0]))
-		throw ConfigParserError(NUMERICAL_VALUE_EXPECTED, __FUNCTION__, __LINE__, current_line);
-	status_code = strtoul(args[0].c_str(), NULL, 10);
-	if (status_code < 100 || status_code > 599)
-		throw ConfigParserError(WRONG_ERROR_PAGES_SCOPE, __FUNCTION__, __LINE__, current_line);
-	if (arg_size == 2)
-		directive->setReturnArgs(status_code, redirection_url);
-	else {
-		redirection_url = args[1];
-		directive->setReturnArgs(status_code, redirection_url);
-	}
-}
-
 void ConfigParser::parseDependsOn(std::vector <std::string> args, LocationBlock *directive, size_t current_line) {
 	std::size_t arg_size = args.size();
 
@@ -206,8 +185,6 @@ void ConfigParser::processDirectiveLoc(LocationBlock *directive, std::string wor
 		parseAlias(working_line, directive, current_line);
 	else if (args[0] == "allowed_method")
 		parseAllowedMethhod(args, directive, current_line);
-	else if (args[0] == "return")
-		parseReturn(args, directive, current_line);
 	else if (args[0] == "depends_on")
 		parseDependsOn(args, directive, current_line);
 }
