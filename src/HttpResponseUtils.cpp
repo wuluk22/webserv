@@ -52,10 +52,17 @@ std::string HttpResponseHandler::urlDecode(const std::string& url)
 }
 
 bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path)
-{
-    const std::string cgiDirectory = "/cgi-bin";
-	if (path.find(cgiDirectory) == 0)
-	{
+{	
+	std::string cgiDir;
+	std::vector<LocationBlock *> loc = rrstate.getServer().getLocations();
+
+	for (std::vector<LocationBlock *>::iterator it = loc.begin(); it != loc.end(); it++) {
+		if (!((*it)->getUriDependance().empty())) {
+			cgiDir = (*it)->getUri();
+			break;
+		}
+	}
+	if (!cgiDir.empty() && path.find(cgiDir) == 0) {
         return true;
     }
     return false;

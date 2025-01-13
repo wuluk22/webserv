@@ -197,9 +197,15 @@ std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& pa
 {
 	std::string newPath;
 	std::string root;
+    size_t pos;
+    std::string imagesPathCgi = rrstate.getServer().getImagesPathCgi();
+
 	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
-	// hardcode again....
-	if (path.compare("/Images") >= 0) {
+    pos = imagesPathCgi.find(root);
+    if (pos != std::string::npos) {
+        imagesPathCgi.erase(pos, root.length());
+    }
+	if (path.compare(imagesPathCgi) >= 0) {
 		newPath = root + path;
 	}
 	else
