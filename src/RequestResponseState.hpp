@@ -38,9 +38,6 @@ class	RRState
 	void				setResponse(HttpResponseHandler& res);
 	void				setServer(const ServerHandler& server);
 	void				setClientSock(const int& clientSock);
-
-	HttpRequestHandler	initRequest(const HttpRequestHandler& request);
-
 };
 
 #endif

@@ -55,7 +55,6 @@ class HttpRequestHandler
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
 		bool																		isRequestComplete;
 		static std::string															extractBoundary(const std::string& contentType);
-    	static std::string															generateErrorResponse(const std::string& message);
 		DirectoryHandler															_handler;
 		std::map<std::string, std::string>											_cookies;
 	public:
@@ -68,9 +67,7 @@ class HttpRequestHandler
 		std::string																		createErrorPage(int statusCode, const std::string& message);
 		std::string																		toString(size_t value);
 		static std::string																readFile(RRState& rrstate, const std::string& path);
-		static bool																		fileExists(const std::string& path);
 		bool																			isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const;
-		bool																			isPathAllowed(const HttpRequestHandler& request, const std::string& path) const;
 
 		void																			setMethod(const std::string &m);
 		void																			setPath(const std::string &p);
@@ -134,7 +131,6 @@ class HttpRequestHandler
 		void																			handleDirectoryRequest(RRState& rrstate, const std::string& path, HttpResponseHandler& response);
     	void																			handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 		HttpRequestHandler																handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
-		HttpRequestHandler																initRequest(const HttpRequestHandler& request);
 		std::string																		extractDir(std::string& requestPath);
 		std::string																		removeExcessiveSlashes(std::string& path);
 

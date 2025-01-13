@@ -115,19 +115,6 @@ bool HttpRequestHandler::isMethodAllowed(const HttpRequestHandler& request, cons
 	return false;
 }
 
-bool HttpRequestHandler::isPathAllowed(const HttpRequestHandler& request, const std::string& path) const
-{
-	std::vector<std::string> alwdPat = request.getAllowedPaths();
-	for (size_t i = 0; i < alwdPat.size(); i++)
-	{
-			if (alwdPat[i] == path)
-			{
-					return true;
-			}
-	}
-	return false;
-}
-
 std::string HttpRequestHandler::toString(size_t value)
 {
     std::ostringstream	oss;
@@ -153,12 +140,6 @@ std::string HttpRequestHandler::createErrorPage(int statusCode, const std::strin
     oss << "<html><head><title>" << statusCode << " - " << message << "</title></head>";
     oss << "<body><h1>" << statusCode << " - " << message << "</h1></body></html>";
     return oss.str();
-}
-
-bool HttpRequestHandler::fileExists(const std::string& path)
-{
-    struct stat	buffer;
-    return stat(path.c_str(), &buffer) == 0;
 }
 
 std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
@@ -231,17 +212,6 @@ std::string HttpRequestHandler::extractBoundary(const std::string& contentType)
         return "--" + contentType.substr(pos + 9);
     }
     return "";
-}
-
-std::string HttpRequestHandler::generateErrorResponse(const std::string& message)
-{
-	std::ostringstream	response;
-	response << "HTTP/1.1 400 Bad Request\r\n"
-			<< "Content-Type: text/plain\r\n"
-			<< "Content-Length: " << message.length() << "\r\n"
-			<< "\r\n"
-			<< message;
-	return response.str();
 }
 
 void 																			HttpRequestHandler::setMethod(const std::string& m) { method = m; }

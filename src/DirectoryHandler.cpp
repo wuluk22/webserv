@@ -59,28 +59,6 @@ std::string DirectoryHandler::generateBreadcrumbs(const std::string& path)
     return result + "</div>";
 }
 
-std::string DirectoryHandler::getMimeType(const std::string& path)
-{
-    std::string ext;
-    size_t dot_pos = path.find_last_of(".");
-    
-    if (dot_pos != std::string::npos)
-    {
-        ext = path.substr(dot_pos);
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    }
-    if (ext == ".html" || ext == ".htm") return "text/html";
-    if (ext == ".css") return "text/css";
-    if (ext == ".js") return "application/javascript";
-    if (ext == ".jpg" || ext == ".jpeg") return "image/jpeg";
-    if (ext == ".png") return "image/png";
-    if (ext == ".gif") return "image/gif";
-    if (ext == ".pdf") return "application/pdf";
-    if (ext == ".txt") return "text/plain";
-    
-    return "application/octet-stream";
-}
-
 std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& dir_path)
 {
     std::vector<FileInfo> files;

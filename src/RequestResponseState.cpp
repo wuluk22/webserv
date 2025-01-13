@@ -16,25 +16,3 @@ void                RRState::setRequest(HttpRequestHandler& req) { this->_reques
 void                RRState::setResponse(HttpResponseHandler& res) { this->_response = res; }
 void				RRState::setServer(const ServerHandler& server) { this->_server = server; }
 void				RRState::setClientSock(const int& clientSock) { this->_clientSock = clientSock; }
-
-HttpRequestHandler	RRState::initRequest(const HttpRequestHandler& request)
-{
-		HttpRequestHandler			tempRequest(request);
-		std::vector<std::string>	allowedMethods;
-		std::string					root;
-		std::vector<std::string>	allowedPaths;
-
-		allowedMethods.push_back("GET");
-		allowedMethods.push_back("POST");
-		allowedMethods.push_back("DELETE");
-		root = request.getPath();
-		allowedPaths.push_back("/static");
-		allowedPaths.push_back("/index.html");
-		tempRequest.setAllowedMethods(allowedMethods);
-		tempRequest.setRootDirectory(root);
-		tempRequest.setAllowedPaths(allowedPaths);
-		return tempRequest;	
-}
-
-
-
