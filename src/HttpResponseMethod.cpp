@@ -111,7 +111,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
         }
     }
     if (isCgiRequest(rrstate, request.getPath())) {
-        // Hardcode for is cgiRequest....
         Cgi                                     cgi;
         std::string                             path;
         std::vector<std::string>                uris;
@@ -135,6 +134,9 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
         content_file = urlDecode(content_file_reach.first);
     else
         content_file = rrstate.getRequest().getPath();
+    validator.setPath(request.getContPath() + content_file);
+    if (validator.exists() && validator.isDirectory())
+        return errorHandler(rrstate, 404, "Not Found");
     content = rrstate.getRequest().readFile(rrstate, urlDecode(content_file));
     content_file_reach = l_block->checkAvailableRessource(response.getPathOfFile(rrstate));
     switch(content_file_reach.second) {
