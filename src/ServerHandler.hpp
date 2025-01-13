@@ -49,6 +49,7 @@ class ServerHandler
 		void				bindSocket(int port);
 		void				listenSocket(int sock, int backlog);
 		void				setNonblocking(int sock);
+		void				setErrorPages(std::map<unsigned int, std::string> error_map);
 
 		std::map<unsigned int, std::string>	getErrors() const;
 };
