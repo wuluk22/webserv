@@ -147,7 +147,7 @@ def main():
                 <!-- Conteneur de l'image et du texte -->
                 <div class="image-container">
                     {"<img src='" + clean_image + "/" + selected_image + "' alt='Selected Image'>" if selected_image else "<p>No selected image</p>"}
-                    # <div class="caption">{random_phrase}</div>
+                    <div class="caption">{random_phrase}</div>
                 </div>
 
                 <a href="/" class="home-link">Return Home</a>
