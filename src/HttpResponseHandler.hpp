@@ -60,15 +60,12 @@ class HttpResponseHandler
 		HttpResponseHandler						handleGet(RRState& rrstate);
 		bool									isCgiRequest(RRState& rrstate, const std::string& path);
 
-		//void									addCookie(const std::string& name, const std::string& value, const std::string& path);
-
 		std::string								httpVersion;
 		int										code;
 		std::string								status;
 		std::map<std::string, std::string>		headers;
 		std::string								body;
 		std::string								_query;
-		//std::vector<std::string, std::string>	_setCookies;
 };
 void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);
 std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);
