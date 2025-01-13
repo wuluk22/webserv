@@ -5,7 +5,7 @@ LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_client_max_body_size = false;
 	this->_location_params._allowed_methods = 0;
 	this->_location_params._modified_content_path = false;
-	this->_location_params._return_args._status_code = NO_RETURN;
+	this->_location_params._modified_auto_index = false;
 }
 
 LocationBlock::~LocationBlock() {}
@@ -174,11 +174,6 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std:
 	return (result);
 }
 
-void LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
-	this->_location_params._return_args._status_code = status_code;
-	this->_location_params._return_args._redirection_url = redirection_url;
-}
-
 void LocationBlock::setUriDependance(std::string uri) {
 	this->_location_params._uri_dependance = uri;
 }
@@ -207,10 +202,6 @@ std::string LocationBlock::getUri(void) const {
 
 std::string LocationBlock::getContentPath(void) const {
 	return (this->_location_params._content_path);
-}
-
-s_return LocationBlock::getReturnArgs(void) const {
-	return (this->_location_params._return_args);
 }
 
 bool LocationBlock::isGetAllowed(void) const {
@@ -244,10 +235,6 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 		<< "Content Path: " << params->getContentPath() << "\n"
 		<< "URI Dependance: " << params->getUriDependance() << "\n"
 		<< "Allowed Methods: " << "\n";
-	if (params->getReturnArgs()._status_code != NO_RETURN)
-		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
-	if (!params->getReturnArgs()._redirection_url.empty())
-		os << "Redirection URL : " << params->getReturnArgs()._redirection_url << "\n";
 	if (params->isGetAllowed()) 
 		os << "GET ";
 	if (params->isPostAllowed()) 
