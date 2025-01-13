@@ -234,7 +234,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 		size_t &current_line, ServerBlock *current_server, ServerConfig *server_config) {
 	LocationBlock *l_directive = new LocationBlock();
 	std::vector<std::string> splitted_line;
-	s_parser_flags flag = {false, false, false, false, false};
+	s_parser_flags flag = {false};
 	std::string uri;
 	size_t uri_line;
 	std::streampos last_position;

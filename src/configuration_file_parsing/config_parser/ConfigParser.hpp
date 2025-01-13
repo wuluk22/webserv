@@ -38,10 +38,6 @@
 
 typedef struct s_parser_flags {
 	bool went_in_directive;
-	bool root_defined;
-	bool alias_defined;
-	bool cgi_allowed_defined;
-	bool cgi_path_defined;
 }	t_parser_flags;
 
 class ConfigParser {
