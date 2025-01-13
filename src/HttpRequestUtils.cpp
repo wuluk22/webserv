@@ -45,36 +45,43 @@ LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vecto
     std::string requestPath = this->getPath();
     LocationBlock* matchedBlock = NULL;
     size_t longestMatch = 0;
-	std::string alles;
-    for (std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
-         it != locationBlocks.end(); ++it)
-	{
+    std::string requestSwap;
+	
+	// Check perfect match 
+	std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
+    for (;it != locationBlocks.end(); ++it) {
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
-		if (locationUri == "/" && requestPath.length() > locationUri.length() && it != locationBlocks.end() && it == locationBlocks.begin())
-			continue;
-		if (!block->isCgiAllowed())
-		{
-			alles = rrstate.getRequest().extractDir(requestPath);
-		}
-		else
-		{
-			alles = locationUri;
-		}
-		if (alles == locationUri)
-			requestPath = alles;
         if (requestPath == locationUri)
-		{
+            return (block);
+    }
+	// Check closest-match
+    it = locationBlocks.begin();
+	for (;it != locationBlocks.end(); ++it) {
+        LocationBlock* block = *it;
+        const std::string& locationUri = block->getLocationParams()._uri;
+        if (locationUri == "/" && requestPath.length() > locationUri.length() &&
+            it != locationBlocks.end() && it == locationBlocks.begin()) {
+            continue;
+        }
+        if (!block->isCgiAllowed())
+            requestSwap = rrstate.getRequest().extractDir(requestPath);
+        else
+            requestSwap = locationUri;
+        if (requestSwap == locationUri)
+            requestPath = requestSwap;
+        if (requestPath == locationUri) {
             size_t matchLength = locationUri.length();
-            if (matchLength > longestMatch) {
+            if (matchLength > longestMatch) 
+            {
                 longestMatch = matchLength;
                 matchedBlock = block;
-				break;
             }
         }
     }
-    return matchedBlock;
+    return (matchedBlock);
 }
+
 
 std::string HttpRequestHandler::trim(const std::string& str)
 {
