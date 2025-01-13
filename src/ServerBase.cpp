@@ -44,6 +44,7 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 		}
 		
 		std::string	server_name = it->second->getServerHeader()->getServerName();
+		std::map <unsigned int, std::string> error_pages = it->second->getServerHeader()->getErrorPagesRecord();
 		for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++)
 		{
 			ServerHandler NewServer;
@@ -51,6 +52,7 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 			NewServer.setServerName(server_name);
 			NewServer.setImagesPathCgi(ImagesPath);
 			NewServer.InitializeServerSocket(*it, 3);
+			NewServer.setErrorPages(error_pages);
 			logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
 			FD_SET(NewServer.getSock(), &getReadfds());
 			this->maxSock = std::max(this->maxSock, NewServer.getSock());
