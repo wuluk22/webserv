@@ -22,7 +22,7 @@
 
 // TOKENS
 #define S_BLOCK_TOKENS "server_name listen error_pages"
-#define L_BLOCK_TOKENS "cgi_path alias allowed_method depends_on return"
+#define L_BLOCK_TOKENS "cgi_path alias allowed_method depends_on"
 #define C_TOKENS "root index auto_index client_max_body_size"
 #define L_NO_RPT_TOKENS "root cgi_path alias depends_on"
 #define S_NO_RPT_TOKENS "root"
@@ -51,7 +51,7 @@ class ConfigParser {
 		std::vector <std::string>			_s_params;
 		std::vector <std::string>			_non_repeat_tokens_l;
 		std::vector <std::string>			_non_repeat_tokens_s;
-		std::set <std::string>				_server_names;
+		std::set <std::string>				_server_name;
 		std::set <unsigned int>				_ports;
 		static ConfigParser*				_instance;
 		std::map<size_t , ServerConfig *>	_servers_config;
@@ -100,7 +100,6 @@ class ConfigParser {
 		void parseCgiPath(std::string working_line, LocationBlock *directive, size_t current_line);
 		void parseAlias(std::string working_line, LocationBlock *directive, size_t current_line);
 		void parseAllowedMethhod(std::vector <std::string> args, LocationBlock *directive, size_t current_line);
-		void parseReturn(std::vector <std::string> args,LocationBlock *directive, size_t current_line);
 		void parseServerName(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		void parseListeningPorts(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		bool checkErrorPagesAvailability(std::string path, size_t current_line);
