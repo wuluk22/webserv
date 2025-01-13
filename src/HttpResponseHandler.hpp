@@ -34,23 +34,23 @@ class RRState;
 class HttpResponseHandler
 {
 	public:
-		void								setHttpVersion(std::string version);
-		void								setStatusCode(int code);
-		void								setStatusMsg(std::string message);
-		void								setHeader(const std::string &headerName, const std::string &headerValue);
-		void								setBody(std::string body);
-		void								setResponse(std::string output);
-		void    							setQuery(std::string query);
-		
-		std::string							getHttpVersion() const;
-		int									getStatusCode() const;
-		std::string							getStatusMsg() const;
-		std::string							getHeader(const std::string &headerName) const;
-		std::map<std::string, std::string>	getHeaders() const;
-		std::string							getBody() const;
-		std::string							getAll() const;
-		std::string							getQuery() const;
-		std::string							getPathOfFile(RRState& rrstate);
+		void									setHttpVersion(std::string version);
+		void									setStatusCode(int code);
+		void									setStatusMsg(std::string message);
+		void									setHeader(const std::string &headerName, const std::string &headerValue);
+		void									setBody(std::string body);
+		void									setResponse(std::string output);
+		void    								setQuery(std::string query);
+
+		std::string								getHttpVersion() const;
+		int										getStatusCode() const;
+		std::string								getStatusMsg() const;
+		std::string								getHeader(const std::string &headerName) const;
+		std::map<std::string, std::string>		getHeaders() const;
+		std::string								getBody() const;
+		std::string								getAll() const;
+		std::string								getQuery() const;
+		std::string								getPathOfFile(RRState& rrstate);
 		
 		HttpResponseHandler						handlePath(RRState& rrstate);
 		void									handleResponse(RRState& rrstate);
@@ -60,12 +60,15 @@ class HttpResponseHandler
 		HttpResponseHandler						handleGet(RRState& rrstate);
 		bool									isCgiRequest(RRState& rrstate, const std::string& path);
 
-		std::string							httpVersion;
-		int									code;
-		std::string							status;
-		std::map<std::string, std::string>	headers;
-		std::string							body;
-		std::string							_query;
+		//void									addCookie(const std::string& name, const std::string& value, const std::string& path);
+
+		std::string								httpVersion;
+		int										code;
+		std::string								status;
+		std::map<std::string, std::string>		headers;
+		std::string								body;
+		std::string								_query;
+		//std::vector<std::string, std::string>	_setCookies;
 };
 void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);
 std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);

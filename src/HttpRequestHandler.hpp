@@ -57,6 +57,7 @@ class HttpRequestHandler
 		static std::string															extractBoundary(const std::string& contentType);
     	static std::string															generateErrorResponse(const std::string& message);
 		DirectoryHandler															_handler;
+		std::map<std::string, std::string>											_cookies;
 	public:
 		HttpRequestHandler();
 		~HttpRequestHandler();
@@ -136,6 +137,10 @@ class HttpRequestHandler
 		HttpRequestHandler																initRequest(const HttpRequestHandler& request);
 		std::string																		extractDir(std::string& requestPath);
 		std::string																		removeExcessiveSlashes(std::string& path);
+
+		void																			parseCookies(const std::string& cookieHeader);
+		const std::map<std::string, std::string>&										getCookies() const;
+		std::string																		trimCookies(const std::string& str);
 
 };
 std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i);
