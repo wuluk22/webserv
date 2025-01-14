@@ -1,5 +1,5 @@
 #ifndef SERVERBASE_HPP
-#define SERVERBASE_HPP
+# define SERVERBASE_HPP
 
 #include "RequestResponseState.hpp"
 #include "ServerHandler.hpp"

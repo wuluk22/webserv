@@ -1,5 +1,5 @@
 #ifndef PATHVALIDATOR_HPP
-#define PATHVALIDATOR_HPP
+# define PATHVALIDATOR_HPP
 
 #include <string>
 #include <sys/stat.h>
