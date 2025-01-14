@@ -30,54 +30,48 @@
     <h1>Cookie Clicker</h1>
     <img id="cookie" src="/static/cookie_clicker/cookie.jpg">
     <div id="score">Score: 0</div>
-    <button id="save-btn">Save Progress</button>
-    <button id="load-btn">Load Progress</button>
+    <button id="rst-btn">Reset</button>
 
     <script>
-        let score = 0;
-        const cookie = document.getElementById('cookie');
-        const scoreDisplay = document.getElementById('score');
-        const saveButton = document.getElementById('save-btn');
-        const loadButton = document.getElementById('load-btn');
-
-        // Increment score when clicking on the cookie
-        cookie.addEventListener('click', () => {
-            score++;
-            updateScore();
-        });
-
-        // Update score display
-        function updateScore() {
-            scoreDisplay.textContent = `Score: ${score}`;
-        }
-
-        // Save progress to localStorage
-        saveButton.addEventListener('click', () => {
-            localStorage.setItem('cookieClickerScore', score);
-            alert('Progress saved!');
-        });
-
-        // Load progress from localStorage
-        loadButton.addEventListener('click', () => {
-            const savedScore = localStorage.getItem('cookieClickerScore');
-            if (savedScore !== null) {
-                score = parseInt(savedScore, 10);
-                updateScore();
-                alert('Progress loaded!');
-            } else {
-                alert('No saved progress found.');
+        document.addEventListener('DOMContentLoaded', () => {
+            let score = 0;
+    
+            const cookie = document.getElementById('cookie');
+            const scoreDisplay = document.getElementById('score');
+            const rstBtn = document.getElementById('rst-btn');
+    
+            // Fetch score from cookies
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return "0";
             }
-        });
-
-        // Initialize score on page load
-        window.onload = () => {
-            const savedScore = localStorage.getItem('cookieClickerScore');
-            if (savedScore !== null) {
-                score = parseInt(savedScore, 10);
-                updateScore();
+    
+            // Update score
+            function updateScore(newScore) {
+                score = newScore;
+                scoreDisplay.textContent = `Score: ${score}`;
+                document.cookie = `score=${score}; path=/;`;
             }
-        };
+    
+            // Initialize score
+            score = parseInt(getCookie('score'), 10);
+            updateScore(score);
+    
+            // Increment score on cookie click
+            cookie.addEventListener('click', () => {
+                updateScore(score + 1);
+            });
+            
+            rstBtn.addEventListener('click', () => {
+                updateScore(0);
+            });
+            
+
+        });
     </script>
+    
 </body>
 </html>
 

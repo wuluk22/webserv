@@ -79,12 +79,28 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     return rrstate.getResponse();
 }
 
-HttpResponseHandler HttpResponseHandler::errorHandler(RRState &rrstate, unsigned int error_code, std::string message) {
+HttpResponseHandler HttpResponseHandler::errorHandler(RRState &rrstate, unsigned int error_code, std::string message)
+{
     setErrorResponse(rrstate, error_code, message);
     return rrstate.getResponse();
 }
 
-HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
+std::string generateSessionId()
+{
+    std::srand(std::time(0));
+    std::string sessionId;
+    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const size_t maxLength = 16;
+
+    for (size_t i = 0; i < maxLength; ++i)
+    {
+        sessionId += charset[std::rand() % (sizeof(charset) - 1)];
+    }
+    return sessionId;
+}
+
+HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
+{
     HttpRequestHandler request = rrstate.getRequest();
     HttpResponseHandler response = rrstate.getResponse();
     ServerHandler server = rrstate.getServer();
@@ -109,6 +125,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
             request.handleDirectoryRequest(rrstate, request.getPath(), response);
             return rrstate.getResponse();
         }
+    }
+    std::string sessionId = request.getCookie("SESSION_ID");
+    if (sessionId.empty())
+    {
+        sessionId = generateSessionId();
+        response.setHeader("Set-Cookie", "SESSION_ID=" + sessionId + "; Path=/; HttpOnly");
     }
     if (isCgiRequest(rrstate, request.getPath())) {
         Cgi                                     cgi;

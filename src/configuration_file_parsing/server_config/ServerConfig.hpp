@@ -1,5 +1,5 @@
 #ifndef SERVERCONFIG_HPP
-#define SERVERCONFIG_HPP
+# define SERVERCONFIG_HPP
 
 #include "ServerBlock.hpp"
 #include "LocationBlock.hpp"

@@ -1,5 +1,5 @@
 #ifndef CONFIGEXCEPTION_HPP
-#define CONFIGEXCEPTION_HPP
+# define CONFIGEXCEPTION_HPP
 
 #include <iostream>
 #include "../../ErrorHandler.hpp"
