@@ -41,11 +41,15 @@ int main(int ac, char **argv) {
         return (1);
     } 
     catch (ServerBaseError& e) {
-        std::cerr << "ERROR -> " << e.what() << std::endl;
+        if (exit_flag) {
+            std::cerr << "[INFO] Server interrupted by SIGINT, exiting gracefully." << std::endl;
+        } else {
+            std::cerr << "ERROR -> " << e.what() << std::endl;
+        }
         if (config)
-			delete config;
+            delete config;
         return (1);
-    } 
+    }
     catch (ConfigParserError& e) {
         std::cerr << "ERROR -> " << e.what() << std::endl;
         if (config) 
