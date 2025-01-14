@@ -255,3 +255,16 @@ const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	
 bool																			HttpRequestHandler::getIsValid() const { return _valid; }
 bool																			HttpRequestHandler::getAutoIndex() const { return _autoIndex; }
 const unsigned int&																HttpRequestHandler::getMaxBody() const { return _maxBodySize; }
+std::string                                                                     HttpRequestHandler::getCookie(const std::string& name) const
+{
+    std::string cookies = getHeader("Cookie");
+    size_t pos = cookies.find(name + "=");
+    if (pos != std::string::npos) {
+        size_t start = pos + name.length() + 1; // Start after "name="
+        size_t end = cookies.find(";", start); // Find the next semicolon
+        if (end == std::string::npos)
+            end = cookies.length();
+        return cookies.substr(start, end - start);
+    }
+    return ""; // Return empty string if cookie not found
+}

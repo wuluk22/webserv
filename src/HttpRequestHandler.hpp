@@ -55,7 +55,7 @@ class HttpRequestHandler
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
 		bool																		_isRequestComplete;
 		DirectoryHandler															_handler;
-		std::map<std::string, std::string>											_cookies;
+		std::string																	_cookie;
 		static std::string															extractBoundary(const std::string& contentType);
 		
 	public:
@@ -96,6 +96,8 @@ class HttpRequestHandler
 		const std::vector<std::string>&													getAllowedPaths() const;
 		const std::vector<std::string>&													getCgiPath() const;
 		const int&																		getClientSocket() const;
+		std::string																		getCookie(const std::string& name) const;
+
 
 // --------------------------------									
 
