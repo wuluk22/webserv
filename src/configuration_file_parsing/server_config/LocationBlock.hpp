@@ -27,7 +27,6 @@ class RRState;
 class LocationBlock : public ADirective {
 	private:
 		s_loc_params _location_params;
-		LocationBlock* _upper_location;
 	public:
 		LocationBlock(void);
 		~LocationBlock();
