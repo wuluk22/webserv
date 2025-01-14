@@ -131,6 +131,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     {
         sessionId = generateSessionId();
         response.setHeader("Set-Cookie", "SESSION_ID=" + sessionId + "; Path=/; HttpOnly");
+        response.setHeader("SameSite", "None");
     }
     if (isCgiRequest(rrstate, request.getPath())) {
         Cgi                                     cgi;

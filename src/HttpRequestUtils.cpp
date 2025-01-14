@@ -269,11 +269,11 @@ std::string                                                                     
     std::string cookies = getHeader("Cookie");
     size_t pos = cookies.find(name + "=");
     if (pos != std::string::npos) {
-        size_t start = pos + name.length() + 1; // Start after "name="
-        size_t end = cookies.find(";", start); // Find the next semicolon
+        size_t start = pos + name.length() + 1;
+        size_t end = cookies.find(";", start);
         if (end == std::string::npos)
             end = cookies.length();
         return cookies.substr(start, end - start);
     }
-    return ""; // Return empty string if cookie not found
+    return "";
 }
