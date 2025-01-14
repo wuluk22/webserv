@@ -7,7 +7,7 @@ volatile sig_atomic_t exit_flag = 0;
 
 void handleSignal(int sig) {
     if (sig == SIGINT) {
-        std::cerr << YELLOW << "\nCaught signal SIGINT (Ctrl+C). Exiting gracefully..." << RESET << std::endl;
+        std::cout << std::endl;
         exit_flag = 1;
     }
 }
@@ -35,23 +35,22 @@ int main(int ac, char **argv) {
         }
     } 
     catch (ServerHandlerError& e) {
-        std::cerr << "ERROR -> " << e.what() << std::endl;
+        if (!exit_flag)
+            std::cerr << "ERROR -> " << e.what() << std::endl;
         if (config)
 			delete config;
         return (1);
     } 
     catch (ServerBaseError& e) {
-        if (exit_flag) {
-            std::cerr << "[INFO] Server interrupted by SIGINT, exiting gracefully." << std::endl;
-        } else {
+        if (!exit_flag)
             std::cerr << "ERROR -> " << e.what() << std::endl;
-        }
         if (config)
             delete config;
         return (1);
     }
     catch (ConfigParserError& e) {
-        std::cerr << "ERROR -> " << e.what() << std::endl;
+        if (!exit_flag)
+            std::cerr << "ERROR -> " << e.what() << std::endl;
         if (config) 
 			delete config;
         return (1);
