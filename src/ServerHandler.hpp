@@ -54,6 +54,4 @@ class ServerHandler
 		std::map<unsigned int, std::string>	getErrors() const;
 };
 
-void						printFdSet(const fd_set& fdset, std::string functionName);
-
 #endif
