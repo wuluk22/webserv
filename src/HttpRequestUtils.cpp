@@ -5,79 +5,83 @@ std::string HttpRequestHandler::extractDir(std::string& requestPath) {
     if (requestPath.empty()) {
         return "";
     }
-
     size_t pos = requestPath.find('/');
-
     if (pos == std::string::npos) {
         return "";
     }
-
     size_t dirStartPos = requestPath.find('/', pos + 1);
-
     if (dirStartPos == std::string::npos) {
         return "";
     }
-
     size_t dirEndPos = requestPath.find('/', dirStartPos + 1);
-    
     if (dirEndPos != std::string::npos) {
-
         return requestPath.substr(dirStartPos, dirEndPos - dirStartPos);
     }
-
-
     return requestPath.substr(dirStartPos);
+}
+
+std::string HttpRequestHandler::removeExcessiveSlashes(std::string& path) {
+	std::string result;
+	bool was_last_slash = false;
+
+	for (std::string::size_type i = 0; i < path.size(); ++i) {
+		char c = path[i];
+
+		if (c == '/') {
+			if (!was_last_slash) {
+				result += c;
+				was_last_slash = true;
+			}
+		} else {
+			result += c;
+			was_last_slash = false;
+		}
+	}
+    return (result);
 }
 
 LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const
 {
-
-
-
     std::string requestPath = this->getPath();
     LocationBlock* matchedBlock = NULL;
     size_t longestMatch = 0;
-	std::string alles;
-    for (std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
-         it != locationBlocks.end(); ++it)
-	{
+    std::string requestSwap;
+	
+	// Check perfect match 
+	std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
+    for (;it != locationBlocks.end(); ++it) {
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
-		//std::cout << "req:" << requestPath << std::endl;
-		//std::cout << "loc:" << locationUri << std::endl;
-		if (locationUri == "/" && requestPath.length() > locationUri.length() && it != locationBlocks.end() && it == locationBlocks.begin())
-			continue;
-		//std::cout << "yo" << std::endl;
-		if (!block->isCgiAllowed())
-		{
-			alles = rrstate.getRequest().extractDir(requestPath);
-			//std::cout << "1-?-" << alles << "-?-" << std::endl;
-
-		}
-		else
-		{
-			alles = locationUri;
-			//std::cout << "2-?-" << alles << "-?-" << std::endl;
-		}
-		//std::cout << "-?-" << alles << "-?-" << std::endl;
-		if (alles == locationUri)
-			requestPath = alles;
-		//std::cout << "2req:" << requestPath << std::endl;
-		//std::cout << "2loc:" << locationUri << "\n\n" << std::endl;
-		//std::cout << "root " << rrstate.getRequest().getFullPathFromLoc(rrstate, ) << std::endl;
         if (requestPath == locationUri)
-		{
-			//std::cout << "ya" << std::endl;
+            return (block);
+    }
+	// Check closest-match
+    it = locationBlocks.begin();
+	for (;it != locationBlocks.end(); ++it) {
+        LocationBlock* block = *it;
+        const std::string& locationUri = block->getLocationParams()._uri;
+        if (locationUri == "/" && requestPath.length() > locationUri.length() &&
+            it != locationBlocks.end() && it == locationBlocks.begin()) {
+            continue;
+        }
+        if (!block->isCgiAllowed())
+            requestSwap = rrstate.getRequest().extractDir(requestPath);
+        else
+            requestSwap = locationUri;
+        if (requestSwap == locationUri)
+            requestPath = requestSwap;
+        if (requestPath == locationUri) {
             size_t matchLength = locationUri.length();
-            if (matchLength > longestMatch) {
+            if (matchLength > longestMatch) 
+            {
                 longestMatch = matchLength;
                 matchedBlock = block;
-				break;
             }
         }
     }
-    return matchedBlock;
+    return (matchedBlock);
 }
+
 
 std::string HttpRequestHandler::trim(const std::string& str)
 {
@@ -100,28 +104,15 @@ bool HttpRequestHandler::endsWith(const std::string& str, const std::string& suf
 
 bool HttpRequestHandler::isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const
 {
-		std::vector<std::string> alwdMet = request.getAllowedMethods();
-		for (size_t i = 0; i < alwdMet.size(); i++)
-		{
-				if (alwdMet[i] == method)
-				{
-						return true;
-				}
-		}
-		return false;
-}
-
-bool HttpRequestHandler::isPathAllowed(const HttpRequestHandler& request, const std::string& path) const
-{
-		std::vector<std::string> alwdPat = request.getAllowedPaths();
-		for (size_t i = 0; i < alwdPat.size(); i++)
-		{
-				if (alwdPat[i] == path)
-				{
-						return true;
-				}
-		}
-		return false;
+	std::vector<std::string> alwdMet = request.getAllowedMethods();
+	for (size_t i = 0; i < alwdMet.size(); i++)
+	{
+			if (alwdMet[i] == method)
+			{
+					return true;
+			}
+	}
+	return false;
 }
 
 std::string HttpRequestHandler::toString(size_t value)
@@ -149,12 +140,6 @@ std::string HttpRequestHandler::createErrorPage(int statusCode, const std::strin
     oss << "<html><head><title>" << statusCode << " - " << message << "</title></head>";
     oss << "<body><h1>" << statusCode << " - " << message << "</h1></body></html>";
     return oss.str();
-}
-
-bool HttpRequestHandler::fileExists(const std::string& path)
-{
-    struct stat	buffer;
-    return stat(path.c_str(), &buffer) == 0;
 }
 
 std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
@@ -202,14 +187,15 @@ std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& pa
 {
 	std::string newPath;
 	std::string root;
-	std::string ImagesPathCgi;
-	std::string imagesFolderPath;
+    size_t pos;
+    std::string imagesPathCgi = rrstate.getServer().getImagesPathCgi();
 
 	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
-	ImagesPathCgi = rrstate.getServer().getImagesPathCgi();
-	imagesFolderPath = removeRoot(ImagesPathCgi, root);
-
-	if (path.compare(imagesFolderPath) >= 0) {
+    pos = imagesPathCgi.find(root);
+    if (pos != std::string::npos) {
+        imagesPathCgi.erase(pos, root.length());
+    }
+	if (path.compare(imagesPathCgi) >= 0) {
 		newPath = root + path;
 	}
 	else
@@ -237,55 +223,44 @@ std::string HttpRequestHandler::extractBoundary(const std::string& contentType)
     return "";
 }
 
-std::string HttpRequestHandler::generateErrorResponse(const std::string& message)
-{
-	std::ostringstream	response;
-	response << "HTTP/1.1 400 Bad Request\r\n"
-			<< "Content-Type: text/plain\r\n"
-			<< "Content-Length: " << message.length() << "\r\n"
-			<< "\r\n"
-			<< message;
-	return response.str();
-}
-
-void 																			HttpRequestHandler::setMethod(const std::string& m) { method = m; }
-void 																			HttpRequestHandler::setPath(const std::string& p) { path = p; }
-void 																			HttpRequestHandler::setHttpVersion(const std::string& h) { httpVersion = h; }
-void 																			HttpRequestHandler::setHeader(const std::string& name, const std::string& value) { headers[trim(name)] = trim(value); }
-void 																			HttpRequestHandler::setBody(const std::string& b) { body = b; }
-void 																			HttpRequestHandler::setFd(const int& nb) { fd = nb; }
-void 																			HttpRequestHandler::setIsComplete(const bool& is) { isRequestComplete = is; }
-void 																			HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { allowedMethods = methods; }
-void 																			HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { allowedPaths = paths; }
-void 																			HttpRequestHandler::setAllowedPath(const std::string& path) { allowedPath = path; }
-void 																			HttpRequestHandler::setRootDirectory(const std::string& path) { rootDirectory = path; }
-void 																			HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _CgiPath = cgiPath; }
+void 																			HttpRequestHandler::setMethod(const std::string& m) { _method = m; }
+void 																			HttpRequestHandler::setPath(const std::string& p) { _path = p; }
+void 																			HttpRequestHandler::setHttpVersion(const std::string& h) { _httpVersion = h; }
+void 																			HttpRequestHandler::setHeader(const std::string& name, const std::string& value) { _headers[trim(name)] = trim(value); }
+void 																			HttpRequestHandler::setBody(const std::string& b) { _body = b; }
+void 																			HttpRequestHandler::setFd(const int& nb) { _fd = nb; }
+void 																			HttpRequestHandler::setIsComplete(const bool& is) { _isRequestComplete = is; }
+void 																			HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { _allowedMethods = methods; }
+void 																			HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { _allowedPaths = paths; }
+void 																			HttpRequestHandler::setAllowedPath(const std::string& path) { _allowedPath = path; }
+void 																			HttpRequestHandler::setRootDirectory(const std::string& path) { _rootDirectory = path; }
+void 																			HttpRequestHandler::setCgiPath(const std::vector<std::string>& cgiPath) { _cgiPath = cgiPath; }
 void 																			HttpRequestHandler::setClientSocket(const int& clientSock) {_clientSocket = clientSock;}
 																			
 void 																			HttpRequestHandler::setLocInfo(const std::map<std::string, std::map<std::string, std::vector<std::string> > >& locInfo) { _locInfo = locInfo; }
-void 																			HttpRequestHandler::setIsValid(const bool& val) { valid = val; }
-void 																			HttpRequestHandler::setAutoIndex(const bool& index) { autoIndex = index; }
-void 																			HttpRequestHandler::setMaxBody(const unsigned int& max) { maxBodySize = max; }
+void 																			HttpRequestHandler::setIsValid(const bool& val) { _valid = val; }
+void 																			HttpRequestHandler::setAutoIndex(const bool& index) { _autoIndex = index; }
+void 																			HttpRequestHandler::setMaxBody(const unsigned int& max) { _maxBodySize = max; }
 
-std::string 																	HttpRequestHandler::getMethod() const { return method; }
-std::string 																	HttpRequestHandler::getPath() const { return path; }
-std::string 																	HttpRequestHandler::getHttpVersion() const { return httpVersion; }
-std::string 																	HttpRequestHandler::getBody() const { return body; }
+std::string 																	HttpRequestHandler::getMethod() const { return _method; }
+std::string 																	HttpRequestHandler::getPath() const { return _path; }
+std::string 																	HttpRequestHandler::getHttpVersion() const { return _httpVersion; }
+std::string 																	HttpRequestHandler::getBody() const { return _body; }
 std::string 																	HttpRequestHandler::getHeader(const std::string& name) const
 {
-    std::map<std::string, std::string>::const_iterator it = headers.find(name);
-    return it != headers.end() ? it->second : "";
+    std::map<std::string, std::string>::const_iterator it = _headers.find(name);
+    return it != _headers.end() ? it->second : "";
 }
-const std::map<std::string, std::string>&										HttpRequestHandler::getHeaders() const { return headers; }
-int     																		HttpRequestHandler::getFd() const { return fd; }
-bool    																		HttpRequestHandler::getIsComplete() const { return isRequestComplete; }
-std::string																		HttpRequestHandler::getRootDirectory() const { return rootDirectory; }
-const std::vector<std::string>& 												HttpRequestHandler::getAllowedMethods() const { return allowedMethods; }
-const std::vector<std::string>& 												HttpRequestHandler::getAllowedPaths() const { return allowedPaths; }
-const std::string&																HttpRequestHandler::getAllowedPath() const { return allowedPath; }
-const std::vector<std::string>&													HttpRequestHandler::getCgiPath() const { return _CgiPath;}
+const std::map<std::string, std::string>&										HttpRequestHandler::getHeaders() const { return _headers; }
+int     																		HttpRequestHandler::getFd() const { return _fd; }
+bool    																		HttpRequestHandler::getIsComplete() const { return _isRequestComplete; }
+std::string																		HttpRequestHandler::getRootDirectory() const { return _rootDirectory; }
+const std::vector<std::string>& 												HttpRequestHandler::getAllowedMethods() const { return _allowedMethods; }
+const std::vector<std::string>& 												HttpRequestHandler::getAllowedPaths() const { return _allowedPaths; }
+const std::string&																HttpRequestHandler::getAllowedPath() const { return _allowedPath; }
+const std::vector<std::string>&													HttpRequestHandler::getCgiPath() const { return _cgiPath;}
 const int&																		HttpRequestHandler::getClientSocket() const {return _clientSocket; };
 const std::map<std::string, std::map<std::string, std::vector<std::string> > >&	HttpRequestHandler::getLocInfo() const { return _locInfo; }
-bool																			HttpRequestHandler::getIsValid() const { return valid; }
-bool																			HttpRequestHandler::getAutoIndex() const { return autoIndex; }
-const unsigned int&																HttpRequestHandler::getMaxBody() const { return maxBodySize; }
+bool																			HttpRequestHandler::getIsValid() const { return _valid; }
+bool																			HttpRequestHandler::getAutoIndex() const { return _autoIndex; }
+const unsigned int&																HttpRequestHandler::getMaxBody() const { return _maxBodySize; }

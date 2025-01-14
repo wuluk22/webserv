@@ -20,6 +20,10 @@ void  ServerHandler::setServerName(std::string server_name) { this->_server_name
 void  ServerHandler::setLocations(std::vector<LocationBlock *>& locations) { this->_locations = locations; }
 void  ServerHandler::setImagesPathCgi(std::string imagesPath)  {this->_imagesPath = imagesPath;}
 
+void ServerHandler::setErrorPages(std::map <unsigned int, std::string> error_pages) {
+  this->_errorPagesRecord = error_pages;
+}
+
 void ServerHandler::InitializeServerSocket(int port, const int backlog)
 {
 	this->_port = port;
@@ -53,11 +57,8 @@ void ServerHandler::bindSocket(int port)
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
 	this->_address.sin_port = htons(port);
-
 	if (bind(this->_sock, (struct sockaddr*)&this->_address, sizeof(this->_address)) < 0)
-	{
 		throw ServerHandlerError("bind failed", __FUNCTION__, __LINE__);
-  }
 }
 
 void ServerHandler::listenSocket(int sock, int backlog)
@@ -70,9 +71,9 @@ void ServerHandler::setNonblocking(int sock)
 {
     int flags = fcntl(sock, F_GETFL, 0);
     if (flags == -1)
-		throw ServerHandlerError("fcntl failed : unable to get flags", __FUNCTION__, __LINE__);
+		  throw ServerHandlerError("fcntl failed : unable to get flags", __FUNCTION__, __LINE__);
     if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1)
-		throw ServerHandlerError("fcntl failed: unable to set non-blocking", __FUNCTION__, __LINE__);
+		  throw ServerHandlerError("fcntl failed: unable to set non-blocking", __FUNCTION__, __LINE__);
 }
 
 std::map<unsigned int, std::string> ServerHandler::getErrors() const { return _errorPagesRecord; }

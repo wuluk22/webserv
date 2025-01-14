@@ -1,7 +1,7 @@
 #include "DirectoryHandler.hpp"
 
 FileInfo::FileInfo(const std::string& n, const std::string& s, const std::string& m, bool d)
-    : name(n), size(s), modified(m), isDirectory(d) {}
+    : _name(n), _size(s), _modified(m), _isDirectory(d) {}
 
 DirectoryHandler::DirectoryHandler() {}
 DirectoryHandler::~DirectoryHandler() {}
@@ -34,11 +34,11 @@ std::string DirectoryHandler::formatTime(time_t time)
 
 bool DirectoryHandler::compareFileInfo(const FileInfo& a, const FileInfo& b)
 {
-    if (a.isDirectory != b.isDirectory)
+    if (a._isDirectory != b._isDirectory)
     {
-        return a.isDirectory > b.isDirectory;
+        return a._isDirectory > b._isDirectory;
     }
-    return a.name < b.name;
+    return a._name < b._name;
 }
 
 std::string DirectoryHandler::generateBreadcrumbs(const std::string& path)
@@ -57,28 +57,6 @@ std::string DirectoryHandler::generateBreadcrumbs(const std::string& path)
         }
     }
     return result + "</div>";
-}
-
-std::string DirectoryHandler::getMimeType(const std::string& path)
-{
-    std::string ext;
-    size_t dot_pos = path.find_last_of(".");
-    
-    if (dot_pos != std::string::npos)
-    {
-        ext = path.substr(dot_pos);
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    }
-    if (ext == ".html" || ext == ".htm") return "text/html";
-    if (ext == ".css") return "text/css";
-    if (ext == ".js") return "application/javascript";
-    if (ext == ".jpg" || ext == ".jpeg") return "image/jpeg";
-    if (ext == ".png") return "image/png";
-    if (ext == ".gif") return "image/gif";
-    if (ext == ".pdf") return "application/pdf";
-    if (ext == ".txt") return "text/plain";
-    
-    return "application/octet-stream";
 }
 
 std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& dir_path)
@@ -120,7 +98,7 @@ std::vector<FileInfo> DirectoryHandler::getDirectoryListing(const std::string& d
     return files;
 }
 
-std::string DirectoryHandler::generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files) {
+std::string DirectoryHandler::generateDirectoryPage(const std::string& path, const std::vector<FileInfo>& files, const std::string &file_path) {
     std::ostringstream html;
     
     html << "<!DOCTYPE html>\n"
@@ -168,9 +146,7 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
          << "</script>\n"
          << "</head>\n<body>\n"
          << "<div class='container'>\n";
-
     html << generateBreadcrumbs(path);
-
     html << "<div class='upload-form'>\n"
          << "<h3>Upload File</h3>\n"
          << "<form action='" << path << "' method='POST' enctype='multipart/form-data'>\n"
@@ -186,7 +162,7 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
     {
         const FileInfo& file = *it;
         html << "<tr>\n<td>";
-        if (file.isDirectory)
+        if (file._isDirectory)
         {
             html << "<span class='folder'>[] </span>";
         }
@@ -194,33 +170,33 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         {
             html << "<span class='file'>|| </span>";
         }
-        
         std::string link_path;
+        std::string actual_path;
         if (path == "/")
         {
-            link_path = path + file.name;
+            link_path = path + file._name;
+            actual_path = file_path + file._name;
         }
         else
         {
-            link_path = path + "/" + file.name;
+            link_path = path + '/' + file._name;
+            actual_path = file_path + '/' + file._name;
         }
-        if (file.isDirectory)
+        if (file._isDirectory)
         {
-            html << "<a href='" << link_path << "/'>" << file.name << "</a></td>\n";
+            html << "<a href='" << link_path << "/'>" << file._name << "</a></td>\n";
         }
         else
         {
-            html << "<a href='" << link_path << "' download>" << file.name << "</a></td>\n";
+            html << "<a href='" << link_path << "' download>" << file._name << "</a></td>\n";
         }
         
-        html << "<td>" << file.size << "</td>\n"
-             << "<td>" << file.modified << "</td>\n"
+        html << "<td>" << file._size << "</td>\n"
+             << "<td>" << file._modified << "</td>\n"
              << "<td>\n";
-        
-        if (!file.isDirectory)
+        if (!file._isDirectory)
         {
-            link_path = "." + link_path;
-            _validator.setPath(link_path);
+            _validator.setPath(actual_path);
             bool isValid = _validator.exists() && _validator.isFile() && _validator.isWritable();
             html << "<script>";
             html << "   function deleteElement(filePath) {";
@@ -266,10 +242,6 @@ bool DirectoryHandler::createDirectory(const std::string& path)
 
 bool DirectoryHandler::isDirectory(const std::string& path)
 {
-    struct stat path_stat;
-    if (stat(path.c_str(), &path_stat) == 0)
-    {
-        return S_ISDIR(path_stat.st_mode);
-    }
-    return false;
+    _validator.setPath(path);
+    return _validator.isDirectory();
 }

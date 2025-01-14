@@ -12,9 +12,9 @@ HttpRequestHandler::~HttpRequestHandler()
 
 void HttpRequestHandler::reset()
 {
-    this->allowedPaths.clear();
-    this->allowedMethods.clear();
-	this->allowedPath.clear();
+    this->_allowedPaths.clear();
+    this->_allowedMethods.clear();
+	this->_allowedPath.clear();
 }
 
 HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock)
@@ -48,7 +48,7 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
         {
             locInfo[locationUri]["allowed_methods"].push_back("DELETE");
         }
-        if ((*it)->isCgiAllowed() && std::find(_CgiPath.begin(), _CgiPath.end(), (*it)->getCgiPath()) == _CgiPath.end())
+        if ((*it)->isCgiAllowed() && std::find(_cgiPath.begin(), _cgiPath.end(), (*it)->getCgiPath()) == _cgiPath.end())
         {
             cgiPath.push_back((*it)->getCgiPath());
         }
@@ -182,7 +182,7 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
     }
     request = httpParsing(requestData);
     request.setFd(1);
-	request.setIsComplete(isRequestComplete);
+	request.setIsComplete(_isRequestComplete);
 	request = request.handleConfig(request, rrstate.getServer().getLocations());
     return request;
 }

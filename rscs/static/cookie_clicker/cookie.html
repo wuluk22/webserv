@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Cookie Clicker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #cookie {
+            width: 200px;
+            cursor: pointer;
+        }
+        #score {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <button class="home-button" onclick="location.href='/'">Home</button>
+    <h1>Cookie Clicker</h1>
+    <img id="cookie" src="/static/cookie_clicker/cookie.jpg">
+    <div id="score">Score: 0</div>
+    <button id="save-btn">Save Progress</button>
+    <button id="load-btn">Load Progress</button>
+
+    <script>
+        let score = 0;
+        const cookie = document.getElementById('cookie');
+        const scoreDisplay = document.getElementById('score');
+        const saveButton = document.getElementById('save-btn');
+        const loadButton = document.getElementById('load-btn');
+
+        // Increment score when clicking on the cookie
+        cookie.addEventListener('click', () => {
+            score++;
+            updateScore();
+        });
+
+        // Update score display
+        function updateScore() {
+            scoreDisplay.textContent = `Score: ${score}`;
+        }
+
+        // Save progress to localStorage
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem('cookieClickerScore', score);
+            alert('Progress saved!');
+        });
+
+        // Load progress from localStorage
+        loadButton.addEventListener('click', () => {
+            const savedScore = localStorage.getItem('cookieClickerScore');
+            if (savedScore !== null) {
+                score = parseInt(savedScore, 10);
+                updateScore();
+                alert('Progress loaded!');
+            } else {
+                alert('No saved progress found.');
+            }
+        });
+
+        // Initialize score on page load
+        window.onload = () => {
+            const savedScore = localStorage.getItem('cookieClickerScore');
+            if (savedScore !== null) {
+                score = parseInt(savedScore, 10);
+                updateScore();
+            }
+        };
+    </script>
+</body>
+</html>
+

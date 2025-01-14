@@ -8,6 +8,7 @@ HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
 	std::string			name;
 	std::string			value;
 	std::string			body;
+    std::string         unsanitized_path;
     size_t              methodEnd;
 	size_t				pathStart;
 	size_t				pathEnd;
@@ -24,7 +25,8 @@ HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
             pathEnd = line.find(' ', pathStart);
             if (pathEnd != std::string::npos)
 			{
-                request.setPath(line.substr(pathStart, pathEnd - pathStart));
+                unsanitized_path = line.substr(pathStart, pathEnd - pathStart);
+                request.setPath(request.removeExcessiveSlashes(unsanitized_path));
                 request.setHttpVersion(line.substr(pathEnd + 1));
             }
         }

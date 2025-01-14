@@ -1,31 +1,31 @@
 #include "TokenCounter.hpp"
 
 TokenCounter::TokenCounter(void) {
-	blockStack.push(std::map<std::string, int>());
+	_blockStack.push(std::map<std::string, int>());
 }
 
 void TokenCounter::enterBlock(void) {
-	blockStack.push(std::map<std::string, int>());
+	_blockStack.push(std::map<std::string, int>());
 }
 
 void TokenCounter::exitBlock(void) {
-	if (blockStack.size() > 1) {
-		blockStack.pop();
+	if (_blockStack.size() > 1) {
+		_blockStack.pop();
 	} else {
 		std::cerr << "Error: Attempted to exit global block!" << std::endl;
 	}
 }
 
 void TokenCounter::incrementToken(const std::string& token) {
-	if (!blockStack.empty()) {
-		blockStack.top()[token]++;
+	if (!_blockStack.empty()) {
+		_blockStack.top()[token]++;
 	}
 }
 
 int TokenCounter::getTokenCount(const std::string& token) const {
-	if (!blockStack.empty()) {
-		std::map<std::string, int>::const_iterator it = blockStack.top().find(token);
-		if (it != blockStack.top().end()) {
+	if (!_blockStack.empty()) {
+		std::map<std::string, int>::const_iterator it = _blockStack.top().find(token);
+		if (it != _blockStack.top().end()) {
 			return (it->second);
 		}
 	}

@@ -7,27 +7,27 @@
 #include "ErrorHandler.hpp"
 
 //METHODS
-ServerBase::ServerBase() : maxSock(0)
+ServerBase::ServerBase() : _maxSock(0)
 {
-	FD_ZERO(&readfds);
-	FD_ZERO(&writefds);
+	FD_ZERO(&_readfds);
+	FD_ZERO(&_writefds);
 }
 
 ServerBase::~ServerBase()
 {
-	for (std::vector<ServerHandler>::iterator it = Servers.begin(); it != Servers.end(); it++)
+	for (std::vector<ServerHandler>::iterator it = _servers.begin(); it != _servers.end(); it++)
 	{
 		int sock = it->getSock();
-		FD_CLR(sock, &readfds);
-		FD_CLR(sock, &writefds);
+		FD_CLR(sock, &_readfds);
+		FD_CLR(sock, &_writefds);
 		close(sock);
 	}
 }
 
 /////////// GETTER ///////////////
-fd_set&	ServerBase::getReadfds() { return readfds; }
-fd_set&	ServerBase::getWritefds() { return writefds; }
-std::vector<ServerHandler>	ServerBase::getServers() { return Servers; }
+fd_set&	ServerBase::getReadfds() { return _readfds; }
+fd_set&	ServerBase::getWritefds() { return _writefds; }
+std::vector<ServerHandler>	ServerBase::getServers() { return _servers; }
 
 ////////// PUBLIC /////////////
 void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersConfig)
@@ -44,19 +44,19 @@ void	ServerBase::addPortAndServers(std::map <size_t, ServerConfig *> AllServersC
 		}
 		
 		std::string	server_name = it->second->getServerHeader()->getServerName();
+		std::map <unsigned int, std::string> error_pages = it->second->getServerHeader()->getErrorPagesRecord();
 		for (std::set<unsigned int>::iterator it = server_params._listen.begin(); it != server_params._listen.end(); it++)
 		{
 			ServerHandler NewServer;
 			NewServer.setLocations(directives);
 			NewServer.setServerName(server_name);
 			NewServer.setImagesPathCgi(ImagesPath);
-			std::cout << "++++++++++++ ImagesPath : " << ImagesPath << std::endl;
-			std::cout << "PATHIMAGES ::" << NewServer.getImagesPathCgi() << std::endl;
 			NewServer.InitializeServerSocket(*it, 3);
-			logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
+			NewServer.setErrorPages(error_pages);
+			_logger.info("Server Created FD: " + toStrInt(NewServer.getSock()) + " ~ Port: " +  toStrInt(NewServer.getPort())); 
 			FD_SET(NewServer.getSock(), &getReadfds());
-			this->maxSock = std::max(this->maxSock, NewServer.getSock());
-			Servers.push_back(NewServer);
+			this->_maxSock = std::max(this->_maxSock, NewServer.getSock());
+			_servers.push_back(NewServer);
 		}
 	}
 }
@@ -68,38 +68,39 @@ void	ServerBase::acceptConnection(ServerHandler Server)
 	{
 		throw ServerBaseError("Accept failed", __FUNCTION__, __LINE__);
 	}
-	FD_SET(newSocket, &readfds);
+	FD_SET(newSocket, &_readfds);
 	RRState NewConnectionState;
 	NewConnectionState.setServer(Server);
-	ClientSockets.insert(std::make_pair(newSocket, NewConnectionState));
-	if (newSocket > maxSock)
-		maxSock = newSocket;
+	_clientSockets.insert(std::make_pair(newSocket, NewConnectionState));
+	if (newSocket > _maxSock)
+		_maxSock = newSocket;
 }
 
 void	ServerBase::processClientConnections()
 {
 	fd_set	cpyReadFds, cpyWriteFds;
 	HttpRequestHandler	request;
+
 	while (true)
     {
-		cpyReadFds = readfds;
-		cpyWriteFds = writefds;
+		cpyReadFds = _readfds;
+		cpyWriteFds = _writefds;
 		std::vector<int> clientToRemove;
 
-        if (select(maxSock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
+        if (select(_maxSock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
 		{
 			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
 		}
-		for (unsigned long i = 0; i < this->Servers.size(); i++)
+		for (unsigned long i = 0; i < this->_servers.size(); i++)
 		{
-			int serverSocket = this->Servers[i].getSock();
+			int serverSocket = this->_servers[i].getSock();
 			if (FD_ISSET(serverSocket, &cpyReadFds))
 			{
-				acceptConnection(this->Servers[(int)i]);
+				acceptConnection(this->_servers[(int)i]);
 			}
 		}
 		// Handling Request/Response
-		for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end(); it++)
+		for (std::map<int, RRState>::iterator it = _clientSockets.begin(); it != _clientSockets.end(); it++)
 		{
 			int client_sock = it->first;
 			std::vector<LocationBlock *> loc = it->second.getServer().getLocations();
@@ -111,14 +112,14 @@ void	ServerBase::processClientConnections()
 				if (request.getFd() <= 0)
 				{
 					close(client_sock);
-					FD_CLR(client_sock, &readfds);
-					FD_CLR(client_sock, &writefds);
+					FD_CLR(client_sock, &_readfds);
+					FD_CLR(client_sock, &_writefds);
 					clientToRemove.push_back(client_sock);
 					continue ;
 				}
 				if (request.getIsComplete() == true)
 				{
-					FD_CLR(client_sock, &readfds);
+					FD_CLR(client_sock, &_readfds);
 					FD_SET(client_sock, &cpyWriteFds);
 				}
 			}
@@ -127,20 +128,19 @@ void	ServerBase::processClientConnections()
 				HttpResponseHandler response = it->second.getResponse();
                 response.handleResponse(it->second);
 				it->second.setResponse(response);
-				//std::cout << it->second.getResponse() << std::endl;
 				close(client_sock);
-				FD_CLR(client_sock, &writefds);
+				FD_CLR(client_sock, &_writefds);
             }
 		}
 		for(unsigned long i = 0; i < clientToRemove.size(); i++)
 		{
-			for (std::map<int, RRState>::iterator it = ClientSockets.begin(); it != ClientSockets.end();)
+			for (std::map<int, RRState>::iterator it = _clientSockets.begin(); it != _clientSockets.end();)
 			{
 				if (it->first == clientToRemove[(int)i])
 				{
 					std::map<int, RRState>::iterator toErase = it;
 					++it;
-					ClientSockets.erase(toErase);
+					_clientSockets.erase(toErase);
 				}
 				else
 				{

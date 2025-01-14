@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestHandler.hpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nechaara <nechaara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/09 17:56:21 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/14 13:09:31 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,30 +33,31 @@ class HttpResponseHandler;
 class HttpRequestHandler
 {
 	private:
-		int																			fd;
+		int																			_fd;
 		int																			_clientSocket;
-		std::string																	method;
-		std::string																	path;
-		std::string																	httpVersion;
-		std::map<std::string, std::string>											headers;
-		std::string																	body;
-		bool																		valid;
+		std::string																	_method;
+		std::string																	_path;
+		std::string																	_httpVersion;
+		std::map<std::string, std::string>											_headers;
+		std::string																	_body;
+		bool																		_valid;
 
-		std::vector<std::string>													allowedMethods;
-		std::vector<std::string>													allowedPaths;
-		std::string																	allowedPath;
-		std::string																	contentPath;
-		unsigned int																maxBodySize;
-		bool																		autoIndex;
-		std::string																	rootDirectory;
-		std::vector<std::string>													_CgiPath;
+		std::vector<std::string>													_allowedMethods;
+		std::vector<std::string>													_allowedPaths;
+		std::string																	_allowedPath;
+		std::string																	_contentPath;
+		unsigned int																_maxBodySize;
+		bool																		_autoIndex;
+		std::string																	_rootDirectory;
+		std::vector<std::string>													_cgiPath;
 		LocationBlock																_locationBlocks;
 		
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
-		bool																		isRequestComplete;
-		static std::string															extractBoundary(const std::string& contentType);
-    	static std::string															generateErrorResponse(const std::string& message);
+		bool																		_isRequestComplete;
 		DirectoryHandler															_handler;
+		std::map<std::string, std::string>											_cookies;
+		static std::string															extractBoundary(const std::string& contentType);
+		
 	public:
 		HttpRequestHandler();
 		~HttpRequestHandler();
@@ -66,10 +67,8 @@ class HttpRequestHandler
 		std::string																		getMimeType(const std::string& path);
 		std::string																		createErrorPage(int statusCode, const std::string& message);
 		std::string																		toString(size_t value);
-		std::string																		readFile(RRState& rrstate, const std::string& path);
-		static bool																		fileExists(const std::string& path);
+		static std::string																readFile(RRState& rrstate, const std::string& path);
 		bool																			isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const;
-		bool																			isPathAllowed(const HttpRequestHandler& request, const std::string& path) const;
 
 		void																			setMethod(const std::string &m);
 		void																			setPath(const std::string &p);
@@ -133,8 +132,12 @@ class HttpRequestHandler
 		void																			handleDirectoryRequest(RRState& rrstate, const std::string& path, HttpResponseHandler& response);
     	void																			handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response);
 		HttpRequestHandler																handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
-		HttpRequestHandler																initRequest(const HttpRequestHandler& request);
 		std::string																		extractDir(std::string& requestPath);
+		std::string																		removeExcessiveSlashes(std::string& path);
+
+		void																			parseCookies(const std::string& cookieHeader);
+		const std::map<std::string, std::string>&										getCookies() const;
+		std::string																		trimCookies(const std::string& str);
 
 };
 std::ostream	&operator<<(std::ostream &out, const HttpRequestHandler &i);

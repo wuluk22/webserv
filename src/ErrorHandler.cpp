@@ -20,8 +20,8 @@ std::string toStrInt(int value)
     return oss.str();
 }
 
-Error::Error(const std::string& msg) : msg(msg) {};
-const char* Error::what() const throw() { return msg.c_str(); }
+Error::Error(const std::string& msg) : _msg(msg) {};
+const char* Error::what() const throw() { return _msg.c_str(); }
 Error::~Error() throw() {}
 
 ServerHandlerError::ServerHandlerError(const std::string& msg, const char* function, int line) : Error("Error in ServerHandler class in function : " + toStr(function) + " in line : " + toStrInt(line) + " : " + msg) {};

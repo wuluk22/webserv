@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpResponseHandler.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nechaara <nechaara@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/09 18:05:36 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/11 15:46:32 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,43 +27,45 @@
 # include <sys/stat.h>
 # include <sys/wait.h>
 # include <unistd.h>
+# include "configuration_file_parsing/server_config/ADirective.hpp"
 
 class RRState;
 
 class HttpResponseHandler
 {
 	public:
-		void								setHttpVersion(std::string version);
-		void								setStatusCode(int code);
-		void								setStatusMsg(std::string message);
-		void								setHeader(const std::string &headerName, const std::string &headerValue);
-		void								setBody(std::string body);
-		void								setResponse(std::string output);
-		void    							setQuery(std::string query);
-		
-		std::string							getHttpVersion() const;
-		int									getStatusCode() const;
-		std::string							getStatusMsg() const;
-		std::string							getHeader(const std::string &headerName) const;
-		std::map<std::string, std::string>	getHeaders() const;
-		std::string							getBody() const;
-		std::string							getAll() const;
-		std::string							getQuery() const;
-		std::string							getPathOfFile(RRState& rrstate);
-		
-		HttpResponseHandler					handlePath(RRState& rrstate);
-		void								handleResponse(RRState& rrstate);
-		std::string							urlDecode(const std::string& url);
-		HttpResponseHandler					errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
-		HttpResponseHandler					handleGet(RRState& rrstate);
-		bool								isCgiRequest(RRState& rrstate, const std::string& path);
+		void									setHttpVersion(std::string version);
+		void									setStatusCode(int code);
+		void									setStatusMsg(std::string message);
+		void									setHeader(const std::string &headerName, const std::string &headerValue);
+		void									setBody(std::string body);
+		void									setResponse(std::string output);
+		void    								setQuery(std::string query);
 
-		std::string							httpVersion;
-		int									code;
-		std::string							status;
-		std::map<std::string, std::string>	headers;
-		std::string							body;
-		std::string							_query;
+		std::string								getHttpVersion() const;
+		int										getStatusCode() const;
+		std::string								getStatusMsg() const;
+		std::string								getHeader(const std::string &headerName) const;
+		std::map<std::string, std::string>		getHeaders() const;
+		std::string								getBody() const;
+		std::string								getAll() const;
+		std::string								getQuery() const;
+		std::string								getPathOfFile(RRState& rrstate);
+		
+		HttpResponseHandler						handlePath(RRState& rrstate);
+		void									handleResponse(RRState& rrstate);
+		std::string								urlDecode(const std::string& url);
+		HttpResponseHandler						errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
+		std::pair<std::string, e_data_reach>	checkAvailableRessource(std::string& file_path);
+		HttpResponseHandler						handleGet(RRState& rrstate);
+		bool									isCgiRequest(RRState& rrstate, const std::string& path);
+
+		std::string								_httpVersion;
+		int										_code;
+		std::string								_status;
+		std::map<std::string, std::string>		_headers;
+		std::string								_body;
+		std::string								_query;
 };
 void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);
 std::ostream		&operator<<(std::ostream &out, const HttpResponseHandler &i);

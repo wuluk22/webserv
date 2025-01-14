@@ -57,9 +57,4 @@
 #define NO_URI_LOCATION ERROR_HEADER "Location token contain no URI," AB RESET
 #define BAD_URI ERROR_HEADER "Bad URI," AB RESET
 
-// WARNING HEADER
-#define WARNING_HEADER "\e[33m[CONFIG_PARSER | WARNING] : "
-// WARNING MESSAGES
-#define NO_ROOT_DEFINED_ERROR_PAGES WARNING_HEADER "No root defined for error pages, switching to absolute path" RESET
-
 #endif

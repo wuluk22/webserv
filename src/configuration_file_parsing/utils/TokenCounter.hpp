@@ -8,7 +8,7 @@
 
 class TokenCounter {
 	private:
-		std::stack<std::map<std::string, int> > blockStack;
+		std::stack<std::map<std::string, int> > _blockStack;
 	public:
 		TokenCounter(void);
 

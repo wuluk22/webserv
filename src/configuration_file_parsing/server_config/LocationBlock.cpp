@@ -5,7 +5,7 @@ LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_client_max_body_size = false;
 	this->_location_params._allowed_methods = 0;
 	this->_location_params._modified_content_path = false;
-	this->_location_params._return_args._status_code = NO_RETURN;
+	this->_location_params._modified_auto_index = false;
 }
 
 LocationBlock::~LocationBlock() {}
@@ -93,8 +93,29 @@ e_data_reach LocationBlock::isCgiPathReachable(void){
 	return (DATA_NOK);
 }
 
-std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string& file_path) {
+std::string removeExcessiveSlashes(const std::string& path) {
+	std::string result;
+	bool was_last_slash = false;
+
+	for (std::string::size_type i = 0; i < path.size(); ++i) {
+		char c = path[i];
+
+		if (c == '/') {
+			if (!was_last_slash) {
+				result += c;
+				was_last_slash = true;
+			}
+		} else {
+			result += c;
+			was_last_slash = false;
+		}
+	}
+    return (result);
+}
+
+std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string file_path) {
 	std::string full_file_path;
+	std::string directory_path;
 	std::pair <std::string, e_data_reach> result;
 	bool hasEntered = false;
 	std::string uri = this->_location_params._uri;
@@ -126,7 +147,14 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std:
 				continue;
 		}
 	} else {
-		full_file_path = file_path;
+		full_file_path = removeExcessiveSlashes(file_path);
+		directory_path = full_file_path.substr(0, full_file_path.find_last_of('/'));
+		_validator.setPath(directory_path);
+		if (_validator.exists() && _validator.isDirectory() && !_validator.isReadable()) {
+				result.first = full_file_path;
+				result.second = DATA_NOK;
+				return (result);
+			}
 		_validator.setPath(full_file_path);
 		if (_validator.exists() && _validator.isFile()) {
 				hasEntered = true;
@@ -143,14 +171,7 @@ std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std:
 		result.first = full_file_path;
 		result.second = NO_DATA;
 	}
-	//std::cout << "DATA PATH : "<< result.first << "\n";
-	//std::cout << "DATA REACH : " << result.second << "\n";
 	return (result);
-}
-
-void LocationBlock::setReturnArgs(std::size_t status_code, std::string redirection_url) {
-	this->_location_params._return_args._status_code = status_code;
-	this->_location_params._return_args._redirection_url = redirection_url;
 }
 
 void LocationBlock::setUriDependance(std::string uri) {
@@ -181,10 +202,6 @@ std::string LocationBlock::getUri(void) const {
 
 std::string LocationBlock::getContentPath(void) const {
 	return (this->_location_params._content_path);
-}
-
-s_return LocationBlock::getReturnArgs(void) const {
-	return (this->_location_params._return_args);
 }
 
 bool LocationBlock::isGetAllowed(void) const {
@@ -218,10 +235,6 @@ std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 		<< "Content Path: " << params->getContentPath() << "\n"
 		<< "URI Dependance: " << params->getUriDependance() << "\n"
 		<< "Allowed Methods: " << "\n";
-	if (params->getReturnArgs()._status_code != NO_RETURN)
-		os << "Return status code : " << params->getReturnArgs()._status_code << "\n";
-	if (!params->getReturnArgs()._redirection_url.empty())
-		os << "Redirection URL : " << params->getReturnArgs()._redirection_url << "\n";
 	if (params->isGetAllowed()) 
 		os << "GET ";
 	if (params->isPostAllowed()) 

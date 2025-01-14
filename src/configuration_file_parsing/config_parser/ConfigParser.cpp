@@ -28,10 +28,9 @@ ConfigParser::ConfigParser(const std::string init_path) {
 
 ConfigParser::~ConfigParser() {
 	for (int i = 0; i < _servers_config.size(); i++) {
-		_logger.info("Removing server " + toStrInt(i) + ".");
+		_logger.warn("Disabling server " + toStrInt(i) + ".");
 		delete _servers_config[i];
 	}
-	delete this->_instance;
 }
 
 ConfigParser* ConfigParser::getInstance(const std::string init_path = "") {
@@ -183,7 +182,6 @@ void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *
 		if (!CgiPathChecker(directive))
 			throw ConfigParserError(BAD_CGI_PATH, __FUNCTION__, __LINE__, line);
 	}
-
 	if (!directive->hasAutoIndexModified())
 		directive->setAutoIndex(server_config->getAutoIndex());
 	if (!directive->hasClientMaxBodySizeModified())
@@ -236,7 +234,7 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 		size_t &current_line, ServerBlock *current_server, ServerConfig *server_config) {
 	LocationBlock *l_directive = new LocationBlock();
 	std::vector<std::string> splitted_line;
-	s_parser_flags flag = {false, false, false, false, false};
+	s_parser_flags flag = {false};
 	std::string uri;
 	size_t uri_line;
 	std::streampos last_position;
@@ -265,7 +263,6 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	finalizeLocationBlock(l_directive, current_server, uri, uri_line);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
-	std::cout << l_directive << std::endl;
 }
 
 void ConfigParser::processServerBlock(std::ifstream &config_file, std::string working_line, size_t &current_line, ServerConfig *server_config, size_t server_id) {

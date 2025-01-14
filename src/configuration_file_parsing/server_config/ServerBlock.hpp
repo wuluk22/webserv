@@ -11,8 +11,6 @@ struct s_server_params {
 	std::string								_server_name;
 	std::set<unsigned int>					_listen;
 	std::map<unsigned int, std::string>		_error_pages_record;
-	std::string								_access_log_file_path;
-	std::string								_error_log_file_path;
 	std::vector <std::string>				_declared_path;
 };
 
