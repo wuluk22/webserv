@@ -8,7 +8,7 @@
 class Error : public std::exception
 {
 	protected:
-		std::string msg;
+		std::string _msg;
 	public:
 		explicit Error(const std::string& msg);
 		explicit Error(void);

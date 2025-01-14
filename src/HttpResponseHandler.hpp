@@ -60,11 +60,11 @@ class HttpResponseHandler
 		HttpResponseHandler						handleGet(RRState& rrstate);
 		bool									isCgiRequest(RRState& rrstate, const std::string& path);
 
-		std::string								httpVersion;
-		int										code;
-		std::string								status;
-		std::map<std::string, std::string>		headers;
-		std::string								body;
+		std::string								_httpVersion;
+		int										_code;
+		std::string								_status;
+		std::map<std::string, std::string>		_headers;
+		std::string								_body;
 		std::string								_query;
 };
 void				setErrorResponse(RRState& rrstate, int statusCode, const std::string& statusMsg);

@@ -16,11 +16,11 @@
 class	ServerBase
 {
 	private:
-		int							maxSock;
-		std::map<int, RRState>		ClientSockets;
-		std::vector<ServerHandler>	Servers;
-		fd_set 						readfds, writefds;
-		Logger						logger;
+		int							_maxSock;
+		std::map<int, RRState>		_clientSockets;
+		std::vector<ServerHandler>	_servers;
+		fd_set 						_readfds, _writefds;
+		Logger						_logger;
 
 	public:
 		//METHODS

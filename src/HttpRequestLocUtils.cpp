@@ -151,5 +151,5 @@ std::string HttpRequestHandler::getContentPath(const std::map<std::string, std::
     return "";
 }
 
-std::string HttpRequestHandler::getContPath() { return contentPath; };
-void HttpRequestHandler::setContentPath(const std::string& path) { this->contentPath = path; };
+std::string HttpRequestHandler::getContPath() { return _contentPath; };
+void HttpRequestHandler::setContentPath(const std::string& path) { this->_contentPath = path; };

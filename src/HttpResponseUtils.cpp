@@ -83,38 +83,38 @@ std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
 	return out;
 }
 
-void	                            HttpResponseHandler::setHttpVersion(std::string version) { this->httpVersion = version; }
-void	                            HttpResponseHandler::setStatusCode(int code) { this->code = code; }
-void	                            HttpResponseHandler::setStatusMsg(std::string message) { this->status = message; }
-void	                            HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { headers[headerName] = headerValue; }
-void	                            HttpResponseHandler::setBody(std::string body) { this->body = body; }
+void	                            HttpResponseHandler::setHttpVersion(std::string version) { this->_httpVersion = version; }
+void	                            HttpResponseHandler::setStatusCode(int code) { this->_code = code; }
+void	                            HttpResponseHandler::setStatusMsg(std::string message) { this->_status = message; }
+void	                            HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { _headers[headerName] = headerValue; }
+void	                            HttpResponseHandler::setBody(std::string body) { this->_body = body; }
 void                                HttpResponseHandler::setQuery(std::string query) { this->_query = query;}
 void	                            HttpResponseHandler::setResponse(std::string output) {}
-std::string                         HttpResponseHandler::getHttpVersion() const { return httpVersion; }
-int                                 HttpResponseHandler::getStatusCode() const { return code; }
-std::string                         HttpResponseHandler::getStatusMsg() const { return status; }
+std::string                         HttpResponseHandler::getHttpVersion() const { return _httpVersion; }
+int                                 HttpResponseHandler::getStatusCode() const { return _code; }
+std::string                         HttpResponseHandler::getStatusMsg() const { return _status; }
 std::string                         HttpResponseHandler::getHeader(const std::string &headerName) const
 {
-	std::map<std::string, std::string>::const_iterator it = headers.find(headerName);
-	if (it != headers.end())
+	std::map<std::string, std::string>::const_iterator it = _headers.find(headerName);
+	if (it != _headers.end())
 	{
 		return it->second;
 	}
 	return "";
 }
-std::map<std::string, std::string>  HttpResponseHandler::getHeaders() const { return headers; }
-std::string                         HttpResponseHandler::getBody() const { return body; }
+std::map<std::string, std::string>  HttpResponseHandler::getHeaders() const { return _headers; }
+std::string                         HttpResponseHandler::getBody() const { return _body; }
 std::string                         HttpResponseHandler::getAll() const
 {
 	std::ostringstream all;
-	all << httpVersion << " " << code << " " << status << "\r\n";
+	all << _httpVersion << " " << _code << " " << _status << "\r\n";
 	std::map<std::string, std::string>::const_iterator it;
-	for (it = headers.begin(); it != headers.end(); ++it)
+	for (it = _headers.begin(); it != _headers.end(); ++it)
 	{
 		all << it->first << ": " << it->second << "\r\n";
 	}
 	all << "\r\n";
-	all << body;
+	all << _body;
 	return all.str();
 }
 std::string							HttpResponseHandler::getQuery() const { return _query;}

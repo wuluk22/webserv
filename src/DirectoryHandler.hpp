@@ -14,10 +14,10 @@
 
 struct FileInfo
 {
-    std::string name;
-    std::string size;
-    std::string modified;
-    bool        isDirectory;
+    std::string _name;
+    std::string _size;
+    std::string _modified;
+    bool        _isDirectory;
     
     FileInfo(const std::string& n, const std::string& s, const std::string& m, bool d);
 };
@@ -25,11 +25,13 @@ struct FileInfo
 class DirectoryHandler
 {
     private:
+        PathValidator            _validator;
+
         std::string				humanReadableSize(size_t bytes);
         std::string				formatTime(time_t time);
         static bool				compareFileInfo(const FileInfo& a, const FileInfo& b);
         std::string				generateBreadcrumbs(const std::string& path);
-        PathValidator            _validator;
+        
     public:
         DirectoryHandler();
         ~DirectoryHandler();

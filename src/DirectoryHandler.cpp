@@ -1,7 +1,7 @@
 #include "DirectoryHandler.hpp"
 
 FileInfo::FileInfo(const std::string& n, const std::string& s, const std::string& m, bool d)
-    : name(n), size(s), modified(m), isDirectory(d) {}
+    : _name(n), _size(s), _modified(m), _isDirectory(d) {}
 
 DirectoryHandler::DirectoryHandler() {}
 DirectoryHandler::~DirectoryHandler() {}
@@ -34,11 +34,11 @@ std::string DirectoryHandler::formatTime(time_t time)
 
 bool DirectoryHandler::compareFileInfo(const FileInfo& a, const FileInfo& b)
 {
-    if (a.isDirectory != b.isDirectory)
+    if (a._isDirectory != b._isDirectory)
     {
-        return a.isDirectory > b.isDirectory;
+        return a._isDirectory > b._isDirectory;
     }
-    return a.name < b.name;
+    return a._name < b._name;
 }
 
 std::string DirectoryHandler::generateBreadcrumbs(const std::string& path)
@@ -162,7 +162,7 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
     {
         const FileInfo& file = *it;
         html << "<tr>\n<td>";
-        if (file.isDirectory)
+        if (file._isDirectory)
         {
             html << "<span class='folder'>[] </span>";
         }
@@ -174,27 +174,27 @@ std::string DirectoryHandler::generateDirectoryPage(const std::string& path, con
         std::string actual_path;
         if (path == "/")
         {
-            link_path = path + file.name;
-            actual_path = file_path + file.name;
+            link_path = path + file._name;
+            actual_path = file_path + file._name;
         }
         else
         {
-            link_path = path + '/' + file.name;
-            actual_path = file_path + '/' + file.name;
+            link_path = path + '/' + file._name;
+            actual_path = file_path + '/' + file._name;
         }
-        if (file.isDirectory)
+        if (file._isDirectory)
         {
-            html << "<a href='" << link_path << "/'>" << file.name << "</a></td>\n";
+            html << "<a href='" << link_path << "/'>" << file._name << "</a></td>\n";
         }
         else
         {
-            html << "<a href='" << link_path << "' download>" << file.name << "</a></td>\n";
+            html << "<a href='" << link_path << "' download>" << file._name << "</a></td>\n";
         }
         
-        html << "<td>" << file.size << "</td>\n"
-             << "<td>" << file.modified << "</td>\n"
+        html << "<td>" << file._size << "</td>\n"
+             << "<td>" << file._modified << "</td>\n"
              << "<td>\n";
-        if (!file.isDirectory)
+        if (!file._isDirectory)
         {
             _validator.setPath(actual_path);
             bool isValid = _validator.exists() && _validator.isFile() && _validator.isWritable();

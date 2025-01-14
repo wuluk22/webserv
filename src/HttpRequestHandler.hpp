@@ -33,30 +33,31 @@ class HttpResponseHandler;
 class HttpRequestHandler
 {
 	private:
-		int																			fd;
+		int																			_fd;
 		int																			_clientSocket;
-		std::string																	method;
-		std::string																	path;
-		std::string																	httpVersion;
-		std::map<std::string, std::string>											headers;
-		std::string																	body;
-		bool																		valid;
+		std::string																	_method;
+		std::string																	_path;
+		std::string																	_httpVersion;
+		std::map<std::string, std::string>											_headers;
+		std::string																	_body;
+		bool																		_valid;
 
-		std::vector<std::string>													allowedMethods;
-		std::vector<std::string>													allowedPaths;
-		std::string																	allowedPath;
-		std::string																	contentPath;
-		unsigned int																maxBodySize;
-		bool																		autoIndex;
-		std::string																	rootDirectory;
-		std::vector<std::string>													_CgiPath;
+		std::vector<std::string>													_allowedMethods;
+		std::vector<std::string>													_allowedPaths;
+		std::string																	_allowedPath;
+		std::string																	_contentPath;
+		unsigned int																_maxBodySize;
+		bool																		_autoIndex;
+		std::string																	_rootDirectory;
+		std::vector<std::string>													_cgiPath;
 		LocationBlock																_locationBlocks;
 		
 		std::map<std::string, std::map<std::string, std::vector<std::string> > >	_locInfo;
-		bool																		isRequestComplete;
-		static std::string															extractBoundary(const std::string& contentType);
+		bool																		_isRequestComplete;
 		DirectoryHandler															_handler;
 		std::map<std::string, std::string>											_cookies;
+		static std::string															extractBoundary(const std::string& contentType);
+		
 	public:
 		HttpRequestHandler();
 		~HttpRequestHandler();
