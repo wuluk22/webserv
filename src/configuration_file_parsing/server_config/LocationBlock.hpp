@@ -10,6 +10,7 @@ struct s_loc_params {
 	std::string		_uri;
 	std::string		_content_path;
 	std::string		_uri_dependance;
+	std::string		_raw_uri_dependence;
 	std::string		_alias_uri;
 	unsigned char	_allowed_methods;
 	bool			_modified_content_path;
@@ -46,6 +47,7 @@ class LocationBlock : public ADirective {
 		void setAlias(std::string alias_path);
 		bool setAllowedMethods(unsigned char allowed_method);
 		bool setContentPath(std::string content_path);
+		void setRawUriDependence(const std::string uri);
 		
         // Getter
 		std::string					getCgiPath(void) const;
@@ -61,6 +63,7 @@ class LocationBlock : public ADirective {
 		bool						hasClientMaxBodySizeModified(void) const;
 		bool						hasAutoIndexModified(void) const;
 		std::string					getUriDependance(void) const;
+		std::string					getRawUriDependence(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const LocationBlock *location_params);
