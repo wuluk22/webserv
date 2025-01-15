@@ -45,43 +45,34 @@ LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vecto
     std::string requestPath = this->getPath();
     LocationBlock* matchedBlock = NULL;
     size_t longestMatch = 0;
-    std::string requestSwap;
-	
-	// Check perfect match 
-	std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
-    for (;it != locationBlocks.end(); ++it) {
+
+    std::vector<LocationBlock*>::const_iterator it = locationBlocks.begin();
+    for (; it != locationBlocks.end(); ++it) {
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
         if (requestPath == locationUri)
-            return (block);
+            return block;
     }
-	// Check closest-match
     it = locationBlocks.begin();
-	for (;it != locationBlocks.end(); ++it) {
+    for (; it != locationBlocks.end(); ++it) {
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
         if (locationUri == "/" && requestPath.length() > locationUri.length() &&
-            it != locationBlocks.end() && it == locationBlocks.begin()) {
+            it == locationBlocks.begin()) {
             continue;
         }
-        if (!block->isCgiAllowed())
-            requestSwap = rrstate.getRequest().extractDir(requestPath);
-        else
-            requestSwap = locationUri;
-        if (requestSwap == locationUri)
-            requestPath = requestSwap;
-        if (requestPath == locationUri) {
+        if (requestPath.find(locationUri) != std::string::npos) {
             size_t matchLength = locationUri.length();
-            if (matchLength > longestMatch) 
-            {
+            if (matchLength > longestMatch) {
                 longestMatch = matchLength;
                 matchedBlock = block;
             }
+        } else if (block->isCgiAllowed() && requestPath.find(block->getRawUriDependence()) != std::string::npos ) {
+            matchedBlock = block;
         }
     }
-    return (matchedBlock);
+    return matchedBlock;
 }
-
 
 std::string HttpRequestHandler::trim(const std::string& str)
 {
@@ -145,33 +136,33 @@ std::string HttpRequestHandler::createErrorPage(int statusCode, const std::strin
 
 std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 {
-	out << "\n---------------------------REQUEST---------------------------------\n";
-    out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
-    const std::map<std::string, std::string>&	headers = handler.getHeaders();
-	const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
-	const std::vector<std::string>&				allowedPaths = handler.getAllowedPaths();
-    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); 
-         it != headers.end(); ++it)
-	{
-        out << it->first << ": " << it->second << "\n";
-    }
-	out << "\nallowedMethods : \n";
-	for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
-	{
-		out << *it << "\n";
-	}
-	out << "\nallowedPaths : \n";
-	for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
-	{
-		out << *it << "\n";
-	}
-	out << "\nallowedPath : \n";
-	out << handler.getAllowedPath() << "\n";
-	out << "\n \n";
-	out << handler.getAutoIndex() << "\n";
-	out << "\nmaxBody: \n";
-	out << handler.getMaxBody() << "\n";
-	out << "\n---------------------------REQUEST---------------------------------\n";
+	// out << "\n---------------------------REQUEST---------------------------------\n";
+    // out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
+    // const std::map<std::string, std::string>&	headers = handler.getHeaders();
+	// const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
+	// const std::vector<std::string>&				allowedPaths = handler.getAllowedPaths();
+    // for (std::map<std::string, std::string>::const_iterator it = headers.begin(); 
+    //      it != headers.end(); ++it)
+	// {
+    //     out << it->first << ": " << it->second << "\n";
+    // }
+	// out << "\nallowedMethods : \n";
+	// for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
+	// {
+	// 	out << *it << "\n";
+	// }
+	// out << "\nallowedPaths : \n";
+	// for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
+	// {
+	// 	out << *it << "\n";
+	// }
+	// out << "\nallowedPath : \n";
+	// out << handler.getAllowedPath() << "\n";
+	// out << "\n \n";
+	// out << handler.getAutoIndex() << "\n";
+	// out << "\nmaxBody: \n";
+	// out << handler.getMaxBody() << "\n";
+	// out << "\n---------------------------REQUEST---------------------------------\n";
     return out;
 }
 
