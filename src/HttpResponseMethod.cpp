@@ -12,6 +12,7 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::map<std::string, std::vector<std::string> >    config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int                                        max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
+    std::cout << "max---\n" << max << std::endl;
     if (config.empty())
     {
         setErrorResponse(rrstate, 404, "Not Found");
@@ -39,12 +40,20 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     if (rrstate.getRequest().getMethod() == "GET")
     {
         rrstate.getResponse() = handleGet(rrstate);
+        if (rrstate.getRequest().getBody().length() > max)
+        {
+            return errorHandler(rrstate, 413, "Payload Too Large");
+        }
         return rrstate.getResponse();
     }
 	if (rrstate.getRequest().getMethod() == "POST")
 	{
 		rrstate.getRequest().handleFileUpload(rrstate, rrstate.getRequest().getBody(), rrstate.getRequest().getPath(), rrstate.getResponse());
-		return rrstate.getResponse();
+        if (rrstate.getRequest().getBody().length() > max)
+        {
+            return errorHandler(rrstate, 413, "Payload Too Large");
+        }
+        return rrstate.getResponse();
 	}
 	if (rrstate.getRequest().getMethod() == "DELETE")
 	{
@@ -73,9 +82,17 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
         	rrstate.getResponse().setStatusMsg("Noot Found");
         	rrstate.getResponse().setBody("Resource not found.");
 		}
+        if (rrstate.getRequest().getBody().length() > max)
+        {
+            return errorHandler(rrstate, 413, "Payload Too Large");
+        }
         return rrstate.getResponse();
     }
     setErrorResponse(rrstate, 405, "Method not supported");
+    if (rrstate.getRequest().getBody().length() > max)
+    {
+        return errorHandler(rrstate, 413, "Payload Too Large");
+    }
     return rrstate.getResponse();
 }
 
@@ -110,7 +127,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     e_data_reach data_reach;
     PathValidator validator;
     std::string content;
-    unsigned int max;
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
+
 
     rrstate.getRequest().setPath(response.urlDecode(request.getPath()));
     content_file = request.getContPath();
@@ -123,6 +141,10 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         validator.setPath(content_file);
         if (validator.exists() && validator.isDirectory()) {
             request.handleDirectoryRequest(rrstate, request.getPath(), response);
+            if (rrstate.getResponse().getBody().length() > max)
+            {
+                return errorHandler(rrstate, 413, "Payload Too Large");
+            }
             return rrstate.getResponse();
         }
     }
@@ -150,6 +172,10 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++)
             path = *it;
         cgi.handleCGI(rrstate, urlDecode(path));
+        if (rrstate.getResponse().getBody().length() > max)
+        {
+            return errorHandler(rrstate, 413, "Payload Too Large");
+        }
         return (rrstate.getResponse());
     }
     content_file_reach =  l_block->checkAvailableRessource();
@@ -161,6 +187,10 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
     if (validator.exists() && validator.isDirectory())
         return errorHandler(rrstate, 404, "Not Found");
     content = rrstate.getRequest().readFile(rrstate, urlDecode(content_file));
+    if (content.length() > max)
+    {
+        return errorHandler(rrstate, 413, "Payload Too Large");
+    }
     content_file_reach = l_block->checkAvailableRessource(response.getPathOfFile(rrstate));
     switch(content_file_reach.second) {
         case DATA_OK:

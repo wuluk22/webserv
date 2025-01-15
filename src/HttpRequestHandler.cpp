@@ -126,7 +126,7 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
 		{
             std::string::size_type headerEnd = requestData.find("\r\n\r\n");
             
-            if (headerEnd != std::string::npos)
+            if (headerEnd != std::string::npos) 
 			{
                 headersComplete = true;
                 std::string headersPart = requestData.substr(0, headerEnd);

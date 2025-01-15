@@ -7,6 +7,7 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	std::string				dirPath;
 	std::string				content;
 	std::vector<FileInfo>	files;
+    unsigned int            max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
 	dirPath	= rrstate.getRequest().getContPath() + path;
 	files = _handler.getDirectoryListing(dirPath);
