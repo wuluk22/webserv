@@ -98,6 +98,7 @@ bool ConfigParser::checkDependsOn(ServerConfig *current_config) {
 				else if ((*main_it)->getUriDependance() == (*second_it)->getUri()) {
 					found_match = true;
 					(*main_it)->setUriDependance((*second_it)->getContentPath());
+					(*main_it)->setRawUriDependence((*second_it)->getUri());
 				}
 			}
 			if (!found_match)
