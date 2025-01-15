@@ -52,20 +52,38 @@ std::string HttpResponseHandler::urlDecode(const std::string& url)
 }
 
 bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path)
-{	
-	std::string cgiDir;
+{
 	std::vector<LocationBlock *> loc = rrstate.getServer().getLocations();
+	std::string cgiDir;
+	std::string cgiExtension = ".py";
 
-	for (std::vector<LocationBlock *>::iterator it = loc.begin(); it != loc.end(); it++) {
+	std::vector<LocationBlock *>::iterator it = loc.begin();
+	for (; it != loc.end(); ++it) {
+		if ((*it)->getUri() == path && (*it)->isCgiAllowed())
+			return (true);
+	}
+	it = loc.begin();
+	for (;it != loc.end(); ++it) {
 		if (!((*it)->getUriDependance().empty())) {
 			cgiDir = (*it)->getUri();
 			break;
 		}
 	}
 	if (!cgiDir.empty() && path.find(cgiDir) == 0) {
-        return true;
-    }
-    return false;
+		std::string relativePath = path.substr(cgiDir.length());
+		if (relativePath.empty() || relativePath == "/") {
+			return (true);
+		}
+		size_t queryPos = relativePath.find('?');
+		if (queryPos != std::string::npos)
+			relativePath = relativePath.substr(0, queryPos);
+		if (relativePath.size() >= cgiExtension.size() &&
+			relativePath.compare(relativePath.size() - cgiExtension.size(), cgiExtension.size(), cgiExtension) == 0) {
+			return (true);
+		}
+		return (false);
+	}
+	return (false);
 }
 
 std::ostream	&operator<<(std::ostream &out, const HttpResponseHandler &i)
