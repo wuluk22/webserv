@@ -223,7 +223,7 @@ def main():
                 <h1>KitshGI</h1>
 
                 <div class="section" {image_section_style}>
-                    <h2>Choose your favorite one or ... </h2>
+                    <h2> Choose your favorite one </h2>
                     <form id="image-form" action="{clean_path}" method="GET">
                         <input type="hidden" id="selected-image" name="image" value="">
 

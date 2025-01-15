@@ -137,6 +137,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         Cgi                                     cgi;
         std::string                             path;
         std::vector<std::string>                uris;
+        std::
 
         uris = request.getContentPathsFromLoc(rrstate, request.getPath());
         switch(l_block->isContentPathReachable()) {
@@ -147,6 +148,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
             case NO_DATA:
                 return errorHandler(rrstate, 404, "Not found");
         }
+
         for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++)
             path = *it;
         cgi.handleCGI(rrstate, urlDecode(path));

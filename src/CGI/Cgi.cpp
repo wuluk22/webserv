@@ -165,6 +165,7 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
             break ;
         }
     }
+    
     pid = fork();
     if (pid < 0)
     {
