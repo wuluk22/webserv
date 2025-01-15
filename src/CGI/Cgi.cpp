@@ -161,6 +161,7 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
     {
         if (access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
+            std::cout << "selectdScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
