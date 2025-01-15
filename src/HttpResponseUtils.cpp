@@ -64,7 +64,7 @@ bool HttpResponseHandler::isCgiRequest(RRState& rrstate, const std::string& path
 	}
 	it = loc.begin();
 	for (;it != loc.end(); ++it) {
-		if (!((*it)->getUriDependance().empty())) {
+		if ((!(*it)->getCgiPath().empty() && path.find((*it)->getUri()) != std::string::npos)) {
 			cgiDir = (*it)->getUri();
 			break;
 		}
