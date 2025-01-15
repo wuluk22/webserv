@@ -70,6 +70,7 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     stringEnv.push_back("IMAGESPATH=" + rrstate.getServer().getImagesPathCgi());
     if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
+        std::clog << "Query : "<<getQuery(rrstate.getRequest().getPath()) << "\n";
         if (!getQuery(rrstate.getRequest().getPath()).empty())
             rrstate.getResponse().setQuery(getQuery(rrstate.getRequest().getPath()));
     }
@@ -146,7 +147,7 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-void    Cgi::handleCGI(RRState& rrstate, std::string path)
+void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
 {
     int pid;
     int pipefd[2];
@@ -159,13 +160,12 @@ void    Cgi::handleCGI(RRState& rrstate, std::string path)
     std::string selectedScriptPath;
     for (std::vector<std::string>::iterator it = scriptPaths.begin(); it != scriptPaths.end(); it++)
     {
-        if (access(it->c_str(), X_OK) == 0) {
+        if ((*it).find(route) != std::string::npos && access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
             std::cout << "selectdScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
-    
     pid = fork();
     if (pid < 0)
     {
