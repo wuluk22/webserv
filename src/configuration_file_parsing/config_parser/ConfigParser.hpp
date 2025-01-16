@@ -75,6 +75,7 @@ class ConfigParser {
 		bool						checkDependsOn(ServerConfig *current_config);
 		bool						checkAlias(ServerConfig *current_config);
 		bool						CgiPathChecker(LocationBlock *l_block);
+		void						validateCgiPaths(ServerConfig *serv_conf);
 
 		// Config File parsing
 		bool handleDirectiveTokens(std::vector<std::string> tokens, std::string working_line, LocationBlock *location_directive, TokenCounter &token_counter, s_parser_flags &flag, size_t current_line);
