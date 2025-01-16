@@ -53,6 +53,7 @@ def main():
         </style>
     </head>
     <body>
+        <button class="home-button" onclick="location.href='/'">Home</button>
         <h1>Welcome</h1>
         <p>{message}</p>
     </body>
