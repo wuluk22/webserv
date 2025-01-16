@@ -154,7 +154,9 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     } else if (!validator.exists() && !l_block->isCgiAllowed() ){
         return errorHandler(rrstate, 404, "Not Found");
     }
-    if (isCgiRequest(rrstate, request.getPath())) {
+    std::pair<std::string, e_data_reach> hihi = l_block->checkAvailableRessource();
+    bool isCgi = isCgiRequest(rrstate, request.getPath());
+    if (isCgi) {
         Cgi                                     cgi;
         std::string                             path;
         std::vector<std::string>                uris;
@@ -176,7 +178,8 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
             return errorHandler(rrstate, 413, "Payload Too Large");
         }
         return (rrstate.getResponse());
-    }
+    } else if (!isCgi && l_block->isCgiAllowed())
+        return errorHandler(rrstate, 404, "Not found");
     content = request.readFile(rrstate, content_file);
     if (content.length() > max) {
         return errorHandler(rrstate, 413, "Payload Too Large");
