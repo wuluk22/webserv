@@ -1,0 +1,18 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 50px;
+}
+#cookie {
+    width: 200px;
+    cursor: pointer;
+}
+#score {
+    font-size: 24px;
+    margin: 20px 0;
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 10px;
+}
