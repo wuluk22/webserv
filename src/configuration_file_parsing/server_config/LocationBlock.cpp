@@ -178,10 +178,18 @@ void LocationBlock::setUriDependance(std::string uri) {
 	this->_location_params._uri_dependance = uri;
 }
 
+void LocationBlock::setRawUriDependence(const std::string uri) {
+	this->_location_params._raw_uri_dependence = uri;
+}
+
 // **************************************************************************************
 
 std::string LocationBlock::getUriDependance(void) const {
 	return (this->_location_params._uri_dependance);
+}
+
+std::string LocationBlock::getRawUriDependence(void) const {
+	return (this->_location_params._raw_uri_dependence);
 }
 
 bool LocationBlock::isCgiAllowed(void) const {

@@ -109,7 +109,6 @@ void	ServerBase::processClientConnections()
 				it->second.setClientSock(client_sock);
 				request = request.handleRequest(client_sock, it->second);
 				it->second.setRequest(request);
-				// std::cout << "---\n" << it->second.getRequest() << "---\n" << std::endl;
 				if (request.getFd() <= 0)
 				{
 					close(client_sock);

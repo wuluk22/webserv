@@ -98,6 +98,7 @@ bool ConfigParser::checkDependsOn(ServerConfig *current_config) {
 				else if ((*main_it)->getUriDependance() == (*second_it)->getUri()) {
 					found_match = true;
 					(*main_it)->setUriDependance((*second_it)->getContentPath());
+					(*main_it)->setRawUriDependence((*second_it)->getUri());
 				}
 			}
 			if (!found_match)
@@ -140,6 +141,31 @@ bool ConfigParser::checkAlias(ServerConfig *current_config) {
 	return (true);
 }
 
+void ConfigParser::validateCgiPaths(ServerConfig* serverConfig) {
+	std::map<std::string, LocationBlock*> cgiPaths;
+
+	std::vector<LocationBlock*> directives = serverConfig->getDirectives();
+	std::vector<LocationBlock*>::iterator it;
+
+	it = directives.begin();
+	for (; it != directives.end(); ++it) {
+		if ((*it)->isCgiAllowed()) {
+			cgiPaths.insert(std::make_pair((*it)->getUri(), *it));
+		}
+	}
+
+	for (it = directives.begin(); it != directives.end(); ++it) {
+		std::string uri = (*it)->getUri();
+		std::map<std::string, LocationBlock*>::iterator map_it;
+		for (map_it = cgiPaths.begin(); map_it != cgiPaths.end(); ++map_it) {
+			std::string cgiUri = map_it->first;
+			if (uri.find(cgiUri) == 0 && uri.length() > cgiUri.length() && uri[cgiUri.length()] == '/') {
+				throw ConfigParserError(CGI_PATH_HAS_SUBROUTE, __FUNCTION__, __LINE__, -1);
+			}
+		}
+	}
+}
+
 void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf , size_t server_id) {
 	_logger.info("Finalizing server " + toStrInt(server_id + 1) + " parsing");
 	if (!directive->wasListeningPortSet())
@@ -154,7 +180,7 @@ void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, Serv
 		_logger.warn("Relying on root definition for each location directive - not recommanded");
 	if (serv_conf->getDirectives().empty())
 		_logger.warn("No directive set up for the current server");
-
+	validateCgiPaths(serv_conf);
 }
 
 void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
