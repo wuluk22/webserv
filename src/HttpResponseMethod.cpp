@@ -12,7 +12,6 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
     std::map<std::string, std::vector<std::string> >    config = rrstate.getRequest().getLocInfoByUri(rrstate.getRequest());
     unsigned int                                        max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
-    std::cout << "max---\n" << max << std::endl;
     if (config.empty())
     {
         setErrorResponse(rrstate, 404, "Not Found");

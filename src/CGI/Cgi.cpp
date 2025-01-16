@@ -162,7 +162,6 @@ void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
     {
         if ((*it).find(route) != std::string::npos && access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            std::cout << "selectdScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }

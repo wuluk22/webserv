@@ -47,6 +47,5 @@ HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
         body += line + "\n";
     }
     request.setBody(request.trim(body));
-    //std::cout << "REQ PATH: " << request.getPath() << std::endl;
     return request;
 }
