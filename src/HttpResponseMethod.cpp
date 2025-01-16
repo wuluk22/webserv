@@ -115,44 +115,44 @@ std::string generateSessionId()
     return sessionId;
 }
 
-HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
-{
+HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     HttpRequestHandler request = rrstate.getRequest();
     HttpResponseHandler response = rrstate.getResponse();
     ServerHandler server = rrstate.getServer();
     LocationBlock* l_block;
-    std::pair<std::string, e_data_reach> content_file_reach;
-    std::string content_file;
-    e_data_reach data_reach;
     PathValidator validator;
+    std::string content_file;
     std::string content;
-    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
-
-
-    rrstate.getRequest().setPath(response.urlDecode(request.getPath()));
-    content_file = request.getContPath();
+    unsigned int max = request.getMaxBodyFromLoc(rrstate, request.getPath());
+    request.setPath(response.urlDecode(request.getPath()));
+    content_file = request.getContPath() + request.getPath();
     l_block = request.getLocationBlock(rrstate, server.getLocations());
-    if (!l_block)
+    if (!l_block) {
         return errorHandler(rrstate, 404, "Not Found");
-    if (rrstate.getRequest().isAutoIndexEnabledForUri(rrstate, rrstate.getRequest().getPath()))
-    {
-        content_file = content_file + rrstate.getRequest().getPath();
-        validator.setPath(content_file);
-        if (validator.exists() && validator.isDirectory()) {
-            request.handleDirectoryRequest(rrstate, request.getPath(), response);
-            if (rrstate.getResponse().getBody().length() > max)
-            {
-                return errorHandler(rrstate, 413, "Payload Too Large");
-            }
-            return rrstate.getResponse();
-        }
     }
-    std::string sessionId = request.getCookie("SESSION_ID");
-    if (sessionId.empty())
-    {
-        sessionId = generateSessionId();
-        response.setHeader("Set-Cookie", "SESSION_ID=" + sessionId + "; Path=/; HttpOnly");
-        response.setHeader("SameSite", "None");
+    validator.setPath(content_file);
+    if (validator.exists()) {
+        if (validator.isDirectory()) {
+            if (request.isAutoIndexEnabledForUri(rrstate, request.getPath())) {
+                request.handleDirectoryRequest(rrstate, request.getPath(), response);
+                if (response.getBody().length() > max) {
+                    return errorHandler(rrstate, 413, "Payload Too Large");
+                }
+                return rrstate.getResponse();
+            } else {
+                content_file = l_block->checkAvailableRessource().first;
+                validator.setPath(content_file);
+                if (validator.exists() && !validator.isReadable()){
+                    return errorHandler(rrstate, 403, "Forbidden");
+                } else if (!validator.exists() && !l_block->isCgiAllowed()){
+                    return errorHandler(rrstate, 404, "Not Found");
+                }
+            }
+        }
+    } else if (validator.exists() && !validator.isReadable()){
+        return errorHandler(rrstate, 403, "Forbidden");
+    } else if (!validator.exists() && !l_block->isCgiAllowed() ){
+        return errorHandler(rrstate, 404, "Not Found");
     }
     if (isCgiRequest(rrstate, request.getPath())) {
         Cgi                                     cgi;
@@ -177,33 +177,15 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate)
         }
         return (rrstate.getResponse());
     }
-    content_file_reach =  l_block->checkAvailableRessource();
-    if (l_block->getCgiPath().empty())
-        content_file = urlDecode(content_file_reach.first);
-    else
-        content_file = rrstate.getRequest().getPath();
-    validator.setPath(request.getContPath() + content_file);
-    if (validator.exists() && validator.isDirectory())
-        return errorHandler(rrstate, 404, "Not Found");
-    content = rrstate.getRequest().readFile(rrstate, urlDecode(content_file));
-    if (content.length() > max)
-    {
+    content = request.readFile(rrstate, content_file);
+    if (content.length() > max) {
         return errorHandler(rrstate, 413, "Payload Too Large");
-    }
-    content_file_reach = l_block->checkAvailableRessource(response.getPathOfFile(rrstate));
-    switch(content_file_reach.second) {
-        case DATA_OK:
-            break;
-        case DATA_NOK:
-            return errorHandler(rrstate, 403, "Forbidden");
-        case NO_DATA:
-            return errorHandler(rrstate, 404, "Not found");
     }
     response.setStatusCode(200);
     response.setStatusMsg("OK");
     response.setBody(content);
-    response.setHeader("Content-Type", rrstate.getRequest().getMimeType(content_file));
-    response.setHeader("Content-Length", rrstate.getRequest().toString(content.length()));
+    response.setHeader("Content-Type", request.getMimeType(content_file));
+    response.setHeader("Content-Length", request.toString(content.length()));
     response.setHttpVersion("HTTP/1.1");
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("X-Frame-Options", "SAMEORIGIN");
