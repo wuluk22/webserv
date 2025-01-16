@@ -51,7 +51,7 @@ LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vecto
         LocationBlock* block = *it;
         const std::string& locationUri = block->getLocationParams()._uri;
         if (requestPath == locationUri)
-            return block;
+            return (block);
     }
     it = locationBlocks.begin();
     for (; it != locationBlocks.end(); ++it) {
@@ -61,17 +61,15 @@ LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vecto
             it == locationBlocks.begin()) {
             continue;
         }
-        if (requestPath.find(locationUri) != std::string::npos) {
+        if ((requestPath.find(locationUri + "/") == 0) || requestPath == locationUri) {
             size_t matchLength = locationUri.length();
             if (matchLength > longestMatch) {
                 longestMatch = matchLength;
                 matchedBlock = block;
             }
-        } else if (block->isCgiAllowed() && requestPath.find(block->getRawUriDependence()) != std::string::npos ) {
-            matchedBlock = block;
         }
     }
-    return matchedBlock;
+    return (matchedBlock);
 }
 
 std::string HttpRequestHandler::trim(const std::string& str)
