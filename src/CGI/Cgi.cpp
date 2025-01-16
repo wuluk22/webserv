@@ -70,7 +70,6 @@ std::vector<char *> Cgi::homeMadeSetEnv(RRState& rrstate, std::string scriptPath
     stringEnv.push_back("IMAGESPATH=" + rrstate.getServer().getImagesPathCgi());
     if (rrstate.getRequest().getMethod() == "GET") {
         stringEnv.push_back("QUERY_STRING=" + getQuery(rrstate.getRequest().getPath()));
-        std::clog << "Query : "<<getQuery(rrstate.getRequest().getPath()) << "\n";
         if (!getQuery(rrstate.getRequest().getPath()).empty())
             rrstate.getResponse().setQuery(getQuery(rrstate.getRequest().getPath()));
     }
@@ -162,7 +161,6 @@ void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
     {
         if ((*it).find(route) != std::string::npos && access(it->c_str(), X_OK) == 0) {
             selectedScriptPath = *it;
-            std::cout << "selectdScriptPath : " << selectedScriptPath << std::endl;
             break ;
         }
     }
