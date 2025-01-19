@@ -69,7 +69,7 @@ class ConfigParser {
 		bool						isValidServerName(std::string name);
 		std::string					returnSecondArgs(std::string args);
 		std::string					removeExcessiveSlashes(const std::string& path);
-		bool						distinctUri(std::string current_uri, ServerConfig *current_server);
+		bool						distinctUri(ServerConfig *current_server);
 		std::string					simplifyPath(const std::string& path);
 		std::string 				toStrInt(int value);
 		bool						checkDependsOn(ServerConfig *current_config);

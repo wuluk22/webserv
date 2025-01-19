@@ -181,6 +181,9 @@ void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, Serv
 	if (serv_conf->getDirectives().empty())
 		_logger.warn("No directive set up for the current server");
 	validateCgiPaths(serv_conf);
+	std::vector<LocationBlock*> directives = serv_conf->getDirectives();
+	if (!distinctUri(serv_conf))
+		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, line);
 }
 
 void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
@@ -269,8 +272,6 @@ void ConfigParser::processLocationBlock(std::ifstream &config_file, std::string 
 	server_config->setDirective(l_directive);
 	uri_line = current_line;
 	uri = returnSecondArgs(working_line);
-	if (!distinctUri(uri, server_config))
-		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, current_line);
 	while (std::getline(config_file, working_line)) {
 		current_line++;
 		last_position = config_file.tellg();
@@ -350,20 +351,13 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 	}
 }
 
-bool ConfigParser::distinctUri(std::string current_uri, ServerConfig *current_server) {
-    if (!current_uri.empty() && current_uri[current_uri.size() - 1] == '/' && current_uri.size() != 1)
-        current_uri = current_uri.substr(0, current_uri.size() - 1);
-    std::vector<LocationBlock *> all_directives = current_server->getDirectives();
-    if (current_uri.empty())
-        return false;
-    for (std::vector<LocationBlock *>::iterator it = all_directives.begin(); it != all_directives.end(); ++it) {
-        std::string existing_uri = (*it)->getUri();
-        if (!existing_uri.empty() && existing_uri[existing_uri.size() - 1] == '/')
-            existing_uri = existing_uri.substr(0, existing_uri.size() - 1);
-        if (current_uri == "/" && existing_uri == "/")
-            return false;
-        if (existing_uri == current_uri)
-            return false; 
+bool ConfigParser::distinctUri(ServerConfig *current_server) {
+	std::vector<LocationBlock *> all_directives = current_server->getDirectives();
+	for (std::size_t i = 0; i < all_directives.size(); i++) {
+		for (std::size_t j = i + 1; j < all_directives.size(); j++) {
+			if (removeExcessiveSlashes(all_directives[i]->getUri()) == removeExcessiveSlashes(all_directives[j]->getUri()))
+				return (false);
+		}
 	}
-    return true;
+	return (true);
 }
