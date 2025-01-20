@@ -173,29 +173,21 @@ std::string removeRoot(const std::string& str, const std::string& root) {
     return result;
 }
 
-std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& path)
-{
-	std::string newPath;
-	std::string root;
-    size_t pos;
-    std::string imagesPathCgi = rrstate.getServer().getImagesPathCgi();
-
-	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
-    pos = imagesPathCgi.find(root);
-    if (pos != std::string::npos) {
-        imagesPathCgi.erase(pos, root.length());
+std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& path) {
+    std::ifstream file(path.c_str(), std::ios::binary | std::ios::ate);
+    if (!file.is_open()) {
+        return ("");
     }
-    std::ifstream		file(path.c_str(), std::ios::binary);
-	
-	size_t				size;
-    if (!file) return "";
-    file.seekg(0, std::ios::end);
-    size = file.tellg();
+    std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
-	std::vector<char>	buffer(size);
-    file.read(&buffer[0], size);
-    return std::string(buffer.begin(), buffer.end());
+    std::vector<char> buffer(size);
+    if (file.read(buffer.data(), size)) {
+        return (std::string(buffer.begin(), buffer.end()));
+    } else {
+        return ("");
+    }
 }
+
 
 std::string HttpRequestHandler::extractBoundary(const std::string& contentType)
 {
