@@ -109,9 +109,7 @@ std::string generateSessionId()
     const size_t maxLength = 16;
 
     for (size_t i = 0; i < maxLength; ++i)
-    {
         sessionId += charset[std::rand() % (sizeof(charset) - 1)];
-    }
     return sessionId;
 }
 
@@ -121,39 +119,45 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     ServerHandler server = rrstate.getServer();
     LocationBlock* l_block;
     PathValidator validator;
+    std::pair <std::string, e_data_reach> res;
     std::string content_file;
     std::string content;
+    bool enteredIndexCheck;
+    e_data_reach data_reach;
+    std::string requested_path;
+
     unsigned int max = request.getMaxBodyFromLoc(rrstate, request.getPath());
     request.setPath(response.urlDecode(request.getPath()));
     content_file = request.getContPath() + request.getPath();
     l_block = request.getLocationBlock(rrstate, server.getLocations());
+    requested_path = request.getPath();
     if (!l_block) {
         return errorHandler(rrstate, 404, "Not Found");
     }
+
     validator.setPath(content_file);
     if (validator.exists()) {
         if (validator.isDirectory()) {
+            validator.setPath(content_file);
             if (request.isAutoIndexEnabledForUri(rrstate, request.getPath())) {
                 request.handleDirectoryRequest(rrstate, request.getPath(), response);
                 if (response.getBody().length() > max) {
                     return errorHandler(rrstate, 413, "Payload Too Large");
                 }
                 return rrstate.getResponse();
+            } else if (l_block->getUri() != requested_path) {
+                res = l_block->checkSubPathRessource(content_file);
+                content_file = res.first;
+                data_reach = res.second;
             } else {
-                content_file = l_block->checkAvailableRessource().first;
-                validator.setPath(content_file);
-                if (validator.exists() && !validator.isReadable()){
-                    return errorHandler(rrstate, 403, "Forbidden");
-                } else if (!validator.exists() && !l_block->isCgiAllowed()){
-                    return errorHandler(rrstate, 404, "Not Found");
-                }
+                res = l_block->checkAvailableRessource();
+                content_file = res.first;
+                data_reach = res.second;
             }
+            enteredIndexCheck = true;
         }
-    } else if (validator.exists() && !validator.isReadable()){
-        return errorHandler(rrstate, 403, "Forbidden");
-    } else if (!validator.exists() && !l_block->isCgiAllowed() ){
-        return errorHandler(rrstate, 404, "Not Found");
     }
+
     std::pair<std::string, e_data_reach> hihi = l_block->checkAvailableRessource();
     bool isCgi = isCgiRequest(rrstate, request.getPath());
     if (isCgi) {
@@ -174,16 +178,28 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
             path = *it;
         cgi.handleCGI(rrstate, l_block->getUri() ,urlDecode(path));
         if (rrstate.getResponse().getBody().length() > max)
-        {
             return errorHandler(rrstate, 413, "Payload Too Large");
-        }
         return (rrstate.getResponse());
     } else if (!isCgi && l_block->isCgiAllowed())
         return errorHandler(rrstate, 404, "Not found");
-    content = request.readFile(rrstate, content_file);
-    if (content.length() > max) {
-        return errorHandler(rrstate, 413, "Payload Too Large");
+
+    if (!enteredIndexCheck) {
+        content_file = l_block->checkAvailableRessource(response.getPathOfFile(rrstate)).first;
+        data_reach = l_block->checkAvailableRessource(response.getPathOfFile(rrstate)).second;
     }
+
+    switch(data_reach) {
+        case DATA_OK:
+            break;
+        case DATA_NOK:
+            return errorHandler(rrstate, 403, "Forbidden");
+        case NO_DATA:
+            return errorHandler(rrstate, 404, "Not found");
+    }
+    content = request.readFile(rrstate, content_file);
+    if (content.length() > max)
+        return errorHandler(rrstate, 413, "Payload Too Large");
+
     response.setStatusCode(200);
     response.setStatusMsg("OK");
     response.setBody(content);
