@@ -7,7 +7,7 @@ std::string HttpResponseHandler::getPathOfFile(RRState& rrstate)
 	std::string uri;
 	std::string root;
 	
-	root = rrstate.getRequest().getLocationBlock(rrstate, rrstate.getServer().getLocations())->getRoot();
+	root = rrstate.getRequest().getLocationBlock(rrstate.getServer().getLocations())->getRoot();
     uri = rrstate.getRequest().getPath();
 	filePath = root + uri;
 	struct stat info;
@@ -107,7 +107,6 @@ void	                            HttpResponseHandler::setStatusMsg(std::string m
 void	                            HttpResponseHandler::setHeader(const std::string &headerName, const std::string &headerValue) { _headers[headerName] = headerValue; }
 void	                            HttpResponseHandler::setBody(std::string body) { this->_body = body; }
 void                                HttpResponseHandler::setQuery(std::string query) { this->_query = query;}
-void	                            HttpResponseHandler::setResponse(std::string output) {}
 std::string                         HttpResponseHandler::getHttpVersion() const { return _httpVersion; }
 int                                 HttpResponseHandler::getStatusCode() const { return _code; }
 std::string                         HttpResponseHandler::getStatusMsg() const { return _status; }
