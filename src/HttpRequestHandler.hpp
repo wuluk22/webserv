@@ -6,7 +6,7 @@
 /*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 14:10:05 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/14 13:09:31 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/20 01:58:01 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ class HttpRequestHandler
 		std::string																		getMimeType(const std::string& path);
 		std::string																		createErrorPage(int statusCode, const std::string& message);
 		std::string																		toString(size_t value);
-		static std::string																readFile(RRState& rrstate, const std::string& path);
+		static std::string																readFile(const std::string& path);
 		bool																			isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const;
 
 		void																			setMethod(const std::string &m);
@@ -115,25 +115,25 @@ class HttpRequestHandler
 		std::map<std::string, std::vector<std::string> >								getLocInfoByUri(HttpRequestHandler request);
 		bool																			getIsValid() const;
 
-		std::vector<std::string>														getContentPathsFromLoc(RRState& rrstate, const std::string& uri) const;
-		std::string																		getRootDirectoryFromLoc(RRState& rrstate, const std::string& uri) const;
-		bool																			isAutoIndexEnabled(RRState& rrstate, const std::string& uri) const;
-		std::string																		getFullPathFromLoc(RRState& rrstate, const std::string& relativePath) const;
-		unsigned int																	getMaxBodyFromLoc(RRState& rrstate, const std::string& uri) const;
+		std::vector<std::string>														getContentPathsFromLoc(const std::string& uri) const;
+		std::string																		getRootDirectoryFromLoc(const std::string& uri) const;
+		bool																			isAutoIndexEnabled(const std::string& uri) const;
+		std::string																		getFullPathFromLoc(const std::string& relativePath) const;
+		unsigned int																	getMaxBodyFromLoc(const std::string& uri) const;
 		void																			setContentPath(const std::string& path);
 		std::string																		getContPath();
 		std::string 																	getContentPath(const std::map<std::string, std::vector<std::string> >& config);
 
-		bool																			isAutoIndexEnabledForUri(RRState& rrstate, const std::string& uri) const;
+		bool																			isAutoIndexEnabledForUri(const std::string& uri) const;
 		void																			reset();
-		LocationBlock*																	getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const;
+		LocationBlock*																	getLocationBlock(std::vector<LocationBlock*> locationBlocks) const;
 
 // --------------------------------									
 
 		HttpRequestHandler																handleRequest(int clientSock, RRState& rrstate);
 		static HttpRequestHandler														httpParsing(const std::string &buffer);
-		void																			handleDirectoryRequest(RRState& rrstate, const std::string& path, HttpResponseHandler& response);
-    	void																			handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response);
+		void																			handleDirectoryRequest(RRState& rrstate, const std::string& path);
+    	void																			handleFileUpload(RRState& rrstate, const std::string& requestData);
 		HttpRequestHandler																handleConfig(HttpRequestHandler& request, std::vector<LocationBlock *> locationsBlock);
 		std::string																		extractDir(std::string& requestPath);
 		std::string																		removeExcessiveSlashes(std::string& path);

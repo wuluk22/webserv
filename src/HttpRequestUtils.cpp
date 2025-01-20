@@ -40,7 +40,7 @@ std::string HttpRequestHandler::removeExcessiveSlashes(std::string& path) {
     return (result);
 }
 
-LocationBlock* HttpRequestHandler::getLocationBlock(RRState& rrstate, std::vector<LocationBlock*> locationBlocks) const
+LocationBlock* HttpRequestHandler::getLocationBlock(std::vector<LocationBlock*> locationBlocks) const
 {
     std::string requestPath = this->getPath();
     LocationBlock* matchedBlock = NULL;
@@ -173,7 +173,7 @@ std::string removeRoot(const std::string& str, const std::string& root) {
     return result;
 }
 
-std::string HttpRequestHandler::readFile(RRState& rrstate, const std::string& path) {
+std::string HttpRequestHandler::readFile(const std::string& path) {
     std::ifstream file(path.c_str(), std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
         return ("");

@@ -2,12 +2,11 @@
 #include "HttpResponseHandler.hpp"
 #include "RequestResponseState.hpp"
 
-void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::string& path, HttpResponseHandler& response)
+void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::string& path)
 {
 	std::string				dirPath;
 	std::string				content;
 	std::vector<FileInfo>	files;
-    unsigned int            max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
 
 	dirPath	= rrstate.getRequest().getContPath() + path;
 	files = _handler.getDirectoryListing(dirPath);
@@ -20,7 +19,7 @@ void	HttpRequestHandler::handleDirectoryRequest(RRState& rrstate, const std::str
 	rrstate.getResponse().setBody(content);
 }
 
-void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& requestData, const std::string& path, HttpResponseHandler& response)
+void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& requestData)
 {
     std::string contentType = getHeader("Content-Type");
     std::string filename;
@@ -28,7 +27,7 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
     std::string uploadPath;
     std::string fullPath;
 
-    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate, rrstate.getRequest().getPath());
+    unsigned int max = rrstate.getRequest().getMaxBodyFromLoc(rrstate.getRequest().getPath());
     if (requestData.length() > max)
     {
         setErrorResponse(rrstate, 413, "Payload Too Large");
