@@ -6,7 +6,7 @@
 volatile sig_atomic_t exit_flag = 0;
 
 void handleSignal(int sig) {
-    if (sig == SIGINT) {
+    if (sig == SIGINT || sig == SIGTSTP) {
         std::cout << std::endl;
         exit_flag = 1;
     }
@@ -27,8 +27,6 @@ int main(int ac, char **argv) {
     signal(SIGINT, handleSignal);
     try {
         config = ConfigParser::getInstance(argv[1]);
-        ServerConfig* c = config->getServerConfig(0);
-        ServerBlock* server_header = c->getServerHeader();
         ServerBase.addPortAndServers(config->getAllServerConfig());
         while (!exit_flag) {
             ServerBase.processClientConnections();
