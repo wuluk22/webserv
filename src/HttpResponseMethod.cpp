@@ -126,7 +126,7 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     std::string requested_path;
 
     unsigned int max = request.getMaxBodyFromLoc(request.getPath());
-    request.setPath(response.urlDecode(request.getPath()));
+    rrstate.getRequest().setPath(response.urlDecode(request.getPath()));
     content_file = request.getContPath() + request.getPath();
     l_block = request.getLocationBlock(server.getLocations());
     requested_path = request.getPath();
