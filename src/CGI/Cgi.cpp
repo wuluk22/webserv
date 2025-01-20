@@ -27,8 +27,6 @@ std::string Cgi::getClientIP(RRState& rrstate) {
 }
 
 int Cgi::getClientPort(RRState& rrstate) {
-    struct sockaddr_in clientAddr;
-
     if (getsockname(rrstate.getServer().getSock(), rrstate.getServer().getAddress(), &rrstate.getServer().getAddrlen()) == -1) {
         perror("getsockname");
         return 0;
