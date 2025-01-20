@@ -164,3 +164,13 @@ std::string ConfigParser::toStrInt(int value) {
 	oss << value;
 	return oss.str();
 }
+
+std::string ConfigParser::removeTrailingSlashes(const std::string& input) {
+	std::string result = input;
+	std::string::size_type end = result.size();
+	while (end > 0 && result[end - 1] == '/') {
+		--end;
+	}
+	result.resize(end);
+	return (result);
+}
