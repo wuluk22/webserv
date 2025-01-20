@@ -37,6 +37,7 @@ class LocationBlock : public ADirective {
 		e_data_reach 							isContentPathReachable(void);
 		e_data_reach 							isCgiPathReachable(void);
 		std::pair<std::string, e_data_reach>	checkAvailableRessource(std::string file_path = "");
+		std::pair<std::string, e_data_reach>	checkSubPathRessource(std::string subpath);
 
 		// Setter
 		void setUriDependance(std::string uri);

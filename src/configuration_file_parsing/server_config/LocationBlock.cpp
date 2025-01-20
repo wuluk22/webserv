@@ -113,6 +113,42 @@ std::string removeExcessiveSlashes(const std::string& path) {
     return (result);
 }
 
+std::pair<std::string, e_data_reach> LocationBlock::checkSubPathRessource(std::string subpath) {
+	std::string full_sub_path;
+	std::pair<std::string, e_data_reach> result;
+	bool hasEntered = false;
+	std::string uri = this->_location_params._uri;
+	std::set<std::string>::iterator it = this->_common_params._index.begin();
+	for (; it != this->_common_params._index.end(); it++) {
+		if (uri[uri.size() - 1] == '/')
+			full_sub_path = subpath + (*it);
+		else
+			full_sub_path = subpath + "/" + (*it);
+		_validator.setPath(subpath);
+		if (_validator.exists() && !_validator.isReadable()) {
+			result.first = full_sub_path;
+			result.second = DATA_NOK;
+			return result;
+		}
+		_validator.setPath(full_sub_path);
+		if (_validator.exists() && _validator.isFile()) {
+			hasEntered = true;
+			if (_validator.isReadable()) {
+				result.first = full_sub_path;
+				result.second = DATA_OK;
+			} else {
+				result.first = full_sub_path;
+				result.second = DATA_NOK;
+			}
+		}
+	}
+	if (!hasEntered) {
+		result.first = full_sub_path;
+		result.second = NO_DATA;
+	}
+	return (result);
+}
+
 std::pair<std::string, e_data_reach> LocationBlock::checkAvailableRessource(std::string file_path) {
 	std::string full_file_path;
 	std::string directory_path;
