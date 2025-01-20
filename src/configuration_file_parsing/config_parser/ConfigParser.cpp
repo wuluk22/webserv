@@ -153,7 +153,6 @@ void ConfigParser::validateCgiPaths(ServerConfig* serverConfig) {
 			cgiPaths.insert(std::make_pair((*it)->getUri(), *it));
 		}
 	}
-
 	for (it = directives.begin(); it != directives.end(); ++it) {
 		std::string uri = (*it)->getUri();
 		std::map<std::string, LocationBlock*>::iterator map_it;
@@ -169,13 +168,13 @@ void ConfigParser::validateCgiPaths(ServerConfig* serverConfig) {
 void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf , size_t server_id) {
 	_logger.info("Finalizing server " + toStrInt(server_id + 1) + " parsing");
 	if (!directive->wasListeningPortSet())
-		throw ConfigParserError(PORT_NOT_SET, __FUNCTION__, __LINE__, line);
+		throw ConfigParserError(PORT_NOT_SET, __FUNCTION__, __LINE__, -1);
 	if (directive->getServerName().empty())
-		throw ConfigParserError(SERVER_NAME_NOT_SET, __FUNCTION__, __LINE__, line);
+		throw ConfigParserError(SERVER_NAME_NOT_SET, __FUNCTION__, __LINE__, -1);
 	if (!checkDependsOn(serv_conf))
-		throw ConfigParserError(DEPENDS_ON_NO_MATCH, __FUNCTION__, __LINE__, line);
+		throw ConfigParserError(DEPENDS_ON_NO_MATCH, __FUNCTION__, __LINE__, -1);
 	if (!checkAlias(serv_conf))
-		throw ConfigParserError(ALIAS_NO_MATCH, __FUNCTION__, __LINE__, line);
+		throw ConfigParserError(ALIAS_NO_MATCH, __FUNCTION__, __LINE__, -1);
 	if (directive->getRoot().empty())
 		_logger.warn("Relying on root definition for each location directive - not recommanded");
 	if (serv_conf->getDirectives().empty())
@@ -183,7 +182,7 @@ void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, Serv
 	validateCgiPaths(serv_conf);
 	std::vector<LocationBlock*> directives = serv_conf->getDirectives();
 	if (!distinctUri(serv_conf))
-		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, line);
+		throw ConfigParserError(DOUBLE_LOCATION_URI, __FUNCTION__, __LINE__, -1);
 }
 
 void ConfigParser::finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string uri, size_t line) {
@@ -353,9 +352,14 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 
 bool ConfigParser::distinctUri(ServerConfig *current_server) {
 	std::vector<LocationBlock *> all_directives = current_server->getDirectives();
+	std::string compared;
+	std::string reference;
+
 	for (std::size_t i = 0; i < all_directives.size(); i++) {
 		for (std::size_t j = i + 1; j < all_directives.size(); j++) {
-			if (removeExcessiveSlashes(all_directives[i]->getUri()) == removeExcessiveSlashes(all_directives[j]->getUri()))
+			compared =  removeTrailingSlashes(removeExcessiveSlashes(all_directives[i]->getUri()));
+			reference =  removeTrailingSlashes(removeExcessiveSlashes(all_directives[j]->getUri()));
+			if (compared == reference)
 				return (false);
 		}
 	}
