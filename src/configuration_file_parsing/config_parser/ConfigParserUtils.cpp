@@ -62,7 +62,7 @@ void ConfigParser::initializeVector(std::vector<std::string>& vec, std::string t
 bool ConfigParser::isStringDigit(std::string args) {
 	if (args.empty())
 		return (false);
-	for (int i = 0; i < args.size(); i++) {
+	for (std::size_t i = 0; i < args.size(); i++) {
 		if (!std::isdigit(args[i]))
 			return (false);
 	}
@@ -77,7 +77,7 @@ bool ConfigParser::isValidServerName(std::string name) {
 		return (false);
 	if (!std::isalpha(name[0]))
 		return (false);
-	for (int i = 0; i < name.size(); i++) {
+	for (std::size_t i = 0; i < name.size(); i++) {
 		char c = name[i];
 		if (std::isalnum(c) || c == '-' || c == '.') {
 			if ((i == 0 || i == name.size() - 1) && (c == '.' || c == '-')) 

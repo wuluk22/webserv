@@ -84,7 +84,7 @@ class ConfigParser {
 		void parseConfigurationFile(std::ifstream &configuration_file);
 		void processLocationBlock(std::ifstream &config_file, std::string w_line, TokenCounter &Tk,  size_t &current_line, ServerBlock *current_server, ServerConfig *server_config);
 		void finalizeLocationBlock(LocationBlock *directive, ServerBlock *server_config, std::string location_line, size_t current_line);
-		void finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf, size_t server_id);
+		void finalizeServerBlock(ServerBlock *directive, ServerConfig *serv_conf, size_t server_id);
 		void processServerBlock(std::ifstream &config_file, std::string w_line,  size_t &current_line, ServerConfig *server_config, size_t server_id);
 
 		// Directive parsing
@@ -100,7 +100,7 @@ class ConfigParser {
 		void parseAllowedMethhod(std::vector <std::string> args, LocationBlock *directive, size_t current_line);
 		void parseServerName(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		void parseListeningPorts(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
-		bool checkErrorPagesAvailability(std::string path, size_t current_line);
+		bool checkErrorPagesAvailability(std::string path);
 		void parseErrorPages(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		void parseDependsOn(std::vector <std::string> args, LocationBlock *directive, size_t current_line);
 

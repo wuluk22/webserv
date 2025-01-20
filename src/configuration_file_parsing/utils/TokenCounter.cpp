@@ -33,7 +33,7 @@ int TokenCounter::getTokenCount(const std::string& token) const {
 }
 
 bool TokenCounter::oneOccurenceCheck(std::vector <std::string> unrepeatable_tokens) {
-	for (int i = 0; i < unrepeatable_tokens.size(); i++) {
+	for (std::size_t i = 0; i < unrepeatable_tokens.size(); i++) {
 		if (getTokenCount(unrepeatable_tokens[i]) > 1)
 			return (false);
 	}

@@ -57,8 +57,8 @@ unsigned int ADirective::getClientMaxBodySize(void) const {
 std::ostream& ADirective::printAttributes(std::ostream& os) const {
 	os << "Root : " << _common_params._root << "\n"
 	<< "Auto index : " << _common_params._auto_index << "\n";
-    for (std::set<std::string>::const_iterator it = _common_params._index.begin(); it != _common_params._index.end(); ++it)
-        os << "Index : " << *it << "\n";
+	for (std::set<std::string>::const_iterator it = _common_params._index.begin(); it != _common_params._index.end(); ++it)
+		os << "Index : " << *it << "\n";
 	os << "Client Max Body Size : " << _common_params._client_max_body_size << "\n";
 	return (os);
 }

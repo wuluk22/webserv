@@ -5,7 +5,7 @@ ServerConfig::ServerConfig(void) {
 }
 
 ServerConfig::~ServerConfig() {
-	for (int i = 0; i < _directives.size(); i++) {
+	for (std::size_t i = 0; i < _directives.size(); i++) {
 		delete _directives[i];
 	}
 	if (_server_header)

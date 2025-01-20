@@ -18,7 +18,7 @@ void ConfigParser::parseIndex(std::vector <std::string> working_line, ADirective
 	working_line.erase(working_line.begin());
 	if (working_line.empty())
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
-	for (int i = 0; i < working_line.size(); i++) {
+	for (std::size_t i = 0; i < working_line.size(); i++) {
 		if (!index_file.insert(working_line[i]).second)
 			throw ConfigParserError(DUPE_ELEMS, __FUNCTION__, __LINE__, current_line);
 	}
@@ -69,7 +69,7 @@ void ConfigParser::parseAllowedMethhod(std::vector <std::string> args, LocationB
 	if (args.empty() || args.size() < 2 || args.size() > 4)
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
 	args.erase(args.begin());
-	for (int i = 0; i < args.size() ; i++) {
+	for (std::size_t i = 0; i < args.size() ; i++) {
 		valid_entry = false;
 		if (args[i] == "GET" && !directive->isGetAllowed()) {
 			valid_entry = directive->setAllowedMethods(GET);
@@ -105,7 +105,7 @@ void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	if (args.empty() || args.size() < 2)
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
 	args.erase(args.begin());
-	for (int i = 0; i < args.size(); i++) {
+	for (std::size_t i = 0; i < args.size(); i++) {
 		if (!isStringDigit(args[i]))
 			throw ConfigParserError(NUMERICAL_VALUE_EXPECTED, __FUNCTION__, __LINE__, current_line);
 		value = std::strtoul(args[i].c_str(), NULL, 10);
@@ -124,7 +124,7 @@ void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	directive->setListeningPort(current_working_ports);
 }
 
-bool ConfigParser::checkErrorPagesAvailability(std::string path, size_t current_line) {
+bool ConfigParser::checkErrorPagesAvailability(std::string path) {
 	_validator.setPath(path);
 	if (!(_validator.exists() && _validator.isFile() && _validator.isReadable()))
 		return (false);
@@ -142,13 +142,13 @@ void ConfigParser::parseErrorPages(std::vector <std::string> args, ServerBlock *
 	path = args.back();
 	if (path[0] == '.')
 		throw ConfigParserError(URI_STYLE_FORMAT_ERROR, __FUNCTION__, __LINE__, current_line);
-	if (checkErrorPagesAvailability(directive->getRoot() + path, current_line))
+	if (checkErrorPagesAvailability(directive->getRoot() + path))
 		path = directive->getRoot() + path;
-	else if (checkErrorPagesAvailability( directive->getRoot() + '/' + path, current_line))
+	else if (checkErrorPagesAvailability( directive->getRoot() + '/' + path))
 		path = directive->getRoot() + '/' + path;
-	else if (!checkErrorPagesAvailability(path, current_line))
+	else if (!checkErrorPagesAvailability(path))
 		throw ConfigParserError(BAD_ACCESS, __FUNCTION__, __LINE__, current_line);
-	for (int i = 1; i < arg_size - 1; ++i) {
+	for (std::size_t i = 1; i < arg_size - 1; ++i) {
 		error_code = std::strtoul(args[i].c_str(), NULL, 10);
 		if (error_code < 400 || error_code > 527) 
 			throw ConfigParserError(WRONG_ERROR_PAGES_SCOPE, __FUNCTION__, __LINE__, current_line);

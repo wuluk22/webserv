@@ -27,7 +27,7 @@ ConfigParser::ConfigParser(const std::string init_path) {
 }
 
 ConfigParser::~ConfigParser() {
-	for (int i = 0; i < _servers_config.size(); i++) {
+	for (std::size_t i = 0; i < _servers_config.size(); i++) {
 		_logger.warn("Disabling server " + toStrInt(i) + ".");
 		delete _servers_config[i];
 	}
@@ -165,7 +165,7 @@ void ConfigParser::validateCgiPaths(ServerConfig* serverConfig) {
 	}
 }
 
-void ConfigParser::finalizeServerBlock(ServerBlock *directive, size_t line, ServerConfig *serv_conf , size_t server_id) {
+void ConfigParser::finalizeServerBlock(ServerBlock *directive, ServerConfig *serv_conf , size_t server_id) {
 	_logger.info("Finalizing server " + toStrInt(server_id + 1) + " parsing");
 	if (!directive->wasListeningPortSet())
 		throw ConfigParserError(PORT_NOT_SET, __FUNCTION__, __LINE__, -1);
@@ -320,7 +320,7 @@ void ConfigParser::processServerBlock(std::ifstream &config_file, std::string wo
 		} else
 			throw ConfigParserError(INVALID_TOKEN, __FUNCTION__, __LINE__, current_line);
 	}
-	finalizeServerBlock(s_directive, current_line, server_config, server_id);
+	finalizeServerBlock(s_directive, server_config, server_id);
 	config_file.seekg(last_position);
 	token_counter.exitBlock();
 }
@@ -342,7 +342,6 @@ void ConfigParser::parseConfigurationFile(std::ifstream &config_file) {
 			server_config = new ServerConfig();
 			processServerBlock(config_file, working_line, current_line, server_config, server_id);
 		} else {
-			delete server_config;
 			throw ConfigParserError(TOKEN_POSITION_MISMATCH, __FUNCTION__, __LINE__, current_line);
 		}
 		setServerConfig(server_id, server_config);
