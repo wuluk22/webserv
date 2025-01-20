@@ -6,7 +6,7 @@
 /*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/11 15:46:32 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/20 01:48:55 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ class HttpResponseHandler
 		void									setStatusMsg(std::string message);
 		void									setHeader(const std::string &headerName, const std::string &headerValue);
 		void									setBody(std::string body);
-		void									setResponse(std::string output);
 		void    								setQuery(std::string query);
 
 		std::string								getHttpVersion() const;
