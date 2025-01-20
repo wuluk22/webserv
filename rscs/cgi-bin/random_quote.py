@@ -44,7 +44,7 @@ def get_available_images(directory):
             f for f in os.listdir(directory) 
             if os.path.isfile(os.path.join(directory, f)) 
             and os.access(os.path.join(directory, f), os.R_OK)
-            and f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))
+            and f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))
         ]
     except Exception as e:
         return []
