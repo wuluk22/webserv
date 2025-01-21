@@ -170,7 +170,7 @@ void ConfigParser::finalizeServerBlock(ServerBlock *directive, ServerConfig *ser
 	if (!directive->wasListeningPortSet())
 		throw ConfigParserError(PORT_NOT_SET, __FUNCTION__, __LINE__, -1);
 	if (directive->getServerName().empty())
-		throw ConfigParserError(SERVER_NAME_NOT_SET, __FUNCTION__, __LINE__, -1);
+		directive->setServerName("localhost");
 	if (!checkDependsOn(serv_conf))
 		throw ConfigParserError(DEPENDS_ON_NO_MATCH, __FUNCTION__, __LINE__, -1);
 	if (!checkAlias(serv_conf))

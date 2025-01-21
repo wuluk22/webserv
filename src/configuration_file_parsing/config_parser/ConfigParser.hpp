@@ -47,7 +47,6 @@ class ConfigParser {
 		std::vector <std::string>			_s_params;
 		std::vector <std::string>			_non_repeat_tokens_l;
 		std::vector <std::string>			_non_repeat_tokens_s;
-		std::set <std::string>				_server_name;
 		std::set <unsigned int>				_ports;
 		static ConfigParser*				_instance;
 		std::map<size_t , ServerConfig *>	_servers_config;
