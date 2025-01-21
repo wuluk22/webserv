@@ -112,17 +112,7 @@ std::string generateSessionId()
     return sessionId;
 }
 
-bool HttpResponseHandler::isValidHost(RRState& rrstate) {
-    std::map<std::string, std::string> headers = rrstate.getRequest().getHeaders();
-    std::map<std::string, std::string>::iterator it = headers.find("Host");
-    return (it != headers.end() && it->second.substr(0, it->second.find(":")) == rrstate.getServer().getServerName());
-}
-
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
-    if (!isValidHost(rrstate)) {
-        return errorHandler(rrstate, 404, "Not Found");
-    }
-    
     HttpRequestHandler request = rrstate.getRequest();
     HttpResponseHandler response = rrstate.getResponse();
     ServerHandler server = rrstate.getServer();

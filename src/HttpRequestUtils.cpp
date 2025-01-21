@@ -254,3 +254,16 @@ std::string                                                                     
     }
     return "";
 }
+
+// BUFFER // 
+void HttpRequestHandler::appendToBuffer(const char* data, size_t length) {
+    _requestBuffer.append(data, length);
+}
+
+std::string& HttpRequestHandler::getRequestBuffer() {
+    return _requestBuffer;
+}
+
+void HttpRequestHandler::clearBuffer() {
+    _requestBuffer.clear();
+}
