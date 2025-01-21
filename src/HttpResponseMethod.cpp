@@ -100,28 +100,27 @@ HttpResponseHandler HttpResponseHandler::errorHandler(RRState &rrstate, unsigned
     return rrstate.getResponse();
 }
 
-std::string generateSessionId()
-{
-    std::srand(std::time(0));
-    std::string sessionId;
-    const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    const size_t maxLength = 16;
-
-    for (size_t i = 0; i < maxLength; ++i)
-        sessionId += charset[std::rand() % (sizeof(charset) - 1)];
-    return sessionId;
+bool HttpResponseHandler::isValidHost(RRState& rrstate) {
+    std::map<std::string, std::string> headers = rrstate.getRequest().getHeaders();
+    std::map<std::string, std::string>::iterator it = headers.find("Host");
+    return (it != headers.end() && it->second.substr(0, it->second.find(":")) == rrstate.getServer().getServerName());
 }
 
 HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
+    // Checks if the server name in the request matches with the server name
+    if (!isValidHost(rrstate)) {
+        return errorHandler(rrstate, 404, "Not Found");
+    }
+
     HttpRequestHandler request = rrstate.getRequest();
     HttpResponseHandler response = rrstate.getResponse();
     ServerHandler server = rrstate.getServer();
     LocationBlock* l_block;
     PathValidator validator;
-    std::pair <std::string, e_data_reach> res;
+    std::pair<std::string, e_data_reach> res;
     std::string content_file;
     std::string content;
-    bool enteredIndexCheck;
+    bool enteredIndexCheck = false;
     e_data_reach data_reach;
     std::string requested_path;
 
@@ -130,8 +129,33 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     content_file = request.getContPath() + request.getPath();
     l_block = request.getLocationBlock(server.getLocations());
     requested_path = request.getPath();
+
     if (!l_block) {
         return errorHandler(rrstate, 404, "Not Found");
+    }
+    if (l_block->isReturnSet()) {
+        t_return_args r_args = l_block->getReturn();
+        if (r_args.status_code == 300) {
+            std::ostringstream body;
+            body << "<html><body><h1>Multiple Choices</h1>"
+                    << "<p>Choose one of the following:</p>";
+            for (std::set<std::string>::iterator it = r_args.multi_links.begin(); it != r_args.multi_links.end(); it++) {
+                body << "<a href='" << (*it) << "'>" << (*it) << "</a><br>";
+            }
+            body << "</body></html>";
+            response.setStatusCode(300);
+            response.setStatusMsg("Multiple Choices");
+            response.setHeader("Content-Type", "text/html");
+            response.setHeader("Content-Length", request.toString(body.str().length()));
+            response.setBody(body.str());
+        } else {
+            response.setStatusCode(r_args.status_code);
+            response.setStatusMsg("Redirect");
+            response.setHeader("Location", (*r_args.multi_links.begin()));
+            response.setHeader("Content-Length", "0");
+        }
+        response.setHttpVersion("HTTP/1.1");
+        return (response);
     }
     validator.setPath(content_file);
     if (validator.exists()) {
@@ -155,15 +179,12 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
             enteredIndexCheck = true;
         }
     }
-    std::pair<std::string, e_data_reach> hihi = l_block->checkAvailableRessource();
     bool isCgi = isCgiRequest(rrstate, request.getPath());
     if (isCgi) {
-        Cgi                                     cgi;
-        std::string                             path;
-        std::vector<std::string>                uris;
-
-        uris = request.getContentPathsFromLoc(request.getPath());
-        switch(l_block->isContentPathReachable()) {
+        Cgi cgi;
+        std::string path;
+        std::vector<std::string> uris = request.getContentPathsFromLoc(request.getPath());
+        switch (l_block->isContentPathReachable()) {
             case DATA_OK:
                 break;
             case DATA_NOK:
@@ -171,19 +192,21 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
             case NO_DATA:
                 return errorHandler(rrstate, 404, "Not found");
         }
-        for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); it++)
+        for (std::vector<std::string>::iterator it = uris.begin(); it != uris.end(); ++it)
             path = *it;
-        cgi.handleCGI(rrstate, l_block->getUri() ,urlDecode(path));
+        cgi.handleCGI(rrstate, l_block->getUri(), urlDecode(path));
         if (rrstate.getResponse().getBody().length() > max)
             return errorHandler(rrstate, 413, "Payload Too Large");
-        return (rrstate.getResponse());
-    } else if (!isCgi && l_block->isCgiAllowed() && (!enteredIndexCheck ^ validator.isFile()))
+
+        return rrstate.getResponse();
+    } else if (!isCgi && l_block->isCgiAllowed() && (!enteredIndexCheck ^ validator.isFile())) {
         return errorHandler(rrstate, 404, "Not found");
+    }
     if (!enteredIndexCheck) {
         content_file = l_block->checkAvailableRessource(response.getPathOfFile(rrstate)).first;
         data_reach = l_block->checkAvailableRessource(response.getPathOfFile(rrstate)).second;
     }
-    switch(data_reach) {
+    switch (data_reach) {
         case DATA_OK:
             break;
         case DATA_NOK:
@@ -194,7 +217,6 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
     content = request.readFile(content_file);
     if (content.length() > max)
         return errorHandler(rrstate, 413, "Payload Too Large");
-
     response.setStatusCode(200);
     response.setStatusMsg("OK");
     response.setBody(content);

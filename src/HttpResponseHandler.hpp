@@ -6,7 +6,7 @@
 /*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/21 13:20:42 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/22 00:44:29 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 # include "configuration_file_parsing/server_config/ADirective.hpp"
 
 class RRState;
+class LocationBlock;
 
 class HttpResponseHandler
 {
