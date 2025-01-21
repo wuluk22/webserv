@@ -169,17 +169,28 @@ void ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *di
 	unsigned long status_code;
 	std::string link;
 
-	if (arg_size != 3)
+	if (!((args[1] == "300" && arg_size >= 3) || (args[1] != "300" && arg_size == 3)))
 		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
 	args.erase(args.begin());
 	status_code = std::strtoul(args[0].c_str(), NULL, 10);
-	if (status_code < 300 || status_code > 302)
+	if (status_code < 300 || status_code > 308)
 		throw ConfigParserError(WRONG_RETURN_SCOPE, __FUNCTION__, __LINE__, current_line);
-	link = args[1];
-	if (!isValidURL(link))
-		throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
 	res.status_code = (unsigned short) status_code;
-	res.link = link;
+	if (res.status_code == 300) {
+		args.erase(args.begin());
+		std::vector<std::string>::iterator it = args.begin();
+		for (;it != args.end(); it++) {
+			if (isValidURL(*it))
+				res.multi_links.insert(*it);
+			else
+				throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
+		}
+	} else {
+		if (isValidURL(args[1]))
+			res.multi_links.insert(args[1]);
+		else
+			throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
+	}
 	directive->setReturn(res);
 }
 

@@ -1,6 +1,5 @@
 #include "ConfigParser.hpp"
 #include "ConfigException.hpp"
-#include "../server_config/ServerConfig.hpp"
 
 ConfigParser* ConfigParser::_instance = NULL;
 
@@ -243,8 +242,12 @@ bool ConfigParser::handleDirectiveTokens(std::vector<std::string> tokens, std::s
 	if (tokens.empty())
 		return (false);
 	if (is_token_valid_multiple(tokens[0], _l_params) || is_token_valid_multiple(tokens[0], _c_params)) {
-		if ((tokens[0] == "return" && !token_counter.isEmpty()) ^ (tokens[0] != "return" && token_counter.getTokenCount("return") >= 1))
+		if ((tokens[0] == "return" && !token_counter.isEmpty()) 
+		^ (tokens[0] != "return" && token_counter.getTokenCount("return") >= 1)) {
 			throw ConfigParserError(RETURN_ALLOWS_NO_DIRECTIVE, __FUNCTION__, __LINE__, current_line);
+		} else if (tokens[0] == "return") {
+			location_directive->setAllowedMethods(GET);
+		}
 		token_counter.incrementToken(tokens[0]);
 		if (!token_counter.oneOccurenceCheck(_non_repeat_tokens_l))
 			throw ConfigParserError(TOKEN_REPEATED, __FUNCTION__, __LINE__, current_line);
