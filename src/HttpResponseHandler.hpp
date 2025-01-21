@@ -6,7 +6,7 @@
 /*   By: nechaara <nechaara@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 13:07:27 by clegros           #+#    #+#             */
-/*   Updated: 2025/01/20 01:48:55 by nechaara         ###   ########.fr       */
+/*   Updated: 2025/01/21 13:20:42 by nechaara         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class HttpResponseHandler
 		std::string								urlDecode(const std::string& url);
 		HttpResponseHandler						errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
 		std::pair<std::string, e_data_reach>	checkAvailableRessource(std::string& file_path);
+		bool									isValidHost(RRState& rrstate);
 		HttpResponseHandler						handleGet(RRState& rrstate);
 		bool									isCgiRequest(RRState& rrstate, const std::string& path);
 
