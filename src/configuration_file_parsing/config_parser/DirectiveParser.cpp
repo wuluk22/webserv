@@ -86,13 +86,10 @@ void ConfigParser::parseServerName(std::vector <std::string> args, ServerBlock *
 	if (args.size() != 2)
 		throw ConfigParserError(SERVER_NAME_ONE_NAME, __FUNCTION__, __LINE__, current_line);
 	std::string current_server = args[1];
+	if (current_server == "_")
+		current_server = "localhost";
 	if (!isValidServerName(current_server))
 		throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
-	std::set<std::string>::iterator it = _server_name.find(current_server);
-	if (it == _server_name.end())
-		_server_name.insert(current_server);
-	else
-		throw ConfigParserError(SERVER_NAME_DUPE, __FUNCTION__, __LINE__, current_line);
 	directive->setServerName(current_server);
 }
 
