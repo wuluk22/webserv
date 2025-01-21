@@ -7,7 +7,7 @@
 
 typedef struct s_return_args {
 	unsigned short status_code;
-	std::string link;
+	std::set<std::string> multi_links;
 }	t_return_args;
 
 struct s_loc_params {

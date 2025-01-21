@@ -277,6 +277,10 @@ bool LocationBlock::isReturnSet(void) const {
 	return (this->_location_params._return_set);
 }
 
+s_return_args LocationBlock::getReturn(void) const {
+	return (this->_location_params._return_args);
+}
+
 std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {
 	std::cout << "\n\n" << "LOCATION BLOCK" << "\n\n";
 	
