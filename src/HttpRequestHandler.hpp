@@ -41,6 +41,7 @@ class HttpRequestHandler
 		std::string																	_httpVersion;
 		std::map<std::string, std::string>											_headers;
 		std::string																	_body;
+		std::string 																_requestBuffer;
 		bool																		_valid;
 
 		std::vector<std::string>													_allowedMethods;
@@ -70,6 +71,8 @@ class HttpRequestHandler
 		std::string																		toString(size_t value);
 		static std::string																readFile(const std::string& path);
 		bool																			isMethodAllowed(const HttpRequestHandler& request, const std::string& method) const;
+		void 																			appendToBuffer(const char* data, size_t length);
+		void 																			clearBuffer();
 
 		void																			setMethod(const std::string &m);
 		void																			setPath(const std::string &p);
@@ -98,6 +101,7 @@ class HttpRequestHandler
 		const std::vector<std::string>&													getCgiPath() const;
 		const int&																		getClientSocket() const;
 		std::string																		getCookie(const std::string& name) const;
+		std::string& 																	getRequestBuffer();
 
 
 // --------------------------------									

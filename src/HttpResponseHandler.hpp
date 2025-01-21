@@ -53,7 +53,7 @@ class HttpResponseHandler
 		std::string								getPathOfFile(RRState& rrstate);
 		
 		HttpResponseHandler						handlePath(RRState& rrstate);
-		void									handleResponse(RRState& rrstate);
+		HttpResponseHandler						handleResponse(RRState& rrstate);
 		std::string								urlDecode(const std::string& url);
 		HttpResponseHandler						errorHandler(RRState &rrstate, unsigned int error_code, std::string message);
 		std::pair<std::string, e_data_reach>	checkAvailableRessource(std::string& file_path);

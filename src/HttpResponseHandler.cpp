@@ -2,30 +2,16 @@
 #include "HttpRequestHandler.hpp"
 #include "RequestResponseState.hpp"
 
-void HttpResponseHandler::handleResponse(RRState& rrstate)
+HttpResponseHandler HttpResponseHandler::handleResponse(RRState &rrstate)
 {
     try
     {
         *this = handlePath(rrstate);
-        std::string responseStr = getAll();
-        size_t totalSent = 0;
-        ssize_t sent;
-        while (totalSent < responseStr.length())
-        {
-            sent = send(rrstate.getClientSock(), 
-                        responseStr.c_str() + totalSent, 
-                        responseStr.length() - totalSent, 
-                        0);
-
-            if (sent <= 0)
-                throw std::runtime_error("Failed to send response to client.");
-            
-            totalSent += sent;
-        }
+        return *this; // Return the fully constructed response handler
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
-        std::cerr << "Error sending response: " << e.what() << std::endl;
+        std::cerr << "Error constructing response: " << e.what() << std::endl;
         throw;
     }
 }

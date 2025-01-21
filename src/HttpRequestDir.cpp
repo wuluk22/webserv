@@ -77,11 +77,11 @@ void HttpRequestHandler::handleFileUpload(RRState& rrstate, const std::string& r
         }
         pos += 4;
         std::string::size_type contentEnd = requestData.find(boundary, pos);
-        if (contentEnd == std::string::npos)
+        /*if (contentEnd == std::string::npos)
         {
             setErrorResponse(rrstate, 400, "Bad Request - Invalid file content ending from data");
             return;
-        }
+        }*/
 
         contentEnd -= 2;
         fileContent = requestData.substr(pos, contentEnd - pos);

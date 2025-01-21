@@ -21,6 +21,8 @@ class	RRState
 		HttpResponseHandler				_response;
 		ServerHandler					_server;
 		int								_clientSock;
+		std::string						_readBuffer;
+		std::string						_writeBuffer;
 	
 	public:
 	//METHODS
@@ -32,6 +34,10 @@ class	RRState
 	HttpResponseHandler&			getResponse();
 	ServerHandler&					getServer();
 	int&							getClientSock();
+	std::string&					getWriteBuffer();
+	const std::string&				getWriteBuffer() const;
+	void							setWriteBuffer(const std::string& buffer);
+
 
 	//SETTER
 	void				setRequest(HttpRequestHandler& req);

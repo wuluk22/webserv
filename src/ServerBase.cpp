@@ -76,62 +76,92 @@ void	ServerBase::acceptConnection(ServerHandler Server)
 		_maxSock = newSocket;
 }
 
-void	ServerBase::processClientConnections()
+void ServerBase::processClientConnections()
 {
-	fd_set	cpyReadFds, cpyWriteFds;
+    fd_set cpyReadFds, cpyWriteFds;
 	HttpRequestHandler	request;
 
-	while (true)
+    while (true)
     {
-		cpyReadFds = _readfds;
-		cpyWriteFds = _writefds;
-		std::vector<int> clientToRemove;
+        cpyReadFds = _readfds;
+        cpyWriteFds = _writefds;
+        std::vector<int> clientToRemove;
 
         if (select(_maxSock + 1, &cpyReadFds, &cpyWriteFds, NULL, NULL) < 0)
-		{
-			throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
-		}
-		for (unsigned long i = 0; i < this->_servers.size(); i++)
-		{
-			int serverSocket = this->_servers[i].getSock();
-			if (FD_ISSET(serverSocket, &cpyReadFds))
-			{
-				acceptConnection(this->_servers[(int)i]);
-			}
-		}
-		// Handling Request/Response
-		for (std::map<int, RRState>::iterator it = _clientSockets.begin(); it != _clientSockets.end(); it++)
-		{
-			int client_sock = it->first;
-			std::vector<LocationBlock *> loc = it->second.getServer().getLocations();
-			if (FD_ISSET(client_sock, &cpyReadFds))
-			{
-				it->second.setClientSock(client_sock);
-				request = request.handleRequest(client_sock, it->second);
-				it->second.setRequest(request);
-				if (request.getFd() <= 0)
-				{
-					close(client_sock);
-					FD_CLR(client_sock, &_readfds);
-					FD_CLR(client_sock, &_writefds);
-					clientToRemove.push_back(client_sock);
-					continue ;
-				}
-				if (request.getIsComplete() == true)
-				{
-					FD_CLR(client_sock, &_readfds);
-					FD_SET(client_sock, &cpyWriteFds);
-				}
-			}
-			if (FD_ISSET(client_sock, &cpyWriteFds))
+        {
+            throw ServerBaseError("Select failed", __FUNCTION__, __LINE__);
+        }
+
+        // Accept new connections
+        for (unsigned long i = 0; i < this->_servers.size(); i++)
+        {
+            int serverSocket = this->_servers[i].getSock();
+            if (FD_ISSET(serverSocket, &cpyReadFds))
             {
-				HttpResponseHandler response = it->second.getResponse();
-                response.handleResponse(it->second);
-				it->second.setResponse(response);
-				close(client_sock);
-				FD_CLR(client_sock, &_writefds);
+                acceptConnection(this->_servers[(int)i]);
             }
-		}
+        }
+
+        // Handle client sockets
+        for (std::map<int, RRState>::iterator it = _clientSockets.begin(); it != _clientSockets.end(); it++)
+        {
+            int client_sock = it->first;
+
+            // Handle read events
+            if (FD_ISSET(client_sock, &cpyReadFds))
+            {	
+				it->second.setClientSock(client_sock);
+                request = request.handleRequest(client_sock, it->second);
+                it->second.setRequest(request);
+
+                if (request.getFd() <= 0) // Error or closed connection
+                {
+                    close(client_sock);
+                    FD_CLR(client_sock, &_readfds);
+                    FD_CLR(client_sock, &_writefds);
+                    clientToRemove.push_back(client_sock);
+                    continue;
+                }
+
+                if (request.getIsComplete() == true)
+                {
+                    request.reset();
+                    FD_CLR(client_sock, &_readfds);
+                    FD_SET(client_sock, &cpyWriteFds);
+                }
+            }
+
+            // Handle write events
+            if (FD_ISSET(client_sock, &cpyWriteFds))
+            {
+                HttpResponseHandler response;
+                response = it->second.getResponse();
+				response.handleResponse(it->second);
+				it->second.setResponse(response);
+                it->second.setWriteBuffer(it->second.getResponse().getAll());
+                std::string &responseBuffer = it->second.getWriteBuffer();
+				std::cout << "RESPONSE :: " << responseBuffer << std::endl;
+                if (!responseBuffer.empty())
+                {
+                    ssize_t bytesSent = send(client_sock, responseBuffer.c_str(), responseBuffer.size(), 0);
+                    if (bytesSent <= 0)
+                    {
+                        close(client_sock);
+                        FD_CLR(client_sock, &_writefds);
+                        clientToRemove.push_back(client_sock);
+                        continue;
+                    }
+                    responseBuffer.erase(0, bytesSent); // Remove sent bytes
+                }
+
+                if (responseBuffer.empty())
+                {
+                    close(client_sock);
+                    FD_CLR(client_sock, &_writefds);
+                    clientToRemove.push_back(client_sock);
+                }
+            }
+        }
 		for(unsigned long i = 0; i < clientToRemove.size(); i++)
 		{
 			for (std::map<int, RRState>::iterator it = _clientSockets.begin(); it != _clientSockets.end();)

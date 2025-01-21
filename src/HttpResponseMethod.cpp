@@ -13,7 +13,8 @@ HttpResponseHandler HttpResponseHandler::handlePath(RRState& rrstate)
 
     if (config.empty())
     {
-        setErrorResponse(rrstate, 404, "Not Found");
+        std::cout << "-------------------- ICI ---------------" << std::endl;
+        setErrorResponse(rrstate, 404, "Nooot Found");
         return rrstate.getResponse();
     }
     std::string alles = rrstate.getRequest().getContentPath(config);
