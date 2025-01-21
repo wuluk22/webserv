@@ -94,6 +94,39 @@ bool ConfigParser::isValidServerName(std::string name) {
 	return (true);
 }
 
+bool ConfigParser::isValidURL(const std::string& url) {
+	const std::string http  = "http://";
+	const std::string https = "https://";
+	std::size_t pos = 0;
+	std::size_t slash_pos;
+	std::string domain;
+
+	if (url.compare(0, http.size(), http) == 0) {
+		pos = http.size();
+	} else if (url.compare(0, https.size(), https) == 0) {
+		pos = https.size();
+	} else {
+		return (false);
+	}
+
+    slash_pos = url.find('/', pos);
+    domain = (slash_pos == std::string::npos) ? url.substr(pos) : url.substr(pos, slash_pos - pos);
+
+    if (!isValidServerName(domain))
+        return (false);
+
+    if (slash_pos != std::string::npos) {
+        for (std::size_t i = slash_pos; i < url.size(); i++) {
+            char c = url[i];
+            if (!(std::isalnum(c) || c == '/' || c == '.' || c == '-' || c == '_' || c == '?' || c == '&' || c == '=' || c == '%')) {
+                return (false);
+            }
+        }
+    }
+    
+    return (true);
+}
+
 std::string ConfigParser::returnSecondArgs(std::string args) {
 	std::string trimmed_line;
 	std::string second_args;

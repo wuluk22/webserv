@@ -5,6 +5,11 @@
 #include <iostream>
 #include "ADirective.hpp"
 
+typedef struct s_return_args {
+	unsigned short status_code;
+	std::string link;
+}	t_return_args;
+
 struct s_loc_params {
 	std::string		_cgi_path;
 	std::string		_uri;
@@ -16,14 +21,16 @@ struct s_loc_params {
 	bool			_modified_content_path;
 	bool			_modified_client_max_body_size;
 	bool			_modified_auto_index;
+	bool			_return_set;
+	s_return_args	_return_args;
 };
+
 
 enum e_allowed_methods {
 	GET = 1 << 0,
 	POST = 1 << 1,
 	DELETE = 1 << 2
 };
-class RRState;
 
 class LocationBlock : public ADirective {
 	private:
@@ -49,7 +56,8 @@ class LocationBlock : public ADirective {
 		bool setAllowedMethods(unsigned char allowed_method);
 		bool setContentPath(std::string content_path);
 		void setRawUriDependence(const std::string uri);
-		
+		void setReturn(s_return_args return_arguments);
+
         // Getter
 		std::string					getCgiPath(void) const;
 		std::string					getUri(void) const;
@@ -65,6 +73,8 @@ class LocationBlock : public ADirective {
 		bool						hasAutoIndexModified(void) const;
 		std::string					getUriDependance(void) const;
 		std::string					getRawUriDependence(void) const;
+		s_return_args				getReturn(void) const;
+		bool						isReturnSet(void) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const LocationBlock *location_params);

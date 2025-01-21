@@ -22,7 +22,7 @@
 
 // TOKENS
 #define S_BLOCK_TOKENS "server_name listen error_pages"
-#define L_BLOCK_TOKENS "cgi_path alias allowed_method depends_on"
+#define L_BLOCK_TOKENS "cgi_path alias allowed_method depends_on return"
 #define C_TOKENS "root index auto_index client_max_body_size"
 #define L_NO_RPT_TOKENS "root cgi_path alias depends_on"
 #define S_NO_RPT_TOKENS "root"
@@ -66,6 +66,7 @@ class ConfigParser {
 		bool						endsWith(const std::string path, const std::string extension);
 		bool						isStringDigit(std::string args);
 		bool						isValidServerName(std::string name);
+		bool						isValidURL(const std::string& url);
 		std::string					returnSecondArgs(std::string args);
 		std::string					removeExcessiveSlashes(const std::string& path);
 		bool						distinctUri(ServerConfig *current_server);
@@ -102,6 +103,7 @@ class ConfigParser {
 		bool checkErrorPagesAvailability(std::string path);
 		void parseErrorPages(std::vector <std::string> args, ServerBlock *directive, size_t current_line);
 		void parseDependsOn(std::vector <std::string> args, LocationBlock *directive, size_t current_line);
+		void parseReturn(std::vector <std::string> args, LocationBlock *directive, size_t current_line);
 
 	public:
 		~ConfigParser();

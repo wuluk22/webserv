@@ -99,9 +99,9 @@ void ConfigParser::parseListeningPorts(std::vector <std::string> args, ServerBlo
 	std::string current_string;
 	unsigned int value;
 
-	if (args.empty() || args.size() < 2)
-		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
 	args.erase(args.begin());
+	if (args.empty() || args.size() < 1)
+		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
 	for (std::size_t i = 0; i < args.size(); i++) {
 		if (!isStringDigit(args[i]))
 			throw ConfigParserError(NUMERICAL_VALUE_EXPECTED, __FUNCTION__, __LINE__, current_line);
@@ -163,6 +163,26 @@ void ConfigParser::parseDependsOn(std::vector <std::string> args, LocationBlock 
 	directive->setUriDependance(args[0]);
 }
 
+void ConfigParser::parseReturn(std::vector <std::string> args, LocationBlock *directive, size_t current_line) {
+	std::size_t arg_size = args.size();
+	s_return_args res;
+	unsigned long status_code;
+	std::string link;
+
+	if (arg_size != 3)
+		throw ConfigParserError(NO_ELEMENTS, __FUNCTION__, __LINE__, current_line);
+	args.erase(args.begin());
+	status_code = std::strtoul(args[0].c_str(), NULL, 10);
+	if (status_code < 300 || status_code > 302)
+		throw ConfigParserError(WRONG_RETURN_SCOPE, __FUNCTION__, __LINE__, current_line);
+	link = args[1];
+	if (!isValidURL(link))
+		throw ConfigParserError(NOT_VALID_SERVER_NAME, __FUNCTION__, __LINE__, current_line);
+	res.status_code = (unsigned short) status_code;
+	res.link = link;
+	directive->setReturn(res);
+}
+
 void ConfigParser::processCommonDirective(ADirective *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {
 	if (args[0] == "root")
 		parseRoot(working_line, directive, current_line);
@@ -184,6 +204,8 @@ void ConfigParser::processDirectiveLoc(LocationBlock *directive, std::string wor
 		parseAllowedMethhod(args, directive, current_line);
 	else if (args[0] == "depends_on")
 		parseDependsOn(args, directive, current_line);
+	else if (args[0] == "return")
+		parseReturn(args, directive, current_line);
 }
 
 void ConfigParser::processDirectiveServ(ServerBlock *directive, std::string working_line, std::vector<std::string> args, size_t current_line) {

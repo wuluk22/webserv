@@ -1,11 +1,11 @@
 #include "LocationBlock.hpp"
-#include "../../RequestResponseState.hpp"
 
 LocationBlock::LocationBlock(void) {
 	this->_location_params._modified_client_max_body_size = false;
 	this->_location_params._allowed_methods = 0;
 	this->_location_params._modified_content_path = false;
 	this->_location_params._modified_auto_index = false;
+	this->_location_params._return_set = false;
 }
 
 LocationBlock::~LocationBlock() {}
@@ -218,6 +218,11 @@ void LocationBlock::setRawUriDependence(const std::string uri) {
 	this->_location_params._raw_uri_dependence = uri;
 }
 
+void LocationBlock::setReturn(s_return_args return_args) {
+	this->_location_params._return_args = return_args;
+	this->_location_params._return_set = true;
+}
+
 // **************************************************************************************
 
 std::string LocationBlock::getUriDependance(void) const {
@@ -266,6 +271,10 @@ bool LocationBlock::hasClientMaxBodySizeModified(void) const {
 
 bool LocationBlock::hasAutoIndexModified(void) const {
 	return (this->_location_params._modified_auto_index);
+}
+
+bool LocationBlock::isReturnSet(void) const {
+	return (this->_location_params._return_set);
 }
 
 std::ostream& operator<<(std::ostream& os, const LocationBlock *params) {

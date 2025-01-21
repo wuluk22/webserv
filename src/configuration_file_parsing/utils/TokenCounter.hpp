@@ -17,6 +17,7 @@ class TokenCounter {
 		void	incrementToken(const std::string& token);
 		int		getTokenCount(const std::string& token) const;
 		bool	oneOccurenceCheck(std::vector <std::string> unrepeatable_tokens);
+		bool	isEmpty(void) const;
 };
 
 #endif

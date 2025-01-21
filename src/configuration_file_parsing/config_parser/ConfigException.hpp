@@ -42,6 +42,9 @@
 #define ALIAS_NO_MATCH ERROR_HEADER "No match found for alias directive," AB RESET
 #define BAD_CGI_PATH ERROR_HEADER "No corresponding path for the CGI," AB RESET
 #define CGI_PATH_HAS_SUBROUTE ERROR_HEADER "CGI Path cannot have a subroute," AB RESET
+#define WRONG_RETURN_SCOPE ERROR_HEADER "Return handles redirection. In this context it doesn't support other code from 300-302," AB RESET
+#define WRONG_URL_REDIR ERROR_HEADER "Wrong URL format for redirection," AB RESET
+#define RETURN_ALLOWS_NO_DIRECTIVE ERROR_HEADER "Return allows no other directive than itself in the location block," AB RESET
 
 // SERVER HEADER ERROR MESSAGES
 #define NOT_VALID_SERVER_NAME ERROR_HEADER "Invalid server name," AB RESET

@@ -39,3 +39,7 @@ bool TokenCounter::oneOccurenceCheck(std::vector <std::string> unrepeatable_toke
 	}
 	return (true);
 }
+
+bool TokenCounter::isEmpty(void) const {
+	return (_blockStack.top().size() == 0);
+}
