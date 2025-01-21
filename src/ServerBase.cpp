@@ -140,7 +140,6 @@ void ServerBase::processClientConnections()
 				it->second.setResponse(response);
                 it->second.setWriteBuffer(it->second.getResponse().getAll());
                 std::string &responseBuffer = it->second.getWriteBuffer();
-				std::cout << "RESPONSE :: " << responseBuffer << std::endl;
                 if (!responseBuffer.empty())
                 {
                     ssize_t bytesSent = send(client_sock, responseBuffer.c_str(), responseBuffer.size(), 0);
