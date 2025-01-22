@@ -99,94 +99,53 @@ HttpRequestHandler	HttpRequestHandler::handleConfig(HttpRequestHandler& request,
 
 
 
-HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rrstate)
+HttpRequestHandler HttpRequestHandler::handleRequest(const std::string& requestData, RRState& rrstate)
 {
-    const size_t        bufferSize = 1024;
-    char                buffer[bufferSize];
-    std::string         requestData;
-    HttpRequestHandler  request;
-    bool                headersComplete = false;
-    unsigned int        contentLength = 0;
-    unsigned int        bodyLength = 0;
+    HttpRequestHandler request;
+    bool headersComplete = false;
+    unsigned int contentLength = 0;
+    unsigned int bodyLength = 0;
 
-	request.setIsValid(false);
-	request = request.handleConfig(request, rrstate.getServer().getLocations());
-	request.setClientSocket(clientSock);
-    while (true)
+    request.setIsValid(false);
+    request = request.handleConfig(request, rrstate.getServer().getLocations());
+    request.setIsComplete(false);
+
+    std::string::size_type headerEnd = requestData.find("\r\n\r\n");
+    if (headerEnd != std::string::npos)
     {
-	    request.setIsComplete(false);
-        int bytesRead = recv(clientSock, buffer, bufferSize - 1, 0);
-        if (bytesRead <= 0)
-	    {
-            request.setFd(bytesRead);
-            return request;
-        }
-        buffer[bytesRead] = '\0';
-        requestData.append(buffer, bytesRead);
-        request.appendToBuffer(buffer, bytesRead);
-        requestData = request.getRequestBuffer();
-        if (!headersComplete)
-	    {
-            std::string::size_type headerEnd = requestData.find("\r\n\r\n");
+        headersComplete = true;
+        std::string headersPart = requestData.substr(0, headerEnd);
+        HttpRequestHandler tempRequest = httpParsing(headersPart);
+        std::string contentLengthStr = tempRequest.getHeader("Content-Length");
 
-            if (headerEnd != std::string::npos) 
-	    	{
-                headersComplete = true;
-                std::string headersPart = requestData.substr(0, headerEnd);
-                HttpRequestHandler tempRequest = httpParsing(headersPart);
-                std::string contentLengthStr = tempRequest.getHeader("Content-Length");
-                if (!contentLengthStr.empty())
-	    		{
-                    std::istringstream iss(contentLengthStr);
-                    iss >> contentLength;
-                }
-                bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
-                if (contentLength == 0)
-	    		{
-                    request = httpParsing(requestData);
-                    request.setFd(1);
-	    			request.setIsComplete(true);
-	    			request = request.handleConfig(request, rrstate.getServer().getLocations());
-                    return request;
-                }
-            }
+        if (!contentLengthStr.empty())
+        {
+            std::istringstream iss(contentLengthStr);
+            iss >> contentLength;
         }
-	    else
-	    {
-	    	std::string::size_type headerEnd = requestData.find("\r\n\r\n");
-            bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
-        }
-        bool isRequestComplete = false;
-        if (headersComplete)
-	    {
-            if (contentLength > 0)
-	    	{
-                isRequestComplete = (bodyLength >= contentLength);
-	    		request.setIsComplete(isRequestComplete);
-            }
-	    	else
-	    	{
-                isRequestComplete = true;
-	    		request.setIsComplete(true);
-            }
-        }
-        if (isRequestComplete)
-	    {
+
+        bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
+        if (contentLength == 0 || bodyLength >= contentLength)
+        {
             request = httpParsing(requestData);
+            request.setIsComplete(true);
             request.setFd(1);
-	    	request.setIsComplete(isRequestComplete);
-	    	request = request.handleConfig(request, rrstate.getServer().getLocations());
+            request = request.handleConfig(request, rrstate.getServer().getLocations());
             return request;
-        }
-        if (static_cast<unsigned int>(bytesRead) < bufferSize - 1 && !headersComplete)
-		{
-            break;
         }
     }
-    
-    request = httpParsing(requestData);
-    request.setFd(1);
-	request.setIsComplete(_isRequestComplete);
-	request = request.handleConfig(request, rrstate.getServer().getLocations());
+
+    if (headersComplete)
+    {
+        bodyLength = static_cast<unsigned int>(requestData.length() - (headerEnd + 4));
+        if (contentLength > 0 && bodyLength >= contentLength)
+        {
+            request = httpParsing(requestData);
+            request.setIsComplete(true);
+            request.setFd(1);
+            request = request.handleConfig(request, rrstate.getServer().getLocations());
+        }
+    }
+
     return request;
 }

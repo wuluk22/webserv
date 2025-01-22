@@ -134,7 +134,7 @@ class HttpRequestHandler
 
 // --------------------------------									
 
-		HttpRequestHandler																handleRequest(int clientSock, RRState& rrstate);
+		HttpRequestHandler																handleRequest(const std::string& requestData, RRState& rrstate);
 		static HttpRequestHandler														httpParsing(const std::string &buffer);
 		void																			handleDirectoryRequest(RRState& rrstate, const std::string& path);
     	void																			handleFileUpload(RRState& rrstate, const std::string& requestData);
