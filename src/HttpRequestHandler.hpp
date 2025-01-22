@@ -58,6 +58,7 @@ class HttpRequestHandler
 		bool																		_isRequestComplete;
 		DirectoryHandler															_handler;
 		std::string																	_cookie;
+		std::string																	_ogPath;
 		static std::string															extractBoundary(const std::string& contentType);
 		
 	public:
@@ -76,6 +77,7 @@ class HttpRequestHandler
 
 		void																			setMethod(const std::string &m);
 		void																			setPath(const std::string &p);
+		void																			setOgPath(const std::string &p);
 		void																			setHttpVersion(const std::string &h);
 		void																			setHeader(const std::string &headerName, const std::string &headerValue);
 		void																			setBody(const std::string &body);
@@ -89,6 +91,7 @@ class HttpRequestHandler
 
 		std::string																		getMethod(void) const;
 		std::string																		getPath(void) const;
+		std::string																		getOgPath(void) const;
 		std::string																		getHttpVersion(void) const;
 		std::string																		getHeader(const std::string &headerName) const;
 		const std::map<std::string, std::string>&										getHeaders() const;

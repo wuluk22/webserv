@@ -112,6 +112,16 @@ HttpResponseHandler HttpResponseHandler::handleGet(RRState& rrstate) {
         return errorHandler(rrstate, 404, "Not Found");
     }
 
+    if (rrstate.getRequest().getOgPath() != rrstate.getRequest().getPath())
+    {
+        rrstate.getResponse().setStatusCode(301);
+        rrstate.getResponse().setStatusMsg("Moved Permanently");
+        rrstate.getResponse().setHeader("Location", rrstate.getRequest().getPath());
+        rrstate.getResponse().setHttpVersion("HTTP/1.1");
+        rrstate.getResponse().setHeader("Content-Length", "0");
+        return rrstate.getResponse();
+    }
+
     HttpRequestHandler request = rrstate.getRequest();
     HttpResponseHandler response = rrstate.getResponse();
     ServerHandler server = rrstate.getServer();

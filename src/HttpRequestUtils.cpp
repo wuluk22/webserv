@@ -24,6 +24,7 @@ std::string HttpRequestHandler::removeExcessiveSlashes(std::string& path) {
     std::string result;
     bool was_last_slash = false;
 
+    // Remove excessive slashes from the middle
     for (std::string::size_type i = 0; i < path.size(); ++i) {
         char c = path[i];
 
@@ -37,13 +38,16 @@ std::string HttpRequestHandler::removeExcessiveSlashes(std::string& path) {
             was_last_slash = false;
         }
     }
-    while (result.size() > 1 && result[result.size() - 1] == '/') {
-        result.erase(result.size() - 1, 1);
+
+    // Remove all trailing slashes except the root slash
+    std::string::size_type end = result.size();
+    while (end > 1 && result[end - 1] == '/') {
+        --end;
     }
+    result.erase(end);
 
     return result;
 }
-
 
 
 LocationBlock* HttpRequestHandler::getLocationBlock(std::vector<LocationBlock*> locationBlocks) const
@@ -208,6 +212,7 @@ std::string HttpRequestHandler::extractBoundary(const std::string& contentType)
 
 void 																			HttpRequestHandler::setMethod(const std::string& m) { _method = m; }
 void 																			HttpRequestHandler::setPath(const std::string& p) { _path = p; }
+void 																			HttpRequestHandler::setOgPath(const std::string& p) { _ogPath = p; }
 void 																			HttpRequestHandler::setHttpVersion(const std::string& h) { _httpVersion = h; }
 void 																			HttpRequestHandler::setHeader(const std::string& name, const std::string& value) { _headers[trim(name)] = trim(value); }
 void 																			HttpRequestHandler::setBody(const std::string& b) { _body = b; }
@@ -227,6 +232,7 @@ void 																			HttpRequestHandler::setMaxBody(const unsigned int& max) 
 
 std::string 																	HttpRequestHandler::getMethod() const { return _method; }
 std::string 																	HttpRequestHandler::getPath() const { return _path; }
+std::string 																	HttpRequestHandler::getOgPath() const { return _ogPath; }
 std::string 																	HttpRequestHandler::getHttpVersion() const { return _httpVersion; }
 std::string 																	HttpRequestHandler::getBody() const { return _body; }
 std::string 																	HttpRequestHandler::getHeader(const std::string& name) const

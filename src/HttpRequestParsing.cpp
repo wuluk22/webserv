@@ -26,6 +26,7 @@ HttpRequestHandler HttpRequestHandler::httpParsing(const std::string& buffer)
             if (pathEnd != std::string::npos)
 			{
                 unsanitized_path = line.substr(pathStart, pathEnd - pathStart);
+                request.setOgPath(unsanitized_path);
                 request.setPath(request.removeExcessiveSlashes(unsanitized_path));
                 request.setHttpVersion(line.substr(pathEnd + 1));
             }
