@@ -21,24 +21,30 @@ std::string HttpRequestHandler::extractDir(std::string& requestPath) {
 }
 
 std::string HttpRequestHandler::removeExcessiveSlashes(std::string& path) {
-	std::string result;
-	bool was_last_slash = false;
+    std::string result;
+    bool was_last_slash = false;
 
-	for (std::string::size_type i = 0; i < path.size(); ++i) {
-		char c = path[i];
+    for (std::string::size_type i = 0; i < path.size(); ++i) {
+        char c = path[i];
 
-		if (c == '/') {
-			if (!was_last_slash) {
-				result += c;
-				was_last_slash = true;
-			}
-		} else {
-			result += c;
-			was_last_slash = false;
-		}
-	}
-    return (result);
+        if (c == '/') {
+            if (!was_last_slash) {
+                result += c;
+                was_last_slash = true;
+            }
+        } else {
+            result += c;
+            was_last_slash = false;
+        }
+    }
+    while (result.size() > 1 && result[result.size() - 1] == '/') {
+        result.erase(result.size() - 1, 1);
+    }
+
+    return result;
 }
+
+
 
 LocationBlock* HttpRequestHandler::getLocationBlock(std::vector<LocationBlock*> locationBlocks) const
 {
