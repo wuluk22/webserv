@@ -34,7 +34,6 @@ class HttpResponseHandler;
 class HttpRequestHandler
 {
 	private:
-		int																			_fd;
 		int																			_clientSocket;
 		std::string																	_method;
 		std::string																	_path;
@@ -79,7 +78,6 @@ class HttpRequestHandler
 		void																			setHttpVersion(const std::string &h);
 		void																			setHeader(const std::string &headerName, const std::string &headerValue);
 		void																			setBody(const std::string &body);
-		void																			setFd(const int &nb);
 		void																			setIsComplete(const bool& is);
 		void																			setAllowedMethods(const std::vector<std::string>& methods);
 		void																			setAllowedPaths(const std::vector<std::string>& paths);
@@ -93,7 +91,6 @@ class HttpRequestHandler
 		std::string																		getHeader(const std::string &headerName) const;
 		const std::map<std::string, std::string>&										getHeaders() const;
 		std::string																		getBody() const;
-		int																				getFd() const;
 		bool																			getIsComplete() const;
 		std::string																		getRootDirectory() const;
 		const std::vector<std::string>&													getAllowedMethods() const;

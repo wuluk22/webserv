@@ -118,7 +118,7 @@ void ServerBase::processClientConnections()
 
                 HttpRequestHandler request = request.handleRequest(clientBuffers[clientSock], it->second);
                 it->second.setRequest(request);
-
+                // std::cout << request << std::endl;
                 if (request.getIsComplete())
                 {
                     clientBuffers[clientSock].clear();
@@ -147,7 +147,7 @@ void ServerBase::processClientConnections()
                     }
                     responseBuffer.erase(0, bytesSent);
                 }
-
+                // std::cout << response << std::endl;
                 if (responseBuffer.empty())
                 {
                     close(clientSock);

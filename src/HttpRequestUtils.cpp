@@ -143,26 +143,11 @@ std::ostream& operator<<(std::ostream& out, const HttpRequestHandler& handler)
 	out << "\n---------------------------REQUEST---------------------------------\n";
     out << handler.getMethod() << " " << handler.getPath() << " " << handler.getHttpVersion() << "\n";
     const std::map<std::string, std::string>&	headers = handler.getHeaders();
-	const std::vector<std::string>& 			allowedMethods = handler.getAllowedMethods();
-	const std::vector<std::string>&				allowedPaths = handler.getAllowedPaths();
     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); 
          it != headers.end(); ++it)
 	{
         out << it->first << ": " << it->second << "\n";
     }
-	out << "\nallowedMethods : \n";
-	for (std::vector<std::string>::const_iterator it = allowedMethods.begin(); it != allowedMethods.end(); ++it)
-	{
-		out << *it << "\n";
-	}
-	out << "\nallowedPaths : \n";
-	for (std::vector<std::string>::const_iterator it = allowedPaths.begin(); it != allowedPaths.end(); ++it)
-	{
-		out << *it << "\n";
-	}
-	out << "\nallowedPath : \n";
-	out << handler.getAllowedPath() << "\n";
-	out << "\n \n";
 	out << handler.getAutoIndex() << "\n";
 	out << "\nmaxBody: \n";
 	out << handler.getMaxBody() << "\n";
@@ -211,7 +196,6 @@ void 																			HttpRequestHandler::setPath(const std::string& p) { _pat
 void 																			HttpRequestHandler::setHttpVersion(const std::string& h) { _httpVersion = h; }
 void 																			HttpRequestHandler::setHeader(const std::string& name, const std::string& value) { _headers[trim(name)] = trim(value); }
 void 																			HttpRequestHandler::setBody(const std::string& b) { _body = b; }
-void 																			HttpRequestHandler::setFd(const int& nb) { _fd = nb; }
 void 																			HttpRequestHandler::setIsComplete(const bool& is) { _isRequestComplete = is; }
 void 																			HttpRequestHandler::setAllowedMethods(const std::vector<std::string>& methods) { _allowedMethods = methods; }
 void 																			HttpRequestHandler::setAllowedPaths(const std::vector<std::string>& paths) { _allowedPaths = paths; }
@@ -235,7 +219,6 @@ std::string 																	HttpRequestHandler::getHeader(const std::string& na
     return it != _headers.end() ? it->second : "";
 }
 const std::map<std::string, std::string>&										HttpRequestHandler::getHeaders() const { return _headers; }
-int     																		HttpRequestHandler::getFd() const { return _fd; }
 bool    																		HttpRequestHandler::getIsComplete() const { return _isRequestComplete; }
 std::string																		HttpRequestHandler::getRootDirectory() const { return _rootDirectory; }
 const std::vector<std::string>& 												HttpRequestHandler::getAllowedMethods() const { return _allowedMethods; }

@@ -129,7 +129,6 @@ HttpRequestHandler HttpRequestHandler::handleRequest(const std::string& requestD
         {
             request = httpParsing(requestData);
             request.setIsComplete(true);
-            request.setFd(1);
             request = request.handleConfig(request, rrstate.getServer().getLocations());
             return request;
         }
@@ -142,10 +141,8 @@ HttpRequestHandler HttpRequestHandler::handleRequest(const std::string& requestD
         {
             request = httpParsing(requestData);
             request.setIsComplete(true);
-            request.setFd(1);
             request = request.handleConfig(request, rrstate.getServer().getLocations());
         }
     }
-
     return request;
 }
