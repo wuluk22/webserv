@@ -22,7 +22,6 @@ std::string Cgi::getClientIP(RRState& rrstate) {
         perror("getsockname");
         return "0.0.0.0";
     }
-    // Convertir l'adresse IP en format lisible
     return inet_ntoa(rrstate.getServer().getAdd().sin_addr);
 }
 
@@ -118,8 +117,6 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
                 if (colonPos != std::string::npos) {
                     std::string headerName = headerLine.substr(0, colonPos);
                     std::string headerValue = headerLine.substr(colonPos + 2);
-
-                    // Supprimer un "\r" final si présent
                     if (!headerValue.empty() && headerValue[headerValue.length() - 1] == '\r') {
                         headerValue = headerValue.substr(0, headerValue.length() - 1);
                     }
@@ -144,7 +141,7 @@ void    Cgi::handleCgiResponse(std::string output, RRState& rrstate)
         rrstate.getResponse().setHeader("X-XSS-Protection", "1; mode=block");
 }
 
-void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
+void Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
 {
     int pid;
     int pipefd[2];
@@ -162,6 +159,7 @@ void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
             break ;
         }
     }
+
     pid = fork();
     if (pid < 0)
     {
@@ -169,8 +167,7 @@ void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
         close(pipefd[1]);
         setErrorResponse(rrstate, 500, "Internal Server Error - Fork creation failed");
     }
-    else if (pid == 0)
-    { // Processus enfant
+    else if (pid == 0) {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
@@ -183,7 +180,7 @@ void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
         argv.push_back(NULL);
         if (access(cgiPath.c_str(), X_OK) == 0)
         {
-            
+            alarm(7);
             execve(cgiPath.c_str(), argv.data(), envp.data());
             perror("execve failed");
             ftFree(argv);
@@ -193,33 +190,34 @@ void    Cgi::handleCGI(RRState& rrstate, std::string route, std::string path)
         ftFree(argv);
         ftFree(envp);
     }
-    else 
-    {
+    else {
         int status;
-        int timeout = 15; // Timeout en secondes
+        int timeout = 5;
 
         close(pipefd[1]);
         while (timeout > 0) {
-            // sleep(1);
-            timeout--;
-            if (waitpid(pid, &status, 0) != 0) {
+            int pid_status = waitpid(pid, &status, WNOHANG);
+            if (pid_status > 0) {
+                break;
+            } else if (pid_status == -1) {
+                setErrorResponse(rrstate, 500, "Internal Server Error - waitpid failed");
                 break;
             }
-        }
-        if (timeout == 0) {
-            kill(pid, SIGKILL);
-            waitpid(pid, &status, 0);
-            setErrorResponse(rrstate, 500, "Internal Server Error - CGI Timeout");
-        } else {
-            Cgi cgi;
 
-            output = readDatasFromScript(pipefd[0]);
-            waitpid(pid, &status, 0);
-            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-                cgi.handleCgiResponse(output, rrstate);
-            } else {
-                setErrorResponse(rrstate, 500, "Internal Server Error - CGI Execution Failed");
+            sleep(1);
+            timeout--;
+            if (timeout == 0) {
+                kill(pid, SIGKILL);
+                waitpid(pid, &status, 0);
+                setErrorResponse(rrstate, 500, "Internal Server Error - CGI Timeout");
             }
+        }
+        if (timeout > 0 && WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            output = readDatasFromScript(pipefd[0]);
+            Cgi cgi;
+            cgi.handleCgiResponse(output, rrstate);
+        } else {
+            setErrorResponse(rrstate, 500, "Internal Server Error - CGI Execution Failed");
         }
     }
 }

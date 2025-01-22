@@ -56,6 +56,8 @@ def generate_image_html(images, IMAGES_DIR):
     )
 
 def main():
+    while True :
+        print ("TA MERE")
     form = cgi.FieldStorage()
     method = os.environ.get("REQUEST_METHOD", "GET").upper()
     query = os.environ.get("QUERY_STRING", "")
