@@ -112,7 +112,6 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
 	request.setIsValid(false);
 	request = request.handleConfig(request, rrstate.getServer().getLocations());
 	request.setClientSocket(clientSock);
-    //int i = 0;
     while (true)
     {
 	    request.setIsComplete(false);
@@ -125,8 +124,6 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
         buffer[bytesRead] = '\0';
         requestData.append(buffer, bytesRead);
         request.appendToBuffer(buffer, bytesRead);
-        //if (bytesRead == 0)
-        //{
         requestData = request.getRequestBuffer();
         if (!headersComplete)
 	    {
@@ -185,7 +182,6 @@ HttpRequestHandler	HttpRequestHandler::handleRequest(int clientSock, RRState& rr
 		{
             break;
         }
-        //i++;
     }
     
     request = httpParsing(requestData);
